@@ -1,0 +1,223 @@
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* Ivory Scale */
+  --color-ivory-50: #fefefe;
+  --color-ivory-100: #fdfdfb;
+  --color-ivory-200: #fcfbf9;
+  --color-ivory-300: #fafaf7;
+  --color-ivory-400: #f9f9f5;
+  --color-ivory-500: #f8f7f3;
+  --color-ivory-600: #e2e1dd;
+  --color-ivory-700: #b0afad;
+  --color-ivory-800: #888886;
+  --color-ivory-900: #686866;
+
+  /* Black Scale */
+  --color-black-50: #e8e8e8;
+  --color-black-100: #b8b8b8;
+  --color-black-200: #969696;
+  --color-black-300: #666666;
+  --color-black-400: #494949;
+  --color-black-500: #1b1b1b;
+  --color-black-600: #191919;
+  --color-black-700: #131313;
+  --color-black-800: #0f0f0f;
+  --color-black-900: #0b0b0b;
+
+  /* Gold Scale */
+  --color-gold-50: #fcf8eb;
+  --color-gold-100: #f4e8bf;
+  --color-gold-200: #efdda1;
+  --color-gold-300: #F2EACD;
+  --color-gold-400: #e4c45b;
+  --color-gold-500: #ddb532;
+  --color-gold-600: #c9a52e;
+  --color-gold-700: #9d8124;
+  --color-gold-800: #7a641c;
+  --color-gold-900: #5d4c15;
+
+  /* Font Families */
+  --font-playfair: "Playfair Display", serif;
+  --font-hanken: "Hanken Grotesk", sans-serif;
+
+}
+
+/* Headings Font System Utilities (Playfair Display) */
+@utility text-hg-h1 {
+  font-family: var(--font-playfair);
+  font-size: 76px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-hg-h2 {
+  font-family: var(--font-playfair);
+  font-size: 61px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-hg-h3 {
+  font-family: var(--font-playfair);
+  font-size: 49px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-hg-b1 {
+  font-family: var(--font-playfair);
+  font-size: 39px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-hg-b2 {
+  font-family: var(--font-playfair);
+  font-size: 32px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-hg-b3 {
+  font-family: var(--font-playfair);
+  font-size: 25px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-hg-c1 {
+  font-family: var(--font-playfair);
+  font-size: 20px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-hg-c2 {
+  font-family: var(--font-playfair);
+  font-size: 14px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-hg-c3 {
+  font-family: var(--font-playfair);
+  font-size: 13px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+/* Body Font System Utilities (Hanken Grotesk) */
+@utility text-body-h1 {
+  font-family: var(--font-hanken);
+  font-size: 49px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-body-h2 {
+  font-family: var(--font-hanken);
+  font-size: 39px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-body-h3 {
+  font-family: var(--font-hanken);
+  font-size: 31px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-body-b1 {
+  font-family: var(--font-hanken);
+  font-size: 25px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-body-b2 {
+  font-family: var(--font-hanken);
+  font-size: 20px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-body-b3 {
+  font-family: var(--font-hanken);
+  font-size: 16px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-body-c1 {
+  font-family: var(--font-hanken);
+  font-size: 13px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-body-c2 {
+  font-family: var(--font-hanken);
+  font-size: 10px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@utility text-body-c3 {
+  font-family: var(--font-hanken);
+  font-size: 8px;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+
+@layer base {
+  * {
+    @apply font-hanken;
+  }
+
+  body {
+    @apply bg-black-900 text-white;
+  }
+
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .gradient-text {
+    background: linear-gradient(266.49deg,
+        #CB9938 -0.22%,
+        #FEED84 27.53%,
+        #FDD668 65.35%,
+        #FEED84 96.88%);
+
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+
+.bg-pod-gradient {
+  background: linear-gradient(180deg, #242426 0%, #171718 100%);
+}
+
+.bg-gold-gradient {
+  background: linear-gradient(90deg, #F0D78C 0%, #CFA54E 100%);
+}
+
+.bg-gold-g {
+  background: linear-gradient(180deg, #CB9938 0%, #FEED84 46.63%, #FDD668 95.67%);
+
+}
