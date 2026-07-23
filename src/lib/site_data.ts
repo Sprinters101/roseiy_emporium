@@ -168,3 +168,12 @@ export const categories = [
     },
     { title: "Rum", image: rumImg, href: "/catalog?category=rum" },
 ];
+
+export const glenfiddichLogo = "/icon/I_1.svg";
+export const domPerignonLogo = "/icon/I_2.svg";
+export const veuveClicquotLogo = "/icon/I_3.svg";
+export const moetLogo = "/icon/I_4.svg";
+
+export const donJulioLogo = "/icon/I_5.svg";
+export const claseAzulLogo = "/icon/I_6.svg";
+export const tequilaLogo = "/icon/I_7.svg";
