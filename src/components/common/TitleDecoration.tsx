@@ -1,11 +1,20 @@
 import { badgeOrnament } from "@/lib/site_data";
+import { cn } from "@/lib/utils";
 
-const TitleDecoration = ({ title }) => {
+const TitleDecoration = ({
+    title,
+    className,
+}: {
+    title: string;
+    className?: string;
+}) => {
     return (
-        <div className="w-fit  max-w-4xl mx-auto  md:space-y-6">
+        <div
+            className={cn("w-fit  max-w-4xl mx-auto  md:space-y-6", className)}
+        >
             {/* Premium Tag Capsule */}
             <div
-                className="inline-flex items-center gap-2 gradient-text  px-1 md:px-5 py-1 md:py-2"
+                className="inline-flex items-center gap-2 gradient-text   py-1 md:py-2"
                 style={{
                     backdropFilter: "blur(6px)",
                 }}
