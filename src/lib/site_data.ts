@@ -177,3 +177,10 @@ export const moetLogo = "/icon/I_4.svg";
 export const donJulioLogo = "/icon/I_5.svg";
 export const claseAzulLogo = "/icon/I_6.svg";
 export const tequilaLogo = "/icon/I_7.svg";
+
+export const donJulioReposadoImg = "/icon/p_1.svg";
+export const hennessyXoImg = "/icon/p_2.svg";
+export const claseAzulImg = "/icon/p_3.svg";
+
+export const aboutSplashImg =
+    "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784980140/glass_zkobvg.png";
