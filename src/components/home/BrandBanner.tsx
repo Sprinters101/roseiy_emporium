@@ -1,7 +1,6 @@
 import {
     hennessyLogo,
     chamdorLogo,
-    evaLogo,
     johnnieWalkerLogo,
     brandDivider,
     topFlourishOrnament,
