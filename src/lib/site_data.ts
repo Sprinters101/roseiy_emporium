@@ -2,6 +2,8 @@ import type { Product } from "@/config/types";
 
 export const logo =
     "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784380094/Roseiy_Emporium_Logo_2_zdlboe.png";
+export const footerLogo =
+    "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1785061330/footerLogo_qx820x.png";
 export const activeNavImg =
     "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784400550/navUder_dw5zhf.png";
 
@@ -184,3 +186,6 @@ export const claseAzulImg = "/icon/p_3.svg";
 
 export const aboutSplashImg =
     "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784980140/glass_zkobvg.png";
+
+export const contactChampagneImg =
+    "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1785057214/image_35_i4k23o.png";

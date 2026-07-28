@@ -185,7 +185,8 @@
   }
 
   body {
-    @apply bg-black-900 text-white;
+    @apply bg-black-900 text-white overflow-x-hidden;
+
   }
 
   html {

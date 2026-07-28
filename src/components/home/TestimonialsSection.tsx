@@ -128,6 +128,9 @@ export const TestimonialsSection = () => {
                     {/* Mobile Title Header */}
                     <div className="mb-10 lg:hidden">
                         <TitleDecoration title="Testimonials" />
+                        <h2 className="text-hg-b3 md:text-hg-h3 text-center font-bold mt-1 md:mt-2 font-playfair text-white max-w-104.5 leading-tight">
+                            Hear From Our Happy Customers
+                        </h2>
                     </div>
 
                     {/* Staggered Desktop Grid */}

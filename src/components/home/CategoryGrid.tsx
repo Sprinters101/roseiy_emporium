@@ -58,9 +58,9 @@ const CategoryCard = ({ title, image, href }: CategoryCardProps) => {
 
 export const CategoryGrid = () => {
     return (
-        <section className="w-full bg-black-900 pt-16 md:pt-24">
+        <section className="w-full bg-black-900  pt-16 md:pt-24">
             <Container className="flex flex-col items-center ">
-                <div className="max-w-288.5 mx-auto">
+                <div className="lg:max-w-288.5 mx-auto">
                     {/* Section Title Header */}
                     <TitleDecoration title="Explore Our Collection" />
                     <h2 className="text-hg-b3 md:text-hg-h3 text-center font-bold mt-1 md:mt-2 font-playfair">
