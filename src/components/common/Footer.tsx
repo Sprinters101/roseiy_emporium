@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import Container from "@/components/common/Container";
 import { Phone, Mail, MapPin } from "lucide-react";
-import { footerLogo, heroBg2 } from "@/lib/site_data";
+import { footerLogo } from "@/lib/site_data";
 import { IoLogoInstagram } from "react-icons/io5";
 
 // Custom Snapchat SVG icon

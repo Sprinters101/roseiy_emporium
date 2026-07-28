@@ -1,5 +1,3 @@
-import { Link } from "react-router";
-import Container from "@/components/common/Container";
 import TitleDecoration from "@/components/common/TitleDecoration";
 import {
     donJulioReposadoImg,

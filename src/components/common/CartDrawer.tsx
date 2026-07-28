@@ -1,5 +1,5 @@
 // src/components/CartDrawer.tsx
-import { ShoppingCart, Trash2, Plus, Minus, X } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
 import {
     Sheet,
     SheetContent,
@@ -7,7 +7,6 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
 
 interface CartDrawerProps {
@@ -40,7 +39,7 @@ export const CartDrawer = ({ children }: CartDrawerProps) => {
 
     return (
         <Sheet>
-            <SheetTrigger asChild>{children}</SheetTrigger>
+            <SheetTrigger>{children}</SheetTrigger>
 
             {/* Slide out panel from the right hand side */}
             <SheetContent
@@ -123,7 +122,7 @@ export const CartDrawer = ({ children }: CartDrawerProps) => {
                         </p>
 
                         <div className="grid gap-2 pt-2">
-                            <SheetTrigger asChild>
+                            <SheetTrigger>
                                 <Link
                                     to="/checkout"
                                     className="w-full text-center text-xs font-bold py-3 rounded-lg bg-gold-gradient text-black tracking-wide shadow-lg block hover:opacity-95 transition-opacity"

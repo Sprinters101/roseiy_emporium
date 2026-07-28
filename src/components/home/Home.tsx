@@ -5,7 +5,6 @@ import { CategoryGrid } from "./CategoryGrid";
 import { ContactSection } from "./ContactSection";
 import { FaqSection } from "./FaqSection";
 import { Hero } from "./Hero";
-import { IconicBrands } from "./IconicBrands";
 import { RoseiyDifference } from "./RoseiyDifference";
 import { SignatureSelections } from "./SignatureSelections";
 import { TestimonialsSection } from "./TestimonialsSection";
