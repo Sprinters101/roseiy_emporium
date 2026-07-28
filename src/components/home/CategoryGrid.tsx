@@ -1,15 +1,5 @@
 import { Link } from "react-router";
-import {
-    badgeOrnament,
-    categoryHeaderDivider,
-    champagneImg,
-    sweetwineImg,
-    whiskeyImg,
-    cognacImg,
-    tequilaImg,
-    rumImg,
-    categories,
-} from "@/lib/site_data";
+import { categoryHeaderDivider, categories } from "@/lib/site_data";
 import Container from "../common/Container";
 import TitleDecoration from "../common/TitleDecoration";
 import { Button } from "../ui/button";
