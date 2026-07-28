@@ -185,7 +185,8 @@
   }
 
   body {
-    @apply bg-black-900 text-white;
+    @apply bg-black-900 text-white overflow-x-hidden;
+
   }
 
   html {
@@ -220,4 +221,32 @@
 .bg-gold-g {
   background: linear-gradient(180deg, #CB9938 0%, #FEED84 46.63%, #FDD668 95.67%);
 
+}
+
+/* Infinite Marquee Animation Keyframes */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+
+.mask-gradient-x {
+  mask-image: linear-gradient(to right,
+      transparent 0%,
+      black 15%,
+      black 85%,
+      transparent 100%);
+  -webkit-mask-image: linear-gradient(to right,
+      transparent 0%,
+      black 15%,
+      black 85%,
+      transparent 100%);
 }

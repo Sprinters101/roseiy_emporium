@@ -50,7 +50,7 @@ export const Navbar = () => {
 
     return (
         <header className="w-full bg-transparent  ">
-            <div className="fixed top-0 left-0 right-0 z-50 py-4 md:py-6">
+            <div className="fixed top-0 left-0 right-0 z-50 py-4 md:py-6 z-50">
                 <Container className=" gap-3 lg:gap-4  mx-auto flex items-center justify-between ">
                     {/* Brand Logo Section */}
                     <Link to="/" className="flex items-center shrink-0">
@@ -62,7 +62,7 @@ export const Navbar = () => {
                     </Link>
 
                     {/* Desktop Center: Main Navigation Pod */}
-                    <nav className="hidden shrink-0 bg-white/10 lg:flex h-15 items-center gap-10 rounded-lg px-10 py-4  border-[0.5px] border-[#FEFEFE99]">
+                    <nav className="hidden shrink-0 bg-white/10 lg:flex h-15 items-center gap-10 rounded-lg px-10 py-4  border-[0.5px] border-[#FEFEFE99] backdrop-blur-md">
                         {navLinks?.map((link) => {
                             const active = isActive(link.href);
                             return (
