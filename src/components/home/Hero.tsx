@@ -118,13 +118,7 @@
 
 import { Link } from "react-router";
 import { motion } from "framer-motion";
-import {
-    heroBg,
-    decorativeDivider,
-    badgeOrnament,
-    heroBg2,
-    heroBgMobile,
-} from "@/lib/site_data";
+import { heroBg, badgeOrnament, heroBg2, heroBgMobile } from "@/lib/site_data";
 import Container from "../common/Container";
 
 export const Hero = () => {
@@ -185,13 +179,13 @@ export const Hero = () => {
                             </h1>
 
                             {/* Elegant Flourish Underline Ornament */}
-                            <div className="mt-4 md:mt-6 max-w-xs sm:max-w-sm">
+                            {/* <div className="mt-4 md:mt-6 max-w-xs sm:max-w-sm">
                                 <img
                                     src={decorativeDivider}
                                     alt=""
                                     className="w-full h-auto object-contain opacity-80"
                                 />
-                            </div>
+                            </div> */}
                         </div>
                     </motion.div>
 

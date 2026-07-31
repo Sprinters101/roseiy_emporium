@@ -277,7 +277,7 @@ export const IconicBrands = () => {
                                 <img
                                     src={brand?.logo}
                                     alt={brand?.name}
-                                    className="max-h-auto w-full object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-300"
+                                    className="max-h-auto w-full object-contain  transition-opacity duration-300"
                                 />
                             </div>
 
@@ -285,7 +285,7 @@ export const IconicBrands = () => {
                                 <img
                                     src={categoryHeaderDivider}
                                     alt=""
-                                    className="w-auto max-w-full h-4 object-contain mb-2 brightness-0 invert group-hover:invert-0 group-hover:brightness-100"
+                                    className="w-auto max-w-full h-4 object-contain mb-2 brightness-20 invert group-hover:invert-0 group-hover:brightness-100"
                                 />
                                 <Link
                                     to={brand.href}

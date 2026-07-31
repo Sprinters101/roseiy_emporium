@@ -129,7 +129,7 @@ const CategoryCard = ({ title, image, href }: CategoryCardProps) => {
                     className="w-full h-7.75 object-contain opacity-80 group-hover:opacity-100 transition-opacity brightness-0 invert group-hover:invert-0 group-hover:brightness-100"
                 />
 
-                <h3 className="text-white font-playfair text-hg-b2 font-normal tracking-wide drop-shadow-md group-hover:bg-gradient-to-r group-hover:from-[#CB9938] group-hover:via-[#FEED84] group-hover:to-[#FDD668] group-hover:bg-clip-text group-hover:text-transparent">
+                <h3 className="text-white font-playfair text-hg-b2 font-bold tracking-wide drop-shadow-md group-hover:bg-gradient-to-r group-hover:from-[#CB9938] group-hover:via-[#FEED84] group-hover:to-[#FDD668] group-hover:bg-clip-text group-hover:text-transparent">
                     {title}
                 </h3>
             </div>
