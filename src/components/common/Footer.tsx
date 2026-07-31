@@ -3,23 +3,7 @@ import Container from "@/components/common/Container";
 import { Phone, Mail, MapPin } from "lucide-react";
 import { footerLogo } from "@/lib/site_data";
 import { IoLogoInstagram } from "react-icons/io5";
-
-// Custom Snapchat SVG icon
-const SnapchatIcon = () => (
-    <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="size-5 text-white"
-    >
-        <path d="M12 3c-3.5 0-6 2.5-6 6 0 1.2.3 2.1.8 3-.8.4-1.8.8-2.8.8-.5 0-.9.4-.9.9 0 .6.4 1 1 1 1.2 0 2.2-.4 3.1-.9.8 1.1 2.2 1.9 4.8 1.9s4-1 4.8-1.9c.9.5 1.9.9 3.1.9.6 0 1-.4 1-1 0-.5-.4-.9-.9-.9-1 0-2-.4-2.8-.8.5-.9.8-1.8.8-3 0-3.5-2.5-6-6-6z" />
-    </svg>
-);
+import { PiSnapchatLogoLight } from "react-icons/pi";
 
 const QUICK_LINKS = [
     { label: "Shop", href: "/shop" },
@@ -259,7 +243,7 @@ export const Footer = () => {
                                 </div>
                                 <a
                                     href="tel:+2348156664737"
-                                    className="text-neutral-300 hover:text-gold-500 font-hanken text-xs sm:text-body-b2 font-light transition-colors"
+                                    className="text-neutral-300 hover:text-gold-500 font-hanken text-body-c1 sm:text-body-b2 font-semibold transition-colors"
                                 >
                                     +2348156664737 <br /> & +447946301028
                                 </a>
@@ -272,7 +256,7 @@ export const Footer = () => {
                                 </div>
                                 <a
                                     href="mailto:omobolajrose@gmail.com"
-                                    className="text-neutral-300 hover:text-gold-500 font-hanken text-xs sm:text-body-b2 font-light transition-colors"
+                                    className="text-neutral-300 hover:text-gold-500 font-hanken text-body-c1 sm:text-body-b2 font-semibold transition-colors"
                                 >
                                     omobolajrose@gmail.com
                                 </a>
@@ -283,7 +267,7 @@ export const Footer = () => {
                                 <div className="size-11 rounded-full bg-black-700 border border-white/10 flex items-center justify-center shrink-0">
                                     <MapPin className="size-5 text-white" />
                                 </div>
-                                <span className="text-neutral-300 font-hanken text-xs sm:text-body-b2 font-light leading-snug">
+                                <span className="text-neutral-300 font-hanken text-body-c1 sm:text-body-b2 font-semibold leading-snug">
                                     16 pinnock beach road ajiran , <br /> lekki
                                     , Lagos
                                 </span>
@@ -312,7 +296,7 @@ export const Footer = () => {
                                     className="size-11 rounded-full bg-black-700 border border-white/10 flex items-center justify-center hover:bg-gold-500/20 hover:border-gold-500 transition-all cursor-pointer"
                                     aria-label="Snapchat"
                                 >
-                                    <SnapchatIcon />
+                                    <PiSnapchatLogoLight />
                                 </a>
                             </div>
                         </div>

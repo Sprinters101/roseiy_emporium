@@ -1,11 +1,7 @@
+// import { useState } from "react";
 // import Container from "@/components/common/Container";
 // import TitleDecoration from "@/components/common/TitleDecoration";
-// import {
-//     Accordion,
-//     AccordionContent,
-//     AccordionItem,
-//     AccordionTrigger,
-// } from "@/components/ui/accordion";
+// import { ChevronDown } from "lucide-react";
 
 // interface FaqItem {
 //     id: number;
@@ -14,6 +10,9 @@
 // }
 
 // export const FaqSection = () => {
+//     // Keep item 1 open by default
+//     const [openId, setOpenId] = useState<number | null>(1);
+
 //     const faqs: FaqItem[] = [
 //         {
 //             id: 1,
@@ -52,14 +51,19 @@
 //         },
 //     ];
 
+//     const toggleFaq = (id: number) => {
+//         setOpenId(openId === id ? null : id);
+//     };
+
 //     return (
-//         <section className="w-full bg-black-900 py-16 md:py-24">
+//         <section className="w-full bg-black-900 py-6 md:py-8" id="faqs">
 //             <Container>
-//                 <div className="w-full  mx-auto flex flex-col items-center">
+//                 <div className="w-full mx-auto flex flex-col items-center">
 //                     {/* Title Header */}
-//                     <div className="mb-10 md:mb-14">
+//                     <div className="mb-10 md:mb-14 flex flex-col items-center text-center">
 //                         <TitleDecoration title="Frequently Asked Questions" />
-//                         <h2 className="text-hg-b3 md:text-hg-h3 text-center font-bold mt-1 md:mt-2 font-playfair text-white max-w-104.5 leading-tight ">
+
+//                         <h2 className="text-hg-b3 md:text-hg-h3 text-center font-bold mt-1 md:mt-2 font-playfair text-white max-w-104.5 leading-tight">
 //                             Answers, Before You Ask.
 //                         </h2>
 
@@ -70,29 +74,51 @@
 //                         </p>
 //                     </div>
 
-//                     {/* shadcn Accordion Root Container */}
-//                     <Accordion
-//                         type="single"
-//                         collapsible
-//                         defaultValue="item-1"
-//                         className="w-full space-y-1 md:space-y-4"
-//                     >
-//                         {faqs?.map((faq) => (
-//                             <AccordionItem
-//                                 key={faq.id}
-//                                 value={`item-${faq.id}`}
-//                                 className="group bg-black-700 border-none shadow-none rounded-lg px-6 py-1 transition-all duration-300"
-//                             >
-//                                 <AccordionTrigger className="font-hanken text-body-b3 sm:text-body-b2 font-bold text-white hover:text-gold-500 group-data-[state=open]:text-gold-500 [&_svg]:group-data-[state=open]:text-gold-500 no-underline hover:no-underline py-5">
-//                                     {faq.id}. {faq.question}
-//                                 </AccordionTrigger>
+//                     {/* Custom Accordion Container */}
+//                     <div className="w-full space-y-2 md:space-y-4 max-w-275 mx-auto">
+//                         {faqs?.map((faq) => {
+//                             const isOpen = openId === faq.id;
 
-//                                 <AccordionContent className="text-neutral-300 font-hanken text-body-c1 sm:text-body-b3 font-light leading-relaxed pt-1 pb-5">
-//                                     {faq.answer}
-//                                 </AccordionContent>
-//                             </AccordionItem>
-//                         ))}
-//                     </Accordion>
+//                             return (
+//                                 <div
+//                                     key={faq.id}
+//                                     className="bg-black-700 rounded-lg  px-6 overflow-hidden transition-all duration-300"
+//                                 >
+//                                     {/* Question Header Button */}
+//                                     <button
+//                                         type="button"
+//                                         onClick={() => toggleFaq(faq.id)}
+//                                         className="w-full py-5 text-left flex items-center justify-between gap-4 cursor-pointer focus:outline-none group"
+//                                     >
+//                                         <span
+//                                             className={`font-hanken text-body-b3 sm:text-body-b2 font-bold transition-colors duration-200 ${
+//                                                 isOpen
+//                                                     ? "text-gold-500"
+//                                                     : "text-white group-hover:text-gold-500"
+//                                             }`}
+//                                         >
+//                                             {faq.id}. {faq.question}
+//                                         </span>
+
+//                                         <ChevronDown
+//                                             className={`size-5 shrink-0 transition-transform duration-300 ${
+//                                                 isOpen
+//                                                     ? "rotate-180 text-gold-500"
+//                                                     : "text-white group-hover:text-gold-500"
+//                                             }`}
+//                                         />
+//                                     </button>
+
+//                                     {/* Expandable Answer */}
+//                                     {isOpen && (
+//                                         <div className="text-neutral-300 font-hanken text-body-c1 sm:text-body-b3 font-light leading-relaxed pt-1 pb-5 animate-in fade-in-50 duration-200">
+//                                             {faq.answer}
+//                                         </div>
+//                                     )}
+//                                 </div>
+//                             );
+//                         })}
+//                     </div>
 //                 </div>
 //             </Container>
 //         </section>
@@ -103,6 +129,7 @@ import { useState } from "react";
 import Container from "@/components/common/Container";
 import TitleDecoration from "@/components/common/TitleDecoration";
 import { ChevronDown } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface FaqItem {
     id: number;
@@ -157,11 +184,20 @@ export const FaqSection = () => {
     };
 
     return (
-        <section className="w-full bg-black-900 py-6 md:py-8">
+        <section className="w-full bg-black-900 py-16 md:py-24" id="faqs">
             <Container>
                 <div className="w-full mx-auto flex flex-col items-center">
-                    {/* Title Header */}
-                    <div className="mb-10 md:mb-14 flex flex-col items-center text-center">
+                    {/* Title Header: Slides in from top inline */}
+                    <motion.div
+                        initial={{ opacity: 0, y: -50 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: false, amount: 0.3 }}
+                        transition={{
+                            duration: 0.8,
+                            ease: [0.16, 1, 0.3, 1],
+                        }}
+                        className="mb-10 md:mb-14 flex flex-col items-center text-center"
+                    >
                         <TitleDecoration title="Frequently Asked Questions" />
 
                         <h2 className="text-hg-b3 md:text-hg-h3 text-center font-bold mt-1 md:mt-2 font-playfair text-white max-w-104.5 leading-tight">
@@ -173,16 +209,25 @@ export const FaqSection = () => {
                             orders, delivery, payments, returns, and our premium
                             collection.
                         </p>
-                    </div>
+                    </motion.div>
 
                     {/* Custom Accordion Container */}
-                    <div className="w-full space-y-2 md:space-y-4">
-                        {faqs?.map((faq) => {
+                    <div className="w-full space-y-2 md:space-y-4 max-w-275 mx-auto">
+                        {faqs?.map((faq, index) => {
                             const isOpen = openId === faq.id;
 
                             return (
-                                <div
+                                /* FAQ Item: Slides in from left inline with index delay */
+                                <motion.div
                                     key={faq.id}
+                                    initial={{ opacity: 0, x: -40 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: false, amount: 0.1 }}
+                                    transition={{
+                                        duration: 1,
+                                        delay: 0.2 + index * 0.2,
+                                        ease: "easeInOut",
+                                    }}
                                     className="bg-black-700 rounded-lg px-6 overflow-hidden transition-all duration-300"
                                 >
                                     {/* Question Header Button */}
@@ -210,13 +255,19 @@ export const FaqSection = () => {
                                         />
                                     </button>
 
-                                    {/* Expandable Answer */}
-                                    {isOpen && (
-                                        <div className="text-neutral-300 font-hanken text-body-c1 sm:text-body-b3 font-light leading-relaxed pt-1 pb-5 animate-in fade-in-50 duration-200">
+                                    {/* Expandable Answer (Tailwind native transition) */}
+                                    <div
+                                        className={`grid transition-all duration-300 ease-in-out text-neutral-300 font-hanken text-body-c1 sm:text-body-b3 font-light leading-relaxed ${
+                                            isOpen
+                                                ? "grid-rows-[1fr] opacity-100 pb-5"
+                                                : "grid-rows-[0fr] opacity-0"
+                                        }`}
+                                    >
+                                        <div className="overflow-hidden">
                                             {faq.answer}
                                         </div>
-                                    )}
-                                </div>
+                                    </div>
+                                </motion.div>
                             );
                         })}
                     </div>
