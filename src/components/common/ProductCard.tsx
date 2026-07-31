@@ -41,10 +41,10 @@ export const ProductCard = ({
     return (
         <div
             className={cn(
-                `group relative w-full bg-[#111111] border rounded-lg p-4 md:p-5 flex flex-col justify-between transition-all duration-300 hover:shadow-xl`,
+                `group relative w-full bg-[#111111] border rounded-lg p-4 md:p-5 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:fill-gold-300`,
                 isWishlisted
                     ? "border-gold-300/80  bg-black-500"
-                    : "border-white/10 hover:border-gold-300/40",
+                    : "border-white/30 hover:border-gold-300/80",
                 className,
             )}
         >
@@ -91,7 +91,7 @@ export const ProductCard = ({
                 </span>
 
                 <Link to={`/product/${product.id}`} className="block mt-1">
-                    <h3 className="text-white font-playfair text-hg-c3 md:text-[1.5625rem] font-bold leading-snug line-clamp-2 min-h-8.5 md:min-h-14 hover:text-gold-300 transition-colors">
+                    <h3 className="text-white font-playfair text-hg-c3 md:text-[1.5625rem] font-bold leading-snug line-clamp-2 min-h-8.5 md:min-h-14  transition-colors">
                         {product.name}
                     </h3>
                 </Link>
@@ -115,7 +115,7 @@ export const ProductCard = ({
             <div className="mt-5">
                 <Button
                     onClick={handleAddToCart}
-                    className="w-full h-10 md:h-12 bg-[#1A1A1A] hover:bg-gold-gradient hover:text-black-900 border border-neutral-700 text-white font-hanken font-medium text-body-c1 md:text-body-b3 rounded-sm transition-all duration-300 cursor-pointer"
+                    className="w-full h-10 md:h-12 bg-[#1A1A1A] hover:bg-white/20  border border-neutral-700 text-white font-hanken font-medium text-body-c1 md:text-body-b3 rounded-sm transition-all duration-800 cursor-pointer"
                 >
                     Add to Cart
                 </Button>

@@ -1,7 +1,7 @@
 import type { Product } from "@/config/types";
 
 export const logo =
-    "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784380094/Roseiy_Emporium_Logo_2_zdlboe.png";
+    "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1785511077/Roseiy_Emporium_Logo_2_aikz0d.png";
 export const footerLogo =
     "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1785061330/footerLogo_qx820x.png";
 export const activeNavImg =
@@ -9,10 +9,10 @@ export const activeNavImg =
 
 export const navLinks = [
     { name: "Home", href: "/" },
-    { name: "About Us", href: "/about" },
-    { name: "Shop", href: "/catalog" },
-    { name: "Contact Us", href: "/contact" },
-    { name: "FAQs", href: "/faqs" },
+    { name: "About Us", href: "/#about" },
+    { name: "Shop", href: "/shop" },
+    { name: "Contact Us", href: "/#contact" },
+    { name: "FAQs", href: "/#faqs" },
 ];
 // hero section
 export const heroBg =
