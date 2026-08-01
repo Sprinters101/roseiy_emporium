@@ -305,7 +305,7 @@ export const Footer = () => {
             </Container>
 
             <div className="relative ">
-                <div className="mx-auto w-full max-w-[323px] md:max-w-265.5 mt-20 absolute left-1/2 transform -translate-x-1/2 ">
+                <div className="mx-auto -top-10 md:top-0 w-full max-w-[323px] md:max-w-265.5 mt-20 absolute left-1/2 transform -translate-x-1/2 ">
                     <img
                         src="/icon/footerDivider.svg"
                         alt="divider"

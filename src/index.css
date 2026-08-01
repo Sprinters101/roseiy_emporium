@@ -235,7 +235,7 @@
 }
 
 .animate-marquee {
-  animation: marquee 25s linear infinite;
+  animation: marquee 5s linear infinite;
 }
 
 .mask-gradient-x {
