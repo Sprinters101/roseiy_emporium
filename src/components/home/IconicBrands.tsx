@@ -157,7 +157,7 @@
 //                     {/* Bottom CTA Action Button */}
 //                     <div className="mt-12 md:mt-16 flex justify-center w-full">
 //                         <Link
-//                             to="/catalog"
+//                             to="/shop"
 //                             className="flex items-center justify-center px-12 md:py-3.5 bg-gold-g text-black-900 h-10 md:h-12 font-hanken font-bold text-body-b3 rounded-md tracking-wider shadow-xl hover:opacity-95 transition-all active:scale-[0.98] w-full max-w-62 md:max-w-68 text-center"
 //                         >
 //                             View All
@@ -357,7 +357,7 @@ export const IconicBrands = () => {
                         className="mt-12 md:mt-16 flex justify-center w-full"
                     >
                         <Link
-                            to="/catalog"
+                            to="/shop"
                             className="flex items-center justify-center px-12 md:py-3.5 bg-gold-g text-black-900 h-10 md:h-12 font-hanken font-bold text-body-b3 rounded-md tracking-wider shadow-xl hover:opacity-95 transition-all active:scale-[0.98] w-full max-w-62 md:max-w-68 text-center"
                         >
                             View All

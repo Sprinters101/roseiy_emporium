@@ -4,10 +4,10 @@ import { PublicLayout } from "@/layouts/PublicLayout";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { ProtectedRoute, AdminRoute } from "@/routes/guards";
 import Home from "@/components/home/Home";
+import Shop from "@/components/shop/Shop";
 
 // Placeholder Views (Replace with actual components)
 
-const Catalog = () => <div>Product Listings Grid</div>;
 const Login = () => <div>Authentication Form</div>;
 const ClientHome = () => <div>Client Profile Overview</div>;
 const ClientOrders = () => <div>List of client orders</div>;
@@ -23,7 +23,7 @@ export const router = createBrowserRouter([
         element: <PublicLayout />,
         children: [
             { index: true, element: <Home /> },
-            { path: "catalog", element: <Catalog /> },
+            { path: "catalog", element: <Shop /> },
             { path: "login", element: <Login /> },
             {
                 path: "unauthorized",
