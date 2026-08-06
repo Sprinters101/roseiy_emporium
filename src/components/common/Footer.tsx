@@ -72,10 +72,10 @@ export const Footer = () => {
                             key={index}
                             className="flex flex-col w-full max-w-fit space-y-4"
                         >
-                            <h3 className="text-white font-playfair font-bold text-xl sm:text-[1.9375rem]">
+                            <h3 className="text-white font-playfair font-bold text-xl sm:text-hg-b3">
                                 {item.title}
                             </h3>
-                            <ul className="flex flex-col space-y-3 font-hanken text-body-c1 sm:text-body-b2 text-white">
+                            <ul className="flex flex-col space-y-3 font-hanken text-body-c1 sm:text-base text-white">
                                 {item.data.map((link, index) => (
                                     <li key={index}>
                                         <Link
@@ -89,144 +89,6 @@ export const Footer = () => {
                             </ul>
                         </div>
                     ))}
-
-                    {/* Column 2: Quick Links */}
-                    {/* <div className="flex flex-col w-full max-w-fit space-y-4">
-                        <h3 className="text-white font-playfair font-bold text-xl sm:text-[1.9375rem]">
-                            Quick Links
-                        </h3>
-                        <ul className="flex mt-5 flex-col space-y-5 font-hanken text-body-c1 sm:text-body-b2 text-white font-light">
-                            <li>
-                                <Link
-                                    to="/shop"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    Shop
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/about"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    About Us
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/faq"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    FAQs
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/track-order"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    Track Order
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/terms"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    Terms & Conditions
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/privacy"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    Privacy Policy
-                                </Link>
-                            </li>
-                        </ul>
-                    </div> */}
-
-                    {/* Column 3: Shop Categories */}
-                    {/* <div className="flex flex-col space-y-4">
-                        <h3 className="text-white font-playfair font-bold text-xl sm:text-[1.9375rem]">
-                            Shop
-                        </h3>
-                        <ul className="flex flex-col space-y-3 font-hanken text-body-c1 sm:text-body-b2 text-neutral-300 font-light">
-                            <li>
-                                <Link
-                                    to="/catalog?category=champagne"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    Champagne
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/catalog?category=wine"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    Wine
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/catalog?category=whiskey"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    Whiskey
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/catalog?category=cognac"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    Cognac
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/catalog?category=tequila"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    Tequila
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/catalog?category=gin"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    Gin
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/catalog?category=rum"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    Rum
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/catalog?category=bottled-water"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    Bottled Water
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/catalog?category=drinks-accessories"
-                                    className="hover:text-gold-500 transition-colors"
-                                >
-                                    Drinks Accessories
-                                </Link>
-                            </li>
-                        </ul>
-                    </div> */}
 
                     {/* Column 4: Contact & Socials */}
                     <div className="flex flex-col space-y-6">
@@ -243,9 +105,16 @@ export const Footer = () => {
                                 </div>
                                 <a
                                     href="tel:+2348156664737"
-                                    className="text-neutral-300 hover:text-gold-500 font-hanken text-body-c1 sm:text-body-b2 font-semibold transition-colors"
+                                    className="text-neutral-300 hover:text-gold-500 font-hanken text-body-c1 sm:text- font-semibold transition-colors"
                                 >
-                                    +2348156664737 <br /> & +447946301028
+                                    +2348156664737
+                                </a>{" "}
+                                &
+                                <a
+                                    href="tel:+447946301028"
+                                    className="text-neutral-300 hover:text-gold-500 font-hanken text-body-c1 sm:text- font-semibold transition-colors"
+                                >
+                                    +447946301028
                                 </a>
                             </div>
 
@@ -256,7 +125,7 @@ export const Footer = () => {
                                 </div>
                                 <a
                                     href="mailto:omobolajrose@gmail.com"
-                                    className="text-neutral-300 hover:text-gold-500 font-hanken text-body-c1 sm:text-body-b2 font-semibold transition-colors"
+                                    className="text-neutral-300 hover:text-gold-500 font-hanken text-body-c1 sm:text- font-semibold transition-colors"
                                 >
                                     omobolajrose@gmail.com
                                 </a>
@@ -267,7 +136,7 @@ export const Footer = () => {
                                 <div className="size-11 rounded-full bg-black-700 border border-white/10 flex items-center justify-center shrink-0">
                                     <MapPin className="size-5 text-white" />
                                 </div>
-                                <span className="text-neutral-300 font-hanken text-body-c1 sm:text-body-b2 font-semibold leading-snug">
+                                <span className="text-neutral-300 font-hanken text-body-c1 sm:text- font-semibold leading-snug">
                                     16 pinnock beach road ajiran , <br /> lekki
                                     , Lagos
                                 </span>

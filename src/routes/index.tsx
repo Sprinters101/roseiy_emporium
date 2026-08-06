@@ -23,7 +23,7 @@ export const router = createBrowserRouter([
         element: <PublicLayout />,
         children: [
             { index: true, element: <Home /> },
-            { path: "catalog", element: <Shop /> },
+            { path: "shop", element: <Shop /> },
             { path: "login", element: <Login /> },
             {
                 path: "unauthorized",

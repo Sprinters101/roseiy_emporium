@@ -144,6 +144,78 @@ export const products: Product[] = [
         price: 980,
         image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_8_zk4ynx.png",
     },
+    {
+        id: "9",
+        name: "Veuve Clicquot Yellow Label",
+        category: "Champagne",
+        volume: "750ml",
+        piecesLeft: 18,
+        casesLeft: 5,
+        price: 1600,
+        image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813213/p_1_pndwco.png",
+        isFeatured: true,
+    },
+    {
+        id: "10",
+        name: "Glenfiddich 18 Year Single Malt",
+        category: "Whiskey",
+        volume: "700ml",
+        piecesLeft: 7,
+        casesLeft: 2,
+        price: 2100,
+        image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png",
+    },
+    {
+        id: "11",
+        name: "Don Julio 1942 Anejo Tequila",
+        category: "Tequila",
+        volume: "750ml",
+        piecesLeft: 5,
+        casesLeft: 1,
+        price: 3200,
+        image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_8_zk4ynx.png",
+        isFeatured: true,
+    },
+    {
+        id: "12",
+        name: "Hennessy X.O Cognac",
+        category: "Cognac",
+        volume: "700ml",
+        piecesLeft: 12,
+        casesLeft: 4,
+        price: 2850,
+        image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_6_eph9tv.png",
+    },
+    {
+        id: "13",
+        name: "Chateau Bordeaux Sweet Red Wine",
+        category: "Sweetwine",
+        volume: "750ml",
+        piecesLeft: 25,
+        casesLeft: 8,
+        price: 650,
+        image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_7_bsy5mg.png",
+    },
+    {
+        id: "14",
+        name: "Bombay Sapphire London Dry Gin",
+        category: "Gin",
+        volume: "1000ml",
+        piecesLeft: 16,
+        casesLeft: 5,
+        price: 890,
+        image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813213/p_2_wyfdyq.png",
+    },
+    {
+        id: "15",
+        name: "Captain Morgan Spiced Rum",
+        category: "Rum",
+        volume: "750ml",
+        piecesLeft: 30,
+        casesLeft: 10,
+        price: 720,
+        image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_4_ga8oeh.png",
+    },
 ];
 
 export const categories = [
@@ -189,3 +261,6 @@ export const aboutSplashImg =
 
 export const contactChampagneImg =
     "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1785057214/image_35_i4k23o.png";
+
+export const heroBg3 =
+    "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1785967279/herobg_qzddbs.png";
