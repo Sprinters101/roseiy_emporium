@@ -40,7 +40,7 @@ export const ShopHeader = ({
     ];
 
     return (
-        <div className="flex flex-col gap-4 mb-6 md:mb-8">
+        <div className="flex flex-col gap-4 mb-6 md:mb-">
             {/* Controls Bar: Filters Button (Mobile) + Sort By (All Screens) */}
             <div className="grid grid-cols-2 lg:flex lg:justify-between gap-3 w-full">
                 <div className="col-span-2">
@@ -88,9 +88,9 @@ export const ShopHeader = ({
                                     key={`cat-${catId}`}
                                     type="button"
                                     onClick={() => onRemoveCategory?.(catId)}
-                                    className="inline-flex items-center gap-1.5 bg-[#111111] border border-neutral-700/80 text-white text-xs font-hanken rounded-full px-3 py-1.5 hover:border-gold-500/80 hover:text-gold-300 transition-all shrink-0 cursor-pointer group"
+                                    className="flex flex-row-reverse items-center gap-1.5 bg-black-700 border-none rounded-[8px] text-white text-xs font-hanken  px-2 py-1.5 hover:border-gold-500/80 hover:text-gold-300 transition-all shrink-0 cursor-pointer group"
                                 >
-                                    <X className="size-3.5 text-neutral-400 group-hover:text-gold-500 transition-colors" />
+                                    <X className="size-3.5 text-white group-hover:text-gold-500 transition-colors" />
                                     <span>{label}</span>
                                 </button>
                             );
@@ -105,9 +105,9 @@ export const ShopHeader = ({
                                     key={`brand-${brandId}`}
                                     type="button"
                                     onClick={() => onRemoveBrand?.(brandId)}
-                                    className="inline-flex items-center gap-1.5 bg-[#111111] border border-neutral-700/80 text-white text-xs font-hanken rounded-full px-3 py-1.5 hover:border-gold-500/80 hover:text-gold-300 transition-all shrink-0 cursor-pointer group"
+                                    className="flex flex-row-reverse items-center gap-1.5 bg-black-700 border-none rounded-[8px] text-white text-xs font-hanken  px-2 py-1.5 hover:border-gold-500/80 hover:text-gold-300 transition-all shrink-0 cursor-pointer group"
                                 >
-                                    <X className="size-3.5 text-neutral-400 group-hover:text-gold-500 transition-colors" />
+                                    <X className="size-3.5 text-white group-hover:text-gold-500 transition-colors" />
                                     <span>{label}</span>
                                 </button>
                             );
@@ -122,9 +122,9 @@ export const ShopHeader = ({
                                     key={`price-${priceId}`}
                                     type="button"
                                     onClick={() => onRemovePrice?.(priceId)}
-                                    className="inline-flex items-center gap-1.5 bg-[#111111] border border-neutral-700/80 text-white text-xs font-hanken rounded-full px-3 py-1.5 hover:border-gold-500/80 hover:text-gold-300 transition-all shrink-0 cursor-pointer group"
+                                    className="flex flex-row-reverse items-center gap-1.5 bg-black-700 border-none rounded-[8px] text-white text-xs font-hanken  px-2 py-1.5 hover:border-gold-500/80 hover:text-gold-300 transition-all shrink-0 cursor-pointer group"
                                 >
-                                    <X className="size-3.5 text-neutral-400 group-hover:text-gold-500 transition-colors" />
+                                    <X className="size-3.5 text-white group-hover:text-gold-500 transition-colors" />
                                     <span>{label}</span>
                                 </button>
                             );

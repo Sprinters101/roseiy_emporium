@@ -1,5 +1,5 @@
 import Container from "@/components/common/Container";
-import { heroBg, heroBg2, topFlourishOrnament } from "@/lib/site_data";
+import { heroBg, heroBg2, heroBg3, topFlourishOrnament } from "@/lib/site_data";
 import { motion } from "framer-motion";
 
 export const Hero = () => {
@@ -18,13 +18,13 @@ export const Hero = () => {
 
                 {/* Bottom Rolling Golden Fields Asset */}
                 <img
-                    src={heroBg2}
+                    src={heroBg3}
                     alt="Golden landscape"
-                    className="absolute bottom-0 left-0 w-full h-auto object-cover object-bottom opacity-95"
+                    className="absolute -bottom-20 left-0 w-full  h-auto object-cover object-bottom opacity-95"
                 />
 
                 {/* Subtle Radial Gradient Vignette for Depth */}
-                <div className="absolute inset-0 bg-radial-[at_center] from-transparent via-black-900/30 to-black-900/80" />
+                {/* <div className="absolute inset-0 bg-radial-[at_center] from-transparent via-black-900/30 to-black-900/80" /> */}
             </div>
             {/* Central Content Deck */}
             <Container className="relative z-10 flex flex-col items-center text-center">
@@ -40,7 +40,7 @@ export const Hero = () => {
                         className="flex flex-col items-center w-full"
                     >
                         {/* Center Gold Flourish & Divider Line */}
-                        <div className="w-full max-w-lg mb-4 sm:mb-6 flex justify-center items-center">
+                        <div className="w-full max-w-lg mb-2 sm:mb-2 flex justify-center items-center">
                             <img
                                 src={
                                     topFlourishOrnament ||
@@ -58,7 +58,7 @@ export const Hero = () => {
                     </motion.div>
 
                     {/* Subtitle Copy */}
-                    <p className="mt-4 sm:mt-6 text-ivory-600 font-hanken text-base  max-w-lg md:max-w-[460px] leading-relaxed drop-shadow-md">
+                    <p className="mt-4 sm:mt-2 text-ivory-600 font-hanken text-base  max-w-lg md:max-w-[460px] leading-relaxed drop-shadow-md">
                         Discover the world’s finest champagnes, wines and
                         spirits from iconic brands and rare selections
                     </p>
