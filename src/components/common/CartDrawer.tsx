@@ -1,28 +1,46 @@
-// src/components/CartDrawer.tsx
-import { ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Trash2, Plus, Minus, X } from "lucide-react";
 import {
     Sheet,
     SheetContent,
     SheetHeader,
     SheetTitle,
     SheetTrigger,
+    SheetClose,
 } from "@/components/ui/sheet";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useCart } from "@/context/CartContext";
+import { ShopEmptyState } from "@/components/shop/ShopEmptyState";
+import { cn } from "@/lib/utils";
 
 interface CartDrawerProps {
     children: React.ReactNode;
 }
 
-export const CartDrawer = ({ children }: CartDrawerProps) => {
+export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
+    const navigate = useNavigate();
+    const [isOpen, setIsOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
     const {
         cartItems,
         totalItems,
         subtotal,
-        updateQuantity,
+        updateUnitQuantities,
         removeFromCart,
     } = useCart();
 
+    // Monitor screen width to switch sheet side between bottom (mobile) and right (desktop)
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    // Format currency string with Nigerian Naira symbol
     const formatPrice = (price: number) =>
         new Intl.NumberFormat("en-NG", {
             style: "currency",
@@ -32,107 +50,214 @@ export const CartDrawer = ({ children }: CartDrawerProps) => {
             .format(price)
             .replace("NGN", "₦");
 
+    const drawerSide = isMobile ? "bottom" : "right";
+
+    // Format quantity summary string (e.g. "1 Case and 2 Pieces")
+    const getQuantitySummary = (item: {
+        piecesQty?: number;
+        casesQty?: number;
+        quantity: number;
+    }) => {
+        const pQty = item.piecesQty ?? item.quantity ?? 0;
+        const cQty = item.casesQty ?? 0;
+
+        const parts: string[] = [];
+        if (cQty > 0) {
+            parts.push(`${cQty} ${cQty === 1 ? "Case" : "Cases"}`);
+        }
+        if (pQty > 0 || parts.length === 0) {
+            parts.push(`${pQty} ${pQty === 1 ? "Piece" : "Pieces"}`);
+        }
+        return parts.join(" and ");
+    };
+
     return (
-        <Sheet>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger>{children}</SheetTrigger>
 
-            {/* Slide out panel from the right hand side */}
+            {/* Slide out drawer panel (bottom on mobile, right on desktop) */}
             <SheetContent
-                side="right"
-                className="w-full sm:max-w-md bg-pod-gradient border-l border-neutral-800 p-0 text-white flex flex-col h-full z-50"
+                side={drawerSide}
+                showCloseButton={false}
+                className={cn(
+                    " w-full bg-black-700 border-none p-0 text-white flex flex-col h-full z-50 overflow-hidden data-[side=right]:sm:max-w-2xl",
+                    isMobile &&
+                        "w-full max-h-[92vh] h-[92vh]  border-t border-neutral-800 p-0 text-white flex flex-col z-50 overflow-hidden",
+                )}
             >
-                {/* Drawer Header */}
-                <SheetHeader className="p-6 border-b border-neutral-800 flex flex-row items-center justify-between">
-                    <SheetTitle className="text-xl font-serif text-white tracking-wide flex items-center gap-2">
-                        <ShoppingCart className="h-5 w-5 text-gold-500" /> Shopping
-                        Bag ({totalItems})
+                {/* Header */}
+                <SheetHeader className="px-6 md:p-6 flex flex-row items-center justify-between shrink-0">
+                    <SheetTitle className="text-xl md:text-[1.9375rem] font-playfair font-bold text-white tracking-wider uppercase">
+                        CART ({totalItems})
                     </SheetTitle>
+
+                    <SheetClose className="size-9 rounded-full  flex items-center justify-center text-white hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer">
+                        <X className="size-5" />
+                        <span className="sr-only">Close</span>
+                    </SheetClose>
                 </SheetHeader>
 
-                {/* Drawer Scrollable Items Container List */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {/* Scrollable Body Content */}
+                <div className="flex-1 overflow-y-auto px-4 sm:px-6 space-y-4">
                     {cartItems.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full text-neutral-400 gap-3 py-12">
-                            <ShoppingCart className="h-14 w-14 text-neutral-600 stroke-[1.5]" />
-                            <p className="text-sm font-medium text-neutral-300">
-                                Your cart is currently empty.
-                            </p>
-                            <p className="text-xs text-neutral-500 text-center max-w-xs">
-                                Explore our collection of premium spirits and luxury beverages to populate your bag.
-                            </p>
+                        <div className="flex flex-col items-center justify-center h-full py-8">
+                            <ShopEmptyState
+                                isCartEmpty={true}
+                                onButtonClick={() => {
+                                    setIsOpen(false);
+                                    navigate("/shop");
+                                }}
+                            />
                         </div>
                     ) : (
                         cartItems.map((item) => {
-                            const maxStock =
-                                item.piecesLeft !== undefined
-                                    ? item.piecesLeft
-                                    : item.casesLeft !== undefined
-                                    ? item.casesLeft
-                                    : Infinity;
-                            const isMaxReached = item.quantity >= maxStock;
+                            const pQty = item.piecesQty ?? item.quantity ?? 1;
+                            const cQty = item.casesQty ?? 0;
+                            const piecesLeft = item.piecesLeft ?? Infinity;
+                            const casesLeft = item.casesLeft ?? Infinity;
+
+                            const categoryName = item.category || "Champagne";
+                            const volumeText = item.volume || "75cl";
 
                             return (
                                 <div
                                     key={item.id}
-                                    className="flex gap-4 bg-black/40 p-3.5 rounded-xl border border-neutral-800/80 items-center hover:border-neutral-700 transition-colors"
+                                    className="bsg-[#141415] border-none rounded-2xl  flex gap-4 relative items-stretch hover:border-neutral-700 transition-all md:max-h-56"
                                 >
-                                    <img
-                                        src={item.image}
-                                        alt={item.name}
-                                        className="w-16 h-16 rounded-lg object-contain bg-black-900 border border-neutral-800 p-1 shrink-0"
-                                    />
+                                    {/* Left Product Image Thumbnail Box */}
+                                    <div className="w-full h-41.25 md:h-56 md:max-w-56 max-w-36.25 max-h-41.25 md:max-h-56  min-h-full  bg-black-900 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+                                        <img
+                                            src={item.image}
+                                            alt={item.name}
+                                            className="h-full max-h-26.25 md:max-h-40 w-auto object-contain drop-shadow-md"
+                                        />
+                                    </div>
 
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="text-xs font-medium text-white truncate tracking-wide font-playfair">
-                                            {item.name}
-                                        </h4>
-                                        <p className="text-xs text-gold-500 font-semibold mt-1">
-                                            {formatPrice(item.price)}
-                                        </p>
-
-                                        {/* Quantity Actions Selector */}
-                                        <div className="flex items-center gap-2 mt-2">
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    updateQuantity(
-                                                        item.id,
-                                                        item.quantity - 1,
-                                                    )
-                                                }
-                                                className="h-6 w-6 rounded-md bg-neutral-800 flex items-center justify-center hover:bg-neutral-700 text-neutral-300 transition-colors cursor-pointer"
-                                                aria-label="Decrease quantity"
-                                            >
-                                                <Minus className="h-3 w-3" />
-                                            </button>
-                                            <span className="text-xs font-semibold w-4 text-center">
-                                                {item.quantity}
+                                    {/* Middle Details Column */}
+                                    <div className="flex-1 min-w-0 pr-8 ">
+                                        <div>
+                                            <span className="text-gold-500 font-hanken text-[0.5rem] md:text-[0.625rem] sm:text-[0.8125rem] font-semibold tracking-widest uppercase">
+                                                {categoryName.toUpperCase()}
                                             </span>
-                                            <button
-                                                type="button"
-                                                disabled={isMaxReached}
-                                                onClick={() =>
-                                                    updateQuantity(
-                                                        item.id,
-                                                        item.quantity + 1,
-                                                    )
-                                                }
-                                                className="h-6 w-6 rounded-md bg-neutral-800 flex items-center justify-center hover:bg-neutral-700 text-neutral-300 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-neutral-800"
-                                                aria-label="Increase quantity"
-                                            >
-                                                <Plus className="h-3 w-3" />
-                                            </button>
+
+                                            <h4 className="text-[0.8125rem] sm:text-base md:text-hg-c1 font-playfair font-bold text-white  mt-0.5  line clamp-2 md:line-clamp-1 max-w-28.5 md:max-w-full">
+                                                {item.name}
+                                            </h4>
+
+                                            <p className="text-[0.5rem] md:text-[0.625rem]  text-black-200 font-hanken mt-0.5">
+                                                {volumeText} • Quantity:{" "}
+                                                {getQuantitySummary(item)}
+                                            </p>
+
+                                            <div className="mt-1">
+                                                <span className="text-gold-500 font-playfair text-base sm:text-xl md:text-[1.5625rem] font-bold">
+                                                    {formatPrice(
+                                                        item.price *
+                                                            item.quantity,
+                                                    )}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Counter 1: QUANTITY IN PIECES */}
+                                        <div className="pt-2 md:pt-3">
+                                            <label className="block text-white text-[0.375rem] md:text-[0.625rem] font-semibold tracking-wider uppercase font-hanken">
+                                                QUANTITY IN PIECES
+                                            </label>
+                                            <div className="flex items-center gap-2 mt-1 md:mt-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        updateUnitQuantities(
+                                                            item.id,
+                                                            pQty - 1,
+                                                            cQty,
+                                                        )
+                                                    }
+                                                    disabled={pQty <= 0}
+                                                    className="size-4 md:size-6 rounded border border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                                    aria-label="Decrease pieces quantity"
+                                                >
+                                                    <Minus className="size-3" />
+                                                </button>
+
+                                                <span className="w-8 text-center font-bold text-white text-[0.625rem] md:text-sm font-hanken">
+                                                    {pQty}
+                                                </span>
+
+                                                <button
+                                                    type="button"
+                                                    disabled={
+                                                        pQty >= piecesLeft
+                                                    }
+                                                    onClick={() =>
+                                                        updateUnitQuantities(
+                                                            item.id,
+                                                            pQty + 1,
+                                                            cQty,
+                                                        )
+                                                    }
+                                                    className="size-4 md:size-6 rounded border border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                                    aria-label="Increase pieces quantity"
+                                                >
+                                                    <Plus className="size-3" />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Counter 2: QUANTITY IN CASES */}
+                                        <div className="pt-2 md:pt-3">
+                                            <label className="block text-white text-[0.375rem] md:text-[0.625rem] font-semibold tracking-wider uppercase font-hanken">
+                                                QUANTITY IN CASES
+                                            </label>
+                                            <div className="flex items-center gap-2 mt-1 md:mt-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        updateUnitQuantities(
+                                                            item.id,
+                                                            pQty,
+                                                            cQty - 1,
+                                                        )
+                                                    }
+                                                    disabled={cQty <= 0}
+                                                    className="size-4 md:size-6 rounded border border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                                    aria-label="Decrease cases quantity"
+                                                >
+                                                    <Minus className="size-3" />
+                                                </button>
+
+                                                <span className="w-8 text-center font-bold text-white text-sm font-hanken">
+                                                    {cQty}
+                                                </span>
+
+                                                <button
+                                                    type="button"
+                                                    disabled={cQty >= casesLeft}
+                                                    onClick={() =>
+                                                        updateUnitQuantities(
+                                                            item.id,
+                                                            pQty,
+                                                            cQty + 1,
+                                                        )
+                                                    }
+                                                    className="size-4 md:size-6 rounded border border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                                    aria-label="Increase cases quantity"
+                                                >
+                                                    <Plus className="size-3" />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Remove single item action */}
+                                    {/* Top Right Trash Button */}
                                     <button
                                         type="button"
                                         onClick={() => removeFromCart(item.id)}
-                                        className="text-neutral-500 hover:text-red-400 p-1.5 transition-colors cursor-pointer"
+                                        className="size-9 rounded-full bg-black-900 hover:bg-red-950 border-none  text-red-500 flex items-center justify-center cursor-pointer transition-colors absolute top-4 right-4"
                                         aria-label="Remove item"
                                     >
-                                        <Trash2 className="h-4 w-4" />
+                                        <Trash2 className="size-4" />
                                     </button>
                                 </div>
                             );
@@ -140,30 +265,36 @@ export const CartDrawer = ({ children }: CartDrawerProps) => {
                     )}
                 </div>
 
-                {/* Drawer Sticky Footer Overview panel */}
+                {/* Footer Overview & CTA Action Section */}
                 {cartItems.length > 0 && (
-                    <div className="p-6 border-t border-neutral-800 bg-black/60 space-y-4">
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-neutral-400">Subtotal</span>
-                            <span className="text-lg font-bold text-gold-500 font-playfair">
+                    <div className="p-4 sm:p-6 space-y-4 shrink-0">
+                        {/* Total Summary Container */}
+                        <div className="bg-black-900 border border-white/5 rounded-xl px-5 py-4 flex items-center justify-between">
+                            <span className="text-gold-500 font-hanken text-lg sm:text-xl font-normal">
+                                Total
+                            </span>
+                            <span className="text-gold-500 font-hanken text-2xl sm:text-[1.5625rem] font-bold">
                                 {formatPrice(subtotal)}
                             </span>
                         </div>
-                        <p className="text-[11px] text-neutral-500 leading-normal">
-                            Shipping calculations, taxes, and applied
-                            promotional discounts will be computed at the secure
-                            checkout step.
-                        </p>
 
-                        <div className="grid gap-2 pt-2">
-                            <SheetTrigger>
-                                <Link
-                                    to="/checkout"
-                                    className="w-full text-center text-xs font-bold py-3.5 rounded-lg bg-gold-g text-black tracking-wide shadow-lg block hover:opacity-95 transition-opacity"
-                                >
-                                    Proceed To Checkout
-                                </Link>
-                            </SheetTrigger>
+                        {/* CTA Buttons */}
+                        <div className="space-y-3 md:space-y-4 pt-1">
+                            <Link
+                                to="/checkout"
+                                onClick={() => setIsOpen(false)}
+                                className="w-full h-12 sm:h-13 bg-gold-g hover:opacity-95 text-black-900 font-hanken font-bold text-sm sm:text-base rounded-lg shadow-lg flex items-center justify-center transition-all active:scale-[0.99]"
+                            >
+                                Proceed to Checkout
+                            </Link>
+
+                            <button
+                                type="button"
+                                onClick={() => setIsOpen(false)}
+                                className="w-full h-12 sm:h-13 bg-transparent hover:bg-white/10 border border-white/40 hover:border-gold-400 text-white font-hanken font-medium text-sm sm:text-base rounded-lg flex items-center justify-center transition-all active:scale-[0.99] cursor-pointer"
+                            >
+                                Continue Shopping
+                            </button>
                         </div>
                     </div>
                 )}
@@ -171,3 +302,5 @@ export const CartDrawer = ({ children }: CartDrawerProps) => {
         </Sheet>
     );
 };
+
+export default CartDrawer;

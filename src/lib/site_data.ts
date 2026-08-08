@@ -157,13 +157,29 @@ export const products: Product[] = [
     },
     {
         id: "10",
-        name: "Glenfiddich 18 Year Single Malt",
+        name: "Glenfiddich Single Scotch",
+        brand: "Glenfiddich",
         category: "Whiskey",
-        volume: "700ml",
-        piecesLeft: 7,
-        casesLeft: 2,
-        price: 2100,
+        volume: "70cl",
+        piecesLeft: 22,
+        casesLeft: 10,
+        price: 110000,
         image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png",
+        gallery: [
+            "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png",
+        ],
+        description:
+            "A remarkably rich and luxurious single malt scotch whiskey, matured in fine Spanish Oloroso wood and American oak casks. Small batch production gives this 18-year-old expression extraordinary depth, complexity, and exceptional elegance.",
+        tastingNotes: {
+            nose: "A remarkably rich aroma with ripe orchard fruit, baked apple, and robust oakiness.",
+            taste: "Richly delivers luxurious dried fruit, candy peel, and dates. Overlaid with elegant oak notes.",
+            finish: "Warming, rewarding, and distinguished long finish."
+        },
+        details: {
+            abv: "40%",
+            country: "Scotland",
+            region: "Speyside"
+        }
     },
     {
         id: "11",

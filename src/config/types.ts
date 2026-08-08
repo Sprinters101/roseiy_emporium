@@ -8,6 +8,19 @@ export interface Product {
     price: number;
     image: string;
     isFeatured?: boolean;
+    brand?: string;
+    gallery?: string[];
+    description?: string;
+    tastingNotes?: {
+        nose?: string;
+        taste?: string;
+        finish?: string;
+    };
+    details?: {
+        abv?: string;
+        country?: string;
+        region?: string;
+    };
 }
 
 export interface ProductCardProps {

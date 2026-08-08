@@ -5,12 +5,14 @@ import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { ProtectedRoute, AdminRoute } from "@/routes/guards";
 import Home from "@/components/home/Home";
 import Shop from "@/components/shop/Shop";
+import ProductDetails from "@/components/produtcs/ProductDetails";
 
 // Placeholder Views (Replace with actual components)
 
 const Login = () => <div>Authentication Form</div>;
 const ClientHome = () => <div>Client Profile Overview</div>;
 const ClientOrders = () => <div>List of client orders</div>;
+const Register = () => <div>Register Form</div>;
 
 // Lazy Load Admin Views to drastically optimize initial bundle performance
 // const AdminOverview = React.lazy(() => import("@/features/admin/Overview"));
@@ -25,6 +27,8 @@ export const router = createBrowserRouter([
             { index: true, element: <Home /> },
             { path: "shop", element: <Shop /> },
             { path: "login", element: <Login /> },
+            { path: "register", element: <Register /> },
+            { path: "product/:id", element: <ProductDetails /> },
             {
                 path: "unauthorized",
                 element: (

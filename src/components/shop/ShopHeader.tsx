@@ -130,7 +130,7 @@ export const ShopHeader = ({
                             );
                         })}
 
-                        {/* {onClearAll && (
+                        {onClearAll && (
                             <button
                                 type="button"
                                 onClick={onClearAll}
@@ -138,7 +138,7 @@ export const ShopHeader = ({
                             >
                                 Clear All
                             </button>
-                        )} */}
+                        )}
                     </div>
                 </div>
             )}

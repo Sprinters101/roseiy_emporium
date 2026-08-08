@@ -162,7 +162,7 @@ export const Navbar = () => {
                         </nav>
 
                         {/* Integrated Right Action Pod */}
-                        <div className="bg-po backdrop-blur-md flex items-center h-14 md:h-15 gap-3 md:gap-4 rounded-xl py-2 px-3 md:px-8 border-[0.5px] border-ivory-400/60 shadow-xl lg:w-full max-w-116">
+                        <div className="bg-po bg-white/10 backdrop-blur-md flex items-center h-14 md:h-15 gap-3 md:gap-4 rounded-xl py-2 px-3 md:px-8 border-[0.5px] border-ivory-400/60 shadow-xl lg:w-full max-w-116">
                             <div className="hidden lg:flex items-center gap-4">
                                 <NavSearch />
                                 <button className="flex size-10 shrink-0 items-center justify-center rounded-full bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors cursor-pointer">
