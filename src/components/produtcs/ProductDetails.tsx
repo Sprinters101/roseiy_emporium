@@ -218,7 +218,7 @@ export const ProductDetails: React.FC = () => {
             <div className="min-h-screen bg-black-900 text-white pt-6 font-hanken md:mt-18">
                 <Container className="">
                     {/* 1. Breadcrumbs */}
-                    <nav className="flex items-center space-x-2 text-[10px] sm:text-sm text-neutral-400 font-hanken font-medium tracking-wider uppercase overflow-x-auto whitespace-nowrap pb-2">
+                    <nav className="flex items-center space-x-2 text-[10px] sm:text-sm text-neutral-400 font-hanken font-medium  uppercase overflow-x-hidden line-clamp-1 whitespace-nowrap pb-2">
                         <Link
                             to="/"
                             className="hover:text-gold-400 transition-colors"
@@ -230,24 +230,26 @@ export const ProductDetails: React.FC = () => {
                             to={`/shop?category=${encodeURIComponent(categoryName)}`}
                             className="hover:text-gold-400 transition-colors"
                         >
-                            {categoryName.toUpperCase()}
+                            {/* {categoryName.toUpperCase()} */}
+                            shop
                         </Link>
                         <ChevronRight className="size-3.5 text-neutral-600 shrink-0" />
+                        <span className="text-gold-400 font-semibold">
+                            {product.name.toUpperCase()}
+                        </span>
+                        {/* <ChevronRight className="size-3.5 text-neutral-600 shrink-0" />
                         <Link
                             to={`/shop?brand=${encodeURIComponent(brandName)}`}
                             className="hover:text-gold-400 transition-colors"
                         >
                             {brandName.toUpperCase()}
                         </Link>
-                        <ChevronRight className="size-3.5 text-neutral-600 shrink-0" />
-                        <span className="text-gold-400 font-semibold">
-                            {product.name.toUpperCase()}
-                        </span>
+                         */}
                     </nav>
 
                     {/* 2. Main Page Header Title */}
                     <div className="pb-4">
-                        <h1 className="text-hg-c1 sm:text-hg-b2 font-playfair font-bold text-white tracking-wider uppercase">
+                        <h1 className="text-hg-c1 sm:text-hg-b2 font-playfair font-bold text-white  uppercase">
                             PRODUCT DESCRIPTION
                         </h1>
                     </div>
