@@ -136,11 +136,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                     {/* Middle Details Column */}
                                     <div className="flex-1 min-w-0 pr-8 ">
                                         <div>
-                                            <span className="text-gold-500 font-hanken text-[0.5rem] md:text-[0.625rem] sm:text-[0.8125rem] font-semibold tracking-widest uppercase">
+                                            <span className="text-gold-500 leading-0 font-hanken text-[0.5rem] md:text-[0.625rem] sm:text-[0.8125rem] font-semibold tracking-widest uppercase">
                                                 {categoryName.toUpperCase()}
                                             </span>
 
-                                            <h4 className="text-[0.8125rem] sm:text-base md:text-hg-c1 font-playfair font-bold text-white  mt-0.5  line clamp-2 md:line-clamp-1 max-w-28.5 md:max-w-full">
+                                            <h4 className="text-[0.8125rem] leading-[120%] sm:text-base md:text-hg-c1 font-playfair font-bold text-white  mt-0.5  line clamp-2 md:line-clamp-2 max-w-28.5 md:max-w-59.5">
                                                 {item.name}
                                             </h4>
 
@@ -150,7 +150,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                             </p>
 
                                             <div className="mt-1">
-                                                <span className="text-gold-500 font-playfair text-base sm:text-xl md:text-[1.5625rem] font-bold">
+                                                <span className="text-gold-500 leading-0 leading font-playfair text-base sm:text-xl md:text-[1.5625rem] font-bold">
                                                     {formatPrice(
                                                         item.price *
                                                             item.quantity,
@@ -227,7 +227,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                     <Minus className="size-3" />
                                                 </button>
 
-                                                <span className="w-8 text-center font-bold text-white text-sm font-hanken">
+                                                <span className="w-8 text-center font-bold text-white text-[0.625rem] md:text-sm font-hanken">
                                                     {cQty}
                                                 </span>
 
@@ -254,10 +254,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                     <button
                                         type="button"
                                         onClick={() => removeFromCart(item.id)}
-                                        className="size-9 rounded-full bg-black-900 hover:bg-red-950 border-none  text-red-500 flex items-center justify-center cursor-pointer transition-colors absolute top-4 right-4"
+                                        className="size-6 md:size-9 rounded-full bg-black-900 hover:bg-red-950 border-none  text-red-500 flex items-center justify-center cursor-pointer transition-colors absolute top-4 right-4"
                                         aria-label="Remove item"
                                     >
-                                        <Trash2 className="size-4" />
+                                        <Trash2 className="size-2 md:size-4" />
                                     </button>
                                 </div>
                             );
@@ -267,7 +267,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
 
                 {/* Footer Overview & CTA Action Section */}
                 {cartItems.length > 0 && (
-                    <div className="p-4 sm:p-6 space-y-4 shrink-0">
+                    <div className="px-4 sm:p-6 space-y-4 shrink-0">
                         {/* Total Summary Container */}
                         <div className="bg-black-900 border border-white/5 rounded-xl px-5 py-4 flex items-center justify-between">
                             <span className="text-gold-500 font-hanken text-lg sm:text-xl font-normal">
@@ -283,7 +283,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                             <Link
                                 to="/checkout"
                                 onClick={() => setIsOpen(false)}
-                                className="w-full h-12 sm:h-13 bg-gold-g hover:opacity-95 text-black-900 font-hanken font-bold text-sm sm:text-base rounded-lg shadow-lg flex items-center justify-center transition-all active:scale-[0.99]"
+                                className="w-full h-10 md:h-12 sm:h-13 bg-gold-g hover:opacity-95 text-black-900 font-hanken font-bold text-[0.8125rem] sm:text-base rounded-lg shadow-lg flex items-center justify-center transition-all active:scale-[0.99]"
                             >
                                 Proceed to Checkout
                             </Link>
@@ -291,7 +291,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                             <button
                                 type="button"
                                 onClick={() => setIsOpen(false)}
-                                className="w-full h-12 sm:h-13 bg-transparent hover:bg-white/10 border border-white/40 hover:border-gold-400 text-white font-hanken font-medium text-sm sm:text-base rounded-lg flex items-center justify-center transition-all active:scale-[0.99] cursor-pointer"
+                                className="w-full h-10 sm:h-12 bg-transparent hover:bg-white/10 border border-white/40 hover:border-gold-400 text-white font-hanken font-medium text-sm sm:text-base rounded-lg flex items-center justify-center transition-all active:scale-[0.99] cursor-pointer"
                             >
                                 Continue Shopping
                             </button>

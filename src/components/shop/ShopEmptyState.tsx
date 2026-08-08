@@ -1,5 +1,5 @@
 import React from "react";
-import { topFlourishOrnament, decorativeDivider } from "@/lib/site_data";
+import { topFlourishOrnament } from "@/lib/site_data";
 
 export interface ShopEmptyStateProps {
     totalActiveFilters?: number;
@@ -30,14 +30,14 @@ export const ShopEmptyState: React.FC<ShopEmptyStateProps> = ({
     const defaultTitle = isCartEmpty
         ? "Your Cart Is Empty"
         : isFiltered
-        ? "No Drinks Match Your Filters"
-        : "We Couldn't Find That Bottle";
+          ? "No Drinks Match Your Filters"
+          : "We Couldn't Find That Bottle";
 
     const defaultDescription = isCartEmpty
         ? "It looks like your cart is empty. Consider adjusting your filters or browsing a different category to find some amazing items!"
         : isFiltered
-        ? "Try adjusting your filters or explore another category to discover more exceptional selections."
-        : "Try another search or browse our curated collection.";
+          ? "Try adjusting your filters or explore another category to discover more exceptional selections."
+          : "Try another search or browse our curated collection.";
 
     const displayTitle = title || defaultTitle;
     const displayDescription = description || defaultDescription;
@@ -59,7 +59,7 @@ export const ShopEmptyState: React.FC<ShopEmptyStateProps> = ({
             {/* Header Graphic */}
             <div className="relative w-full max-w-xs mb-2 flex justify-center">
                 <img
-                    src={imageSrc || "/icon/sideDrink.png"}
+                    src={imageSrc || "/icon/empty.svg"}
                     alt="Empty State"
                     className="w-full h-auto max-h-48 sm:max-h-56 object-contain filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]"
                 />
@@ -67,9 +67,9 @@ export const ShopEmptyState: React.FC<ShopEmptyStateProps> = ({
 
             {/* Flourish Decorative Ornament Divider */}
             <img
-                src={decorativeDivider || topFlourishOrnament}
+                src={topFlourishOrnament}
                 alt=""
-                className="w-full max-w-[200px] sm:max-w-xs h-auto object-contain my-2 opacity-90"
+                className="w-full max-w-50 sm:max-w-xs h-auto object-contain my-2 opacity-90"
             />
 
             {/* Heading */}

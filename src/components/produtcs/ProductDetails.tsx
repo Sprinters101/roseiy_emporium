@@ -5,7 +5,7 @@ import { products } from "@/lib/site_data";
 import type { Product } from "@/config/types";
 import { useCart } from "@/context/CartContext";
 import { ProductCard } from "@/components/common/ProductCard";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import Container from "../common/Container";
 
@@ -488,7 +488,7 @@ export const ProductDetails: React.FC = () => {
                                     <p className="block text-white text-xs md:text-base font-semibold tracking-widest uppercase font-hanken">
                                         TOTAL QUANTITY
                                     </p>
-                                    <div className="mt-3 bg-black-900/80 border border-neutral-800/90 rounded-md px-5 py-[3.5px] text-center text-white font-medium text-body-c1 md:text-base md:text-lg md:max-w-60.5 max-w-40.5">
+                                    <div className="mt-3 bg-black-900/80 border border-neutral-800/90 rounded-md px-5 py-[3.5px] text-center text-white font-medium text-body-c1 md:text-base md:text-lg md:max-w-60.5  w-fit">
                                         {totalQuantitySummary}
                                     </div>
                                 </div>

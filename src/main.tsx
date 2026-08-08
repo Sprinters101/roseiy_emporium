@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient } from "./config/queryClient";
 import App from "./App";
 import "./index.css";
-import { Toaster } from "sonner";
+import { Toaster } from "./components/ui/sonner";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
@@ -13,7 +13,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <App />
             {/* Devtools will only open/render during local development */}
             <ReactQueryDevtools initialIsOpen={false} position="bottom" />
-            <Toaster />
+            <Toaster position="top-right" />
         </QueryClientProvider>
     </React.StrictMode>,
 );
