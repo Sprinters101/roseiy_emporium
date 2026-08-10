@@ -1,10 +1,10 @@
-import { useState } from "react";
 import { Link } from "react-router";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ProductCardProps } from "@/config/types";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 export const ProductCard = ({
     product,
@@ -14,7 +14,8 @@ export const ProductCard = ({
     isLandingPage = false,
 }: ProductCardProps) => {
     const { cartItems, addToCart } = useCart();
-    const [isWishlisted, setIsWishlisted] = useState(false);
+    const { isInWishlist, toggleWishlist } = useWishlist();
+    const isWishlisted = isInWishlist(product.id);
 
     const cartItem = cartItems.find((item) => item.id === product.id);
     const inCartQty = cartItem ? cartItem.quantity : 0;
@@ -31,7 +32,7 @@ export const ProductCard = ({
     const handleWishlist = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        setIsWishlisted(!isWishlisted);
+        toggleWishlist(product);
         if (onToggleWishlist) onToggleWishlist(product.id);
     };
 

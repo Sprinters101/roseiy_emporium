@@ -4,6 +4,7 @@ import { Heart, Minus, Plus, Check, ChevronRight } from "lucide-react";
 import { products } from "@/lib/site_data";
 import type { Product } from "@/config/types";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { ProductCard } from "@/components/common/ProductCard";
 import { toast } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
@@ -76,7 +77,8 @@ export const ProductDetails: React.FC = () => {
     const [piecesQty, setPiecesQty] = useState<number>(2);
     const [casesQty, setCasesQty] = useState<number>(1);
 
-    const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
+    const { isInWishlist, toggleWishlist } = useWishlist();
+    const isWishlisted = isInWishlist(product.id);
 
     // Sync local quantities with cart item whenever cart state updates
     useEffect(() => {
@@ -173,12 +175,7 @@ export const ProductDetails: React.FC = () => {
 
     // Toggle Wishlist
     const handleWishlistToggle = () => {
-        setIsWishlisted((prev) => !prev);
-        if (!isWishlisted) {
-            toast.success(`${product.name} added to your wishlist`);
-        } else {
-            toast.info(`${product.name} removed from your wishlist`);
-        }
+        toggleWishlist(product);
     };
 
     // Add to Cart handler (Overrides existing cart quantities with exact local selections)

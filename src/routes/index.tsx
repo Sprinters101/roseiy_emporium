@@ -6,6 +6,7 @@ import { ProtectedRoute, AdminRoute } from "@/routes/guards";
 import Home from "@/components/home/Home";
 import Shop from "@/components/shop/Shop";
 import ProductDetails from "@/components/produtcs/ProductDetails";
+import Wishlist from "@/components/wishlist/wishlist";
 
 // Placeholder Views (Replace with actual components)
 
@@ -29,6 +30,8 @@ export const router = createBrowserRouter([
             { path: "login", element: <Login /> },
             { path: "register", element: <Register /> },
             { path: "product/:id", element: <ProductDetails /> },
+            { path: "wishlist", element: <Wishlist /> },
+            { path: "whitelist", element: <Wishlist /> },
             {
                 path: "unauthorized",
                 element: (

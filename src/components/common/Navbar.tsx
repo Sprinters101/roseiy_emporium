@@ -27,6 +27,7 @@ import { CartDrawer } from "./CartDrawer";
 import { activeNavImg, logo, navLinks } from "@/lib/site_data";
 import Container from "./Container";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 const NavSearch = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -46,6 +47,7 @@ const NavSearch = () => {
 
 export const Navbar = () => {
     const { totalItems } = useCart();
+    const { wishlistCount } = useWishlist();
     const location = useLocation();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
@@ -165,14 +167,26 @@ export const Navbar = () => {
                         <div className="bg-po bg-white/10 backdrop-blur-md flex items-center h-14 md:h-15 gap-3 md:gap-4 rounded-xl py-2 px-3 md:px-8 border-[0.5px] border-ivory-400/60 shadow-xl lg:w-full max-w-116">
                             <div className="hidden lg:flex items-center gap-4">
                                 <NavSearch />
-                                <button className="flex size-10 shrink-0 items-center justify-center rounded-full bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors cursor-pointer">
+                                <Link
+                                    to="/wishlist"
+                                    type="button"
+                                    className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors cursor-pointer"
+                                >
                                     <Heart className="size-5" />
-                                </button>
+                                    {wishlistCount > 0 && (
+                                        <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold-gradient text-[0.6rem] font-black text-black-900">
+                                            {wishlistCount}
+                                        </span>
+                                    )}
+                                </Link>
                             </div>
 
                             {/* Cart */}
                             <CartDrawer>
-                                <button className="relative flex size-9 md:size-10 shrink-0 items-center justify-center rounded-full bg-black/90 md:bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors focus:outline-none cursor-pointer">
+                                <button
+                                    type="button"
+                                    className="relative flex size-9 md:size-10 shrink-0 items-center justify-center rounded-full bg-black/90 md:bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors focus:outline-none cursor-pointer"
+                                >
                                     <ShoppingCart className="size-4 md:size-5" />
                                     <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold-gradient text-[0.6rem] font-black text-black-900">
                                         {totalItems}
