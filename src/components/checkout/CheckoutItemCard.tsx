@@ -36,7 +36,7 @@ export const CheckoutItemCard: React.FC<CheckoutItemCardProps> = ({
                 <img
                     src={item.image}
                     alt={item.name}
-                    className="w-full h-full object-contain"
+                    className="w-full max-h-[4.75rem] md:max-h-full h-full object-contain"
                 />
             </div>
 
@@ -66,11 +66,11 @@ export const CheckoutItemCard: React.FC<CheckoutItemCardProps> = ({
             <button
                 type="button"
                 onClick={() => onRemove(item.id)}
-                className="w-8 h-8 rounded-full bg-black-700 hover:bg-red-950/40 border border-neutral-800 flex items-center justify-center text-neutral-400 hover:text-red-400 transition-all cursor-pointer shrink-0 self-start mt-1"
+                className="size-6 md:size-8 rounded-full bg-black-900 hover:bg-red-950/40 flex items-center justify-center text-red-500 hover:text-red-400 transition-all cursor-pointer shrink-0 self-start mt-1"
                 title="Remove item"
                 aria-label="Remove item"
             >
-                <Trash2 className="size-4" />
+                <Trash2 className="size-2.5 md:size-4" />
             </button>
         </div>
     );

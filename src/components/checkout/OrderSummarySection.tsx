@@ -24,7 +24,7 @@ export const OrderSummarySection: React.FC<OrderSummarySectionProps> = ({
     );
 
     return (
-        <div className="bg-black-700 rounded-sm py-6  px-4 sm:p-8 flex flex-col justify-between h-fit border border-neutral-800/60 shadow-xl">
+        <div className="bg-black-700 rounded-sm py-6  px-4 sm:p-8 flex flex-col justify-between h-fit ">
             <div>
                 {/* Section Title */}
                 <h2 className="text-xl sm:text-base font-playfair font-bold text-white mb-6">
@@ -34,7 +34,7 @@ export const OrderSummarySection: React.FC<OrderSummarySectionProps> = ({
                 {/* Items List */}
                 <div className="flex flex-col gap-4 max-h-110 overflow-y-auto pr-1">
                     {items.length === 0 ? (
-                        <div className="py-8 text-center text-neutral-400 text-sm font-hanken bg-black-900/50 rounded-lg border border-neutral-800/50 p-4">
+                        <div className="py-8 text-center text-white text-sm font-hanken bg-black-900/50 rounded-lg border border-neutral-800/50 p-4">
                             Your cart is currently empty.
                         </div>
                     ) : (
@@ -49,16 +49,16 @@ export const OrderSummarySection: React.FC<OrderSummarySectionProps> = ({
                 </div>
 
                 {/* Breakdown Card */}
-                <div className="bg-black-900 rounded-lg p-4 sm:p-5 flex flex-col gap-3 mt-6 border border-neutral-800/80">
+                <div className="bg-black-900 rounded-sm p-4 sm:p-5 flex flex-col gap-3 mt-6 ">
                     <div className="flex items-center justify-between text-xs sm:text-sm font-hanken">
-                        <span className="text-neutral-400">Subtotal</span>
+                        <span className="text-white">Subtotal</span>
                         <span className="text-white font-bold font-mono">
                             ₦{subtotal.toLocaleString()}
                         </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs sm:text-sm font-hanken">
-                        <span className="text-neutral-400">Delivery Fee</span>
+                    <div className="flex items-center justify-between text-sm sm:text-sm font-hanken">
+                        <span className="text-white">Delivery Fee</span>
                         <span className="text-white font-bold font-mono">
                             {deliveryFee === 0
                                 ? "FREE"
@@ -77,11 +77,11 @@ export const OrderSummarySection: React.FC<OrderSummarySectionProps> = ({
             </div>
 
             {/* Total Display Box */}
-            <div className="bg-black-900 rounded-lg p-5 flex items-center justify-between mt-6 border border-neutral-800">
-                <span className="text-base sm:text-lg font-bold font-hanken text-gold-500">
+            <div className="bg-black-900 rounded-xs p-2 md:p-5 flex items-center justify-between mt-6 ">
+                <span className="text-body-c1 sm:text-lg font-bold font-hanken text-gold-500">
                     Total
                 </span>
-                <span className="text-xl sm:text-2xl font-bold font-playfair text-gold-500">
+                <span className="text-body-c1 sm:text-2xl font-bold font-playfair text-gold-500">
                     ₦{total.toLocaleString()}
                 </span>
             </div>
