@@ -12,8 +12,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <QueryClientProvider client={queryClient}>
             <App />
             {/* Devtools will only open/render during local development */}
-            <ReactQueryDevtools initialIsOpen={false} position="bottom" />
-            <Toaster position="top-right" />
+            <ReactQueryDevtools initialIsOpen={false} position="left" />
+            <Toaster position="bottom-right" />
         </QueryClientProvider>
     </React.StrictMode>,
 );
