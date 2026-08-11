@@ -11,7 +11,7 @@ export const navLinks = [
     { name: "Home", href: "/" },
     { name: "About Us", href: "/#about" },
     { name: "Shop", href: "/shop" },
-    { name: "Contact Us", href: "/#contact" },
+    { name: "Contact Us", href: "/contact" },
     { name: "FAQs", href: "/#faqs" },
 ];
 // hero section

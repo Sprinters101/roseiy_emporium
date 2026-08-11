@@ -8,6 +8,8 @@ import Shop from "@/components/shop/Shop";
 import ProductDetails from "@/components/produtcs/ProductDetails";
 import Wishlist from "@/components/wishlist/wishlist";
 import Privacy from "@/components/policy/Privacy";
+import ContactUs from "@/components/contact/ContactUs";
+import Checkout from "@/components/checkout/Checkout";
 
 // Placeholder Views (Replace with actual components)
 
@@ -28,6 +30,8 @@ export const router = createBrowserRouter([
         children: [
             { index: true, element: <Home /> },
             { path: "shop", element: <Shop /> },
+            { path: "contact", element: <ContactUs /> },
+            { path: "checkout", element: <Checkout /> },
             { path: "login", element: <Login /> },
             { path: "register", element: <Register /> },
             { path: "product/:id", element: <ProductDetails /> },

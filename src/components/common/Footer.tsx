@@ -43,7 +43,7 @@ const footerLinks = [
 
 export const Footer = () => {
     return (
-        <footer className="w-full  pt-16 md:pt-30 ">
+        <footer className="w-full  pt-20 md:pt-30 ">
             <Container>
                 <div className="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 lg:flex lg:justify-between gap-10 lg:gap-12 items-start ">
                     {/* Column 1: Brand Logo, Tagline & Copyright */}
@@ -52,17 +52,17 @@ export const Footer = () => {
                             <img
                                 src={footerLogo}
                                 alt="Roseiy Emporium"
-                                className="h-28 sm:h-42.75 w-auto object-contain -ml-2"
+                                className="h-42.75 w-auto object-contain -ml-2"
                             />
                         </Link>
 
-                        <p className="text-white font-hanken text-xs sm:text-body-b3 font-light leading-relaxed max-w-xs">
+                        <p className="text-white font-hanken text-sm sm:text-body-b3 font-light leading-relaxed max-w-xs">
                             Roseiy Emporium, your trusted destination for
                             premium wines, champagnes, spirits, whiskies,
                             cognacs, and more.
                         </p>
 
-                        <p className="text-white font-hanken text-xs sm:text-body-b3 pt-2">
+                        <p className="text-white font-hanken text-sm sm:text-body-b3 pt-2">
                             © 2026 Roseiy Emporium All Rights Reserved.
                         </p>
                     </div>

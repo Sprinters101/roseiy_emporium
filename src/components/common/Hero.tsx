@@ -2,9 +2,19 @@ import Container from "@/components/common/Container";
 import { heroBg, heroBg3, topFlourishOrnament } from "@/lib/site_data";
 import { motion } from "framer-motion";
 
-export const Hero = () => {
+export interface HeroProps {
+    title?: string;
+    subtitle?: string;
+    className?: string;
+}
+
+export const Hero: React.FC<HeroProps> = ({
+    title = "Shop Our Collection",
+    subtitle = "Discover the world’s finest champagnes, wines and spirits from iconic brands and rare selections",
+    className = "",
+}) => {
     return (
-        <section className="relative w-full max-h-[322px] md:max-h-[491px]  h-[491px] bg-black-900 flex items-center justify-center overflow-hidden ">
+        <section className={`relative w-full max-h-[322px] md:max-h-[491px] h-[491px] bg-black-900 flex items-center justify-center overflow-hidden ${className}`}>
             {/* Background Texture & Golden Wheat Hills Layer */}
             <div className="absolute inset-0 z-0 pointer-events-none select-none">
                 {/* Dark Marble Texture Overlay */}
@@ -20,11 +30,8 @@ export const Hero = () => {
                 <img
                     src={heroBg3}
                     alt="Golden landscape"
-                    className="absolute bottom-0 md:-bottom-20 left-0 w-full  h-auto object-cover object-bottom opacity-95"
+                    className="absolute bottom-0 md:-bottom-20 left-0 w-full h-auto object-cover object-bottom opacity-95"
                 />
-
-                {/* Subtle Radial Gradient Vignette for Depth */}
-                {/* <div className="absolute inset-0 bg-radial-[at_center] from-transparent via-black-900/30 to-black-900/80" /> */}
             </div>
             {/* Central Content Deck */}
             <Container className="relative z-10 flex flex-col items-center text-center">
@@ -52,15 +59,14 @@ export const Hero = () => {
                         </div>
 
                         {/* Main Banner Heading */}
-                        <h1 className="text-white font-playfair text-[25px]  md:text-[49px] font-bold tracking-tight leading-none drop-shadow-xl">
-                            Shop Our Collection
+                        <h1 className="text-white font-playfair text-[25px] md:text-[49px] font-bold tracking-tight leading-none drop-shadow-xl">
+                            {title}
                         </h1>
                     </motion.div>
 
                     {/* Subtitle Copy */}
-                    <p className="mt-2 sm:mt-4 text-ivory-600 font-hanken text-base  max-w-lg md:max-w-115 text-[0.8125rem] drop-shadow-md">
-                        Discover the world’s finest champagnes, wines and
-                        spirits from iconic brands and rare selections
+                    <p className="mt-2 sm:mt-4 text-ivory-600 font-hanken text-base max-w-lg md:max-w-115 text-[0.8125rem] drop-shadow-md">
+                        {subtitle}
                     </p>
                 </div>
             </Container>

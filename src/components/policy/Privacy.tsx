@@ -3,7 +3,7 @@ import Container from "@/components/common/Container";
 const Privacy = () => {
     return (
         <div className="bg-black-900 min-h-screen text-white pt-28 md:pt-36 pb-24">
-            <Container className="md:max-w-[1320px] ">
+            <Container className="md:max-w-330 ">
                 {/* 1. Privacy Policy Section */}
                 <section className="mb-12 md:mb-16">
                     <h1 className="font-playfair text-2xl sm:text-3xl md:text-[2rem] font-bold text-white mb-6 tracking-tight">
