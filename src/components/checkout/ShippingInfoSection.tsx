@@ -68,7 +68,7 @@ export const ShippingInfoSection: React.FC<ShippingInfoSectionProps> = ({
             <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full mt-3 bg-gold-g hover:opacity-95 text-black font-semibold text-base py-3.5 px-6 rounded-sm transition-all shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-sans"
+                className="w-full mt-3 bg-gold-g hover:opacity-95 text-black font-semibold text-body-c1 md:text-base py-3.5 px-6 rounded-sm transition-all shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-hanken"
             >
                 {isSubmitting
                     ? "Processing Payment..."

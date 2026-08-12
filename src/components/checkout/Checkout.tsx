@@ -9,6 +9,7 @@ import { toast } from "@/components/ui/sonner";
 import { PersonalInfoSection } from "./PersonalInfoSection";
 import { ShippingInfoSection } from "./ShippingInfoSection";
 import { OrderSummarySection } from "./OrderSummarySection";
+import { OrderSuccessModal } from "./OrderSuccessModal";
 
 const CheckoutValidationSchema = Yup.object().shape({
     fullName: Yup.string()
@@ -69,6 +70,7 @@ export const Checkout: React.FC = () => {
     const navigate = useNavigate();
     const { cartItems, removeFromCart, clearCart } = useCart();
     const [overrideItems, setOverrideItems] = useState<CartItem[] | null>(null);
+    const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
 
     // Use cart items from context if available, otherwise fallback to sample items
     const displayItems = useMemo(() => {
@@ -111,17 +113,17 @@ export const Checkout: React.FC = () => {
             city: string;
             address: string;
         },
-        { resetForm }: { resetForm: () => void },
+        { resetForm: _resetForm }: { resetForm: () => void },
     ) => {
         try {
             // Simulate payment processing delay
-            await new Promise((resolve) => setTimeout(resolve, 1200));
+            await new Promise((resolve) => setTimeout(resolve, 800));
             toast.success(
                 "Order placed successfully! Thank you for your purchase.",
             );
             clearCart();
-            resetForm();
-            navigate("/");
+            // resetForm();
+            setShowSuccessModal(true);
         } catch {
             toast.error("Failed to process payment. Please try again.");
         }
@@ -199,6 +201,16 @@ export const Checkout: React.FC = () => {
                         </Form>
                     )}
                 </Formik>
+
+                {/* Order Success & Rating Modal */}
+                <OrderSuccessModal
+                    open={showSuccessModal}
+                    onOpenChange={setShowSuccessModal}
+                    onTrackOrder={() => {
+                        setShowSuccessModal(false);
+                        navigate("/track-order");
+                    }}
+                />
             </Container>
         </div>
     );

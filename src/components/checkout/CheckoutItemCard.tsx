@@ -43,14 +43,14 @@ export const CheckoutItemCard: React.FC<CheckoutItemCardProps> = ({
             {/* Middle: Info */}
             <div className="flex flex-col flex-1 min-w-0 pr-1">
                 {item.category && (
-                    <span className="text-[10px] sm:text-xs font-semibold tracking-wider text-gold-500 uppercase font-sans">
+                    <span className="text-[10px] sm:text-xs font-semibold tracking-wider text-gold-500 uppercase font-hanken">
                         {item.category}
                     </span>
                 )}
                 <h4 className="text-sm sm:text-base font-playfair font-bold text-white line-clamp-2 leading-tight mt-0.5">
                     {item.name}
                 </h4>
-                <p className="text-[11px] sm:text-xs text-neutral-400 font-hanken mt-0.5 truncatse">
+                <p className="text-[8px] sm:text-xs text-neutral-400 font-hanken mt-0.5 truncatse">
                     {item.volume ? `${item.volume} • ` : ""}Quantity:{" "}
                     {quantityText}
                 </p>

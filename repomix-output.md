@@ -4934,7 +4934,7 @@ export const IconicBrands = () => {
     }
 
     html {
-        @apply font-sans;
+        @apply font-hanken;
     }
 }
 

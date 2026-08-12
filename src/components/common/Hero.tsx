@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export interface HeroProps {
     title?: string;
-    subtitle?: string;
+    subtitle?: string | React.ReactNode;
     className?: string;
 }
 
@@ -14,7 +14,9 @@ export const Hero: React.FC<HeroProps> = ({
     className = "",
 }) => {
     return (
-        <section className={`relative w-full max-h-[322px] md:max-h-[491px] h-[491px] bg-black-900 flex items-center justify-center overflow-hidden ${className}`}>
+        <section
+            className={`relative w-full max-h-[322px] md:max-h-[491px] h-[491px] bg-black-900 flex items-center justify-center overflow-hidden ${className}`}
+        >
             {/* Background Texture & Golden Wheat Hills Layer */}
             <div className="absolute inset-0 z-0 pointer-events-none select-none">
                 {/* Dark Marble Texture Overlay */}

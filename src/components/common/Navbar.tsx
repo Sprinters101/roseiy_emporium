@@ -28,6 +28,7 @@ import { activeNavImg, logo, navLinks } from "@/lib/site_data";
 import Container from "./Container";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useAuth } from "@/context/AuthContext";
 
 const NavSearch = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -48,6 +49,7 @@ const NavSearch = () => {
 export const Navbar = () => {
     const { totalItems } = useCart();
     const { wishlistCount } = useWishlist();
+    const { isAuthenticated, logout } = useAuth();
     const location = useLocation();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
@@ -198,39 +200,97 @@ export const Navbar = () => {
                             <DropdownMenu>
                                 <DropdownMenuTrigger
                                     render={
-                                        <button className="shrink-0 flex size-9 md:size-10 items-center justify-center rounded-full bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors focus:outline-none" />
+                                        <button className="shrink-0 flex size-9 md:size-10 items-center justify-center rounded-full bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors focus:outline-none cursor-pointer" />
                                     }
                                 >
-                                    <User className="size-3 md:size-5" />
+                                    <User className="size-3.5 md:size-5" />
                                     <ChevronDown className="size-1.5 md:size-2 text-gray-400" />
                                 </DropdownMenuTrigger>
 
-                                <DropdownMenuContent
-                                    align="end"
-                                    className="w-25.5 mt-2 bg-white/10 border-[0.2px] border-ivory-100 text-white rounded-sm py-4 px-2 flex flex-col items-center gap-4 backdrop-blur-sm shadow-none"
-                                >
-                                    <DropdownMenuItem
-                                        render={
-                                            <Link
-                                                to="/login"
-                                                className="w-full text-center flex items-center justify-center text-sm font-medium py-2 rounded-lg text-gray-300 hover:text-white cursor-pointer focus:bg-neutral-800"
-                                            />
-                                        }
+                                {isAuthenticated ? (
+                                    <DropdownMenuContent
+                                        align="end"
+                                        className="w-44 sm:w-48 mt-2 bg-[#18181B] border border-neutral-800 text-white rounded-xl p-2 flex flex-col gap-0.5 backdrop-blur-md shadow-2xl z-50"
                                     >
-                                        Login
-                                    </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            render={
+                                                <Link
+                                                    to="/dashboard"
+                                                    className="w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg text-gold-500 hover:bg-white/5 cursor-pointer font-hanken transition-colors"
+                                                />
+                                            }
+                                        >
+                                            Overview
+                                        </DropdownMenuItem>
 
-                                    <DropdownMenuItem
-                                        render={
-                                            <Link
-                                                to="/register"
-                                                className="w-full text-center flex items-center justify-center text-sm font-bold py-2 rounded-lg bg-gold-g text-black cursor-pointer shadow-md tracking-wide hover:opacity-90 active:scale-98 transition-all"
-                                            />
-                                        }
+                                        <DropdownMenuItem
+                                            render={
+                                                <Link
+                                                    to="/track-order"
+                                                    className="w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg text-white hover:text-gold-300 hover:bg-white/5 cursor-pointer font-hanken transition-colors"
+                                                />
+                                            }
+                                        >
+                                            Orders
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem
+                                            render={
+                                                <Link
+                                                    to="/checkout"
+                                                    className="w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg text-white hover:text-gold-300 hover:bg-white/5 cursor-pointer font-hanken transition-colors"
+                                                />
+                                            }
+                                        >
+                                            Addresses
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem
+                                            render={
+                                                <Link
+                                                    to="/profile"
+                                                    className="w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg text-white hover:text-gold-300 hover:bg-white/5 cursor-pointer font-hanken transition-colors"
+                                                />
+                                            }
+                                        >
+                                            Profile
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem
+                                            onClick={logout}
+                                            className="w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg text-red-500 hover:text-red-400 hover:bg-red-500/10 cursor-pointer font-hanken transition-colors mt-1 border-t border-neutral-800/80 pt-2"
+                                        >
+                                            Logout
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                ) : (
+                                    <DropdownMenuContent
+                                        align="end"
+                                        className="w-25.5 mt-2 bg-white/10 border-[0.2px] border-ivory-100 text-white rounded-sm py-4 px-2 flex flex-col items-center gap-4 backdrop-blur-sm shadow-none"
                                     >
-                                        Register
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
+                                        <DropdownMenuItem
+                                            render={
+                                                <Link
+                                                    to="/login"
+                                                    className="w-full text-center flex items-center justify-center text-sm font-medium py-2 rounded-lg text-gray-300 hover:text-white cursor-pointer focus:bg-neutral-800"
+                                                />
+                                            }
+                                        >
+                                            Login
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem
+                                            render={
+                                                <Link
+                                                    to="/register"
+                                                    className="w-full text-center flex items-center justify-center text-sm font-bold py-2 rounded-lg bg-gold-g text-black cursor-pointer shadow-md tracking-wide hover:opacity-90 active:scale-98 transition-all"
+                                                />
+                                            }
+                                        >
+                                            Register
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                )}
                             </DropdownMenu>
 
                             {/* Mobile Drawer */}

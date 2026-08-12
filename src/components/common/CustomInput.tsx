@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useField } from "formik";
+import { Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface CustomInputProps {
@@ -42,6 +43,10 @@ const CustomInputComponent: React.FC<CustomInputProps> = (props) => {
         id,
         ...restProps
     } = props;
+
+    const [showPassword, setShowPassword] = useState(false);
+    const isPasswordType = type === "password";
+    const inputType = isPasswordType ? (showPassword ? "text" : "password") : type;
 
     let fieldProps: any = {
         name,
@@ -99,15 +104,31 @@ const CustomInputComponent: React.FC<CustomInputProps> = (props) => {
                     {...restProps}
                 />
             ) : (
-                <input
-                    id={id || name}
-                    type={type}
-                    placeholder={placeholder}
-                    disabled={disabled}
-                    className={inputClasses}
-                    {...fieldProps}
-                    {...restProps}
-                />
+                <div className="relative w-full">
+                    <input
+                        id={id || name}
+                        type={inputType}
+                        placeholder={placeholder}
+                        disabled={disabled}
+                        className={cn(inputClasses, isPasswordType && "pr-11")}
+                        {...fieldProps}
+                        {...restProps}
+                    />
+                    {isPasswordType && (
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors cursor-pointer p-1"
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                            {showPassword ? (
+                                <EyeOff className="size-4 text-neutral-400" />
+                            ) : (
+                                <Eye className="size-4 text-neutral-400" />
+                            )}
+                        </button>
+                    )}
+                </div>
             )}
 
             {hasError && (

@@ -1,16 +1,5 @@
 import { Navigate, Outlet, useLocation } from "react-router";
-
-// Mock helper to fetch auth state (replace this with your actual useAuth hook/Zustand store later)
-const useAuth = () => {
-    const token = localStorage.getItem("accessToken");
-    const userJson = localStorage.getItem("user");
-    const user = userJson ? JSON.parse(userJson) : null;
-
-    return {
-        isAuthenticated: !!token,
-        role: user?.role || "guest", // roles: 'guest' | 'client' | 'admin'
-    };
-};
+import { useAuth } from "@/context/AuthContext";
 
 /* Auth Guard: Protects client views from guests */
 export const ProtectedRoute = () => {
