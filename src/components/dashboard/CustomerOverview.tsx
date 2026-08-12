@@ -6,7 +6,12 @@ import { DashboardStatsCard } from "./DashboardStatsCard";
 import { RecentOrdersList } from "./RecentOrdersList";
 import { CustomerOverviewSkeleton } from "./CustomerOverviewSkeleton";
 import { Menu, X } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import {
+    Sheet,
+    SheetContent,
+    SheetTrigger,
+    SheetClose,
+} from "@/components/ui/sheet";
 
 export interface CustomerOverviewProps {
     isLoading?: boolean;
@@ -17,12 +22,22 @@ export const CustomerOverview: React.FC<CustomerOverviewProps> = ({
 }) => {
     const { user } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [loading, setLoading] = useState<boolean>(propIsLoading ?? false);
+    const [loading, setLoading] = useState<boolean>(
+        propIsLoading !== undefined ? propIsLoading : true
+    );
 
     useEffect(() => {
         if (propIsLoading !== undefined) {
             setLoading(propIsLoading);
+            return;
         }
+
+        // Simulate data fetching delay so skeleton displays before data populates
+        const timer = setTimeout(() => {
+            setLoading(false);
+        }, 1200);
+
+        return () => clearTimeout(timer);
     }, [propIsLoading]);
 
     if (loading) {
@@ -55,7 +70,10 @@ export const CustomerOverview: React.FC<CustomerOverviewProps> = ({
 
                     {/* Mobile Sidebar Sheet Trigger Button */}
                     <div className="md:hidden">
-                        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                        <Sheet
+                            open={mobileMenuOpen}
+                            onOpenChange={setMobileMenuOpen}
+                        >
                             <SheetTrigger>
                                 <button
                                     type="button"
@@ -78,6 +96,7 @@ export const CustomerOverview: React.FC<CustomerOverviewProps> = ({
                                         <X className="size-5" />
                                     </SheetClose>
                                 </div>
+
                                 <DashboardSidebar
                                     onItemClick={() => setMobileMenuOpen(false)}
                                 />
