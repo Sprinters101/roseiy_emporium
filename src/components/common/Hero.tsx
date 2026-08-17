@@ -1,0 +1,77 @@
+import Container from "@/components/common/Container";
+import { heroBg, heroBg3, topFlourishOrnament } from "@/lib/site_data";
+import { motion } from "framer-motion";
+
+export interface HeroProps {
+    title?: string;
+    subtitle?: string | React.ReactNode;
+    className?: string;
+}
+
+export const Hero: React.FC<HeroProps> = ({
+    title = "Shop Our Collection",
+    subtitle = "Discover the world’s finest champagnes, wines and spirits from iconic brands and rare selections",
+    className = "",
+}) => {
+    return (
+        <section
+            className={`relative w-full max-h-[322px] md:max-h-[491px] h-[491px] bg-black-900 flex items-center justify-center overflow-hidden ${className}`}
+        >
+            {/* Background Texture & Golden Wheat Hills Layer */}
+            <div className="absolute inset-0 z-0 pointer-events-none select-none">
+                {/* Dark Marble Texture Overlay */}
+                <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
+                    <img
+                        src={heroBg}
+                        alt="Premium selection background"
+                        className="w-full h-full object-cover object-center"
+                    />
+                </div>
+
+                {/* Bottom Rolling Golden Fields Asset */}
+                <img
+                    src={heroBg3}
+                    alt="Golden landscape"
+                    className="absolute bottom-0 md:-bottom-20 left-0 w-full h-auto object-cover object-bottom opacity-95"
+                />
+            </div>
+            {/* Central Content Deck */}
+            <Container className="relative z-10 flex flex-col items-center text-center">
+                <div className="max-w-4xl mx-auto flex flex-col items-center">
+                    {/* Header Title with Ornamental Gold Flourish */}
+                    <motion.div
+                        initial={{ opacity: 0, y: -25 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                            duration: 1.1,
+                            ease: [0.16, 1, 0.3, 1],
+                        }}
+                        className="flex flex-col items-center w-full"
+                    >
+                        {/* Center Gold Flourish & Divider Line */}
+                        <div className="w-full max-w-lg mb-2 sm:mb-2 flex justify-center items-center">
+                            <img
+                                src={
+                                    topFlourishOrnament ||
+                                    "/icon/titleDivider.svg"
+                                }
+                                alt=""
+                                className="w-full max-w-xs sm:max-w-md h-auto object-contain opacity-90"
+                            />
+                        </div>
+
+                        {/* Main Banner Heading */}
+                        <h1 className="text-white font-playfair text-[25px] md:text-[49px] font-bold tracking-tight leading-none drop-shadow-xl">
+                            {title}
+                        </h1>
+                    </motion.div>
+
+                    {/* Subtitle Copy */}
+                    <p className="mt-2 sm:mt-4 text-ivory-600 font-hanken text-base max-w-lg md:max-w-115 text-[0.8125rem] drop-shadow-md">
+                        {subtitle}
+                    </p>
+                </div>
+            </Container>
+        </section>
+    );
+};

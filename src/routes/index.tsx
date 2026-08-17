@@ -4,12 +4,23 @@ import { PublicLayout } from "@/layouts/PublicLayout";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { ProtectedRoute, AdminRoute } from "@/routes/guards";
 import Home from "@/components/home/Home";
+import Shop from "@/components/shop/Shop";
+import ProductDetails from "@/components/produtcs/ProductDetails";
+import Wishlist from "@/components/wishlist/wishlist";
+import Privacy from "@/components/policy/Privacy";
+import ContactUs from "@/components/contact/ContactUs";
+import Checkout from "@/components/checkout/Checkout";
+import TrackOrder from "@/components/track-order/TrackOrder";
+import Login from "@/components/auth/Login";
+import Register from "@/components/auth/Register";
+import VerifyOtp from "@/components/auth/VerifyOtp";
+import ForgotPassword from "@/components/auth/ForgotPassword";
+import ResetPassword from "@/components/auth/ResetPassword";
+
+import CustomerOverview from "@/components/dashboard/CustomerOverview";
 
 // Placeholder Views (Replace with actual components)
 
-const Catalog = () => <div>Product Listings Grid</div>;
-const Login = () => <div>Authentication Form</div>;
-const ClientHome = () => <div>Client Profile Overview</div>;
 const ClientOrders = () => <div>List of client orders</div>;
 
 // Lazy Load Admin Views to drastically optimize initial bundle performance
@@ -23,8 +34,21 @@ export const router = createBrowserRouter([
         element: <PublicLayout />,
         children: [
             { index: true, element: <Home /> },
-            { path: "catalog", element: <Catalog /> },
+            { path: "shop", element: <Shop /> },
+            { path: "contact", element: <ContactUs /> },
+            { path: "checkout", element: <Checkout /> },
+            { path: "track-order", element: <TrackOrder /> },
             { path: "login", element: <Login /> },
+            { path: "register", element: <Register /> },
+            { path: "signup", element: <Register /> },
+            { path: "verify-otp", element: <VerifyOtp /> },
+            { path: "forgot-password", element: <ForgotPassword /> },
+            { path: "reset-password", element: <ResetPassword /> },
+            { path: "product/:id", element: <ProductDetails /> },
+            { path: "wishlist", element: <Wishlist /> },
+            { path: "whitelist", element: <Wishlist /> },
+            { path: "privacy", element: <Privacy /> },
+            { path: "terms", element: <Privacy /> },
             {
                 path: "unauthorized",
                 element: (
@@ -44,9 +68,22 @@ export const router = createBrowserRouter([
             {
                 element: <DashboardLayout isAdmin={false} />, // Inject standard client layout window
                 children: [
-                    { index: true, element: <ClientHome /> },
+                    { index: true, element: <CustomerOverview /> },
+                    { path: "overview", element: <CustomerOverview /> },
                     { path: "orders", element: <ClientOrders /> },
+                    { path: "addresses", element: <CustomerOverview /> },
+                    { path: "profile", element: <CustomerOverview /> },
                 ],
+            },
+        ],
+    },
+    {
+        path: "/overview",
+        element: <ProtectedRoute />,
+        children: [
+            {
+                element: <DashboardLayout isAdmin={false} />,
+                children: [{ index: true, element: <CustomerOverview /> }],
             },
         ],
     },

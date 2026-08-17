@@ -11,7 +11,7 @@ export const navLinks = [
     { name: "Home", href: "/" },
     { name: "About Us", href: "/#about" },
     { name: "Shop", href: "/shop" },
-    { name: "Contact Us", href: "/#contact" },
+    { name: "Contact Us", href: "/contact" },
     { name: "FAQs", href: "/#faqs" },
 ];
 // hero section
@@ -144,31 +144,119 @@ export const products: Product[] = [
         price: 980,
         image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_8_zk4ynx.png",
     },
+    {
+        id: "9",
+        name: "Veuve Clicquot Yellow Label",
+        category: "Champagne",
+        volume: "750ml",
+        piecesLeft: 18,
+        casesLeft: 5,
+        price: 1600,
+        image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813213/p_1_pndwco.png",
+        isFeatured: true,
+    },
+    {
+        id: "10",
+        name: "Glenfiddich Single Scotch",
+        brand: "Glenfiddich",
+        category: "Whiskey",
+        volume: "70cl",
+        piecesLeft: 22,
+        casesLeft: 10,
+        price: 110000,
+        image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png",
+        gallery: [
+            "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png",
+        ],
+        description:
+            "A remarkably rich and luxurious single malt scotch whiskey, matured in fine Spanish Oloroso wood and American oak casks. Small batch production gives this 18-year-old expression extraordinary depth, complexity, and exceptional elegance.",
+        tastingNotes: {
+            nose: "A remarkably rich aroma with ripe orchard fruit, baked apple, and robust oakiness.",
+            taste: "Richly delivers luxurious dried fruit, candy peel, and dates. Overlaid with elegant oak notes.",
+            finish: "Warming, rewarding, and distinguished long finish.",
+        },
+        details: {
+            abv: "40%",
+            country: "Scotland",
+            region: "Speyside",
+        },
+    },
+    {
+        id: "11",
+        name: "Don Julio 1942 Anejo Tequila",
+        category: "Tequila",
+        volume: "750ml",
+        piecesLeft: 5,
+        casesLeft: 1,
+        price: 3200,
+        image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_8_zk4ynx.png",
+        isFeatured: true,
+    },
+    {
+        id: "12",
+        name: "Hennessy X.O Cognac",
+        category: "Cognac",
+        volume: "700ml",
+        piecesLeft: 12,
+        casesLeft: 4,
+        price: 2850,
+        image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_6_eph9tv.png",
+    },
+    {
+        id: "13",
+        name: "Chateau Bordeaux Sweet Red Wine",
+        category: "Sweetwine",
+        volume: "750ml",
+        piecesLeft: 25,
+        casesLeft: 8,
+        price: 650,
+        image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_7_bsy5mg.png",
+    },
+    {
+        id: "14",
+        name: "Bombay Sapphire London Dry Gin",
+        category: "Gin",
+        volume: "1000ml",
+        piecesLeft: 16,
+        casesLeft: 5,
+        price: 890,
+        image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813213/p_2_wyfdyq.png",
+    },
+    {
+        id: "15",
+        name: "Captain Morgan Spiced Rum",
+        category: "Rum",
+        volume: "750ml",
+        piecesLeft: 30,
+        casesLeft: 10,
+        price: 720,
+        image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_4_ga8oeh.png",
+    },
 ];
 
 export const categories = [
     {
         title: "Champagne",
         image: champagneImg,
-        href: "/catalog?category=champagne",
+        href: "/shop?category=champagne",
     },
     {
         title: "Sweetwine",
         image: sweetwineImg,
-        href: "/catalog?category=sweetwine",
+        href: "/shop?category=sweetwine",
     },
     {
         title: "Whiskey",
         image: whiskeyImg,
-        href: "/catalog?category=whiskey",
+        href: "/shop?category=whiskey",
     },
-    { title: "Cognac", image: cognacImg, href: "/catalog?category=cognac" },
+    { title: "Cognac", image: cognacImg, href: "/shop?category=cognac" },
     {
         title: "Tequila",
         image: tequilaImg,
-        href: "/catalog?category=tequila",
+        href: "/shop?category=tequila",
     },
-    { title: "Rum", image: rumImg, href: "/catalog?category=rum" },
+    { title: "Rum", image: rumImg, href: "/shop?category=rum" },
 ];
 
 export const glenfiddichLogo = "/icon/I_1.svg";
@@ -189,3 +277,6 @@ export const aboutSplashImg =
 
 export const contactChampagneImg =
     "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1785057214/image_35_i4k23o.png";
+
+export const heroBg3 =
+    "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1785967279/herobg_qzddbs.png";
