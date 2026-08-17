@@ -173,13 +173,13 @@ export const products: Product[] = [
         tastingNotes: {
             nose: "A remarkably rich aroma with ripe orchard fruit, baked apple, and robust oakiness.",
             taste: "Richly delivers luxurious dried fruit, candy peel, and dates. Overlaid with elegant oak notes.",
-            finish: "Warming, rewarding, and distinguished long finish."
+            finish: "Warming, rewarding, and distinguished long finish.",
         },
         details: {
             abv: "40%",
             country: "Scotland",
-            region: "Speyside"
-        }
+            region: "Speyside",
+        },
     },
     {
         id: "11",
@@ -238,25 +238,25 @@ export const categories = [
     {
         title: "Champagne",
         image: champagneImg,
-        href: "/catalog?category=champagne",
+        href: "/shop?category=champagne",
     },
     {
         title: "Sweetwine",
         image: sweetwineImg,
-        href: "/catalog?category=sweetwine",
+        href: "/shop?category=sweetwine",
     },
     {
         title: "Whiskey",
         image: whiskeyImg,
-        href: "/catalog?category=whiskey",
+        href: "/shop?category=whiskey",
     },
-    { title: "Cognac", image: cognacImg, href: "/catalog?category=cognac" },
+    { title: "Cognac", image: cognacImg, href: "/shop?category=cognac" },
     {
         title: "Tequila",
         image: tequilaImg,
-        href: "/catalog?category=tequila",
+        href: "/shop?category=tequila",
     },
-    { title: "Rum", image: rumImg, href: "/catalog?category=rum" },
+    { title: "Rum", image: rumImg, href: "/shop?category=rum" },
 ];
 
 export const glenfiddichLogo = "/icon/I_1.svg";

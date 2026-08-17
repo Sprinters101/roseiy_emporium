@@ -30,25 +30,25 @@ export const IconicBrands = () => {
         {
             name: "Glenfiddich",
             logo: glenfiddichLogo,
-            href: "/catalog?brand=glenfiddich",
+            href: "/shop?brand=glenfiddich",
             showMobile: true,
         },
         {
             name: "Dom Pérignon",
             logo: domPerignonLogo,
-            href: "/catalog?brand=dom-perignon",
+            href: "/shop?brand=dom-perignon",
             showMobile: false,
         },
         {
             name: "Veuve Clicquot",
             logo: veuveClicquotLogo,
-            href: "/catalog?brand=veuve-clicquot",
+            href: "/shop?brand=veuve-clicquot",
             showMobile: true,
         },
         {
             name: "Moët & Chandon",
             logo: moetLogo,
-            href: "/catalog?brand=moet-chandon",
+            href: "/shop?brand=moet-chandon",
             showMobile: false,
         },
     ];
@@ -58,25 +58,25 @@ export const IconicBrands = () => {
         {
             name: "Hennessy",
             logo: hennessyLogo,
-            href: "/catalog?brand=hennessy",
+            href: "/shop?brand=hennessy",
             showMobile: true,
         },
         {
             name: "Don Julio",
             logo: donJulioLogo,
-            href: "/catalog?brand=don-julio",
+            href: "/shop?brand=don-julio",
             showMobile: false,
         },
         {
             name: "Clase Azul",
             logo: claseAzulLogo,
-            href: "/catalog?brand=clase-azul",
+            href: "/shop?brand=clase-azul",
             showMobile: true,
         },
         {
             name: "Tequila ",
             logo: tequilaLogo,
-            href: "/catalog?brand=tequila",
+            href: "/shop?brand=tequila",
             showMobile: false,
         },
     ];

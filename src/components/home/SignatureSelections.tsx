@@ -49,7 +49,7 @@ export const SignatureSelections = () => {
                         }}
                         className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full mt-4 md:mt-16"
                     >
-                        {products?.map((product) => (
+                        {products?.slice(0, 8)?.map((product) => (
                             <ProductCard
                                 key={product.id}
                                 product={product}

@@ -1,15 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router";
 import { motion } from "framer-motion";
-import {
-    Heart,
-    ShoppingCart,
-    User,
-    ChevronDown,
-    Search,
-    Menu,
-    X,
-} from "lucide-react";
+import { Heart, ShoppingCart, ChevronDown, Search, X } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -53,6 +45,7 @@ export const Navbar = () => {
     const location = useLocation();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const isOverview = location.pathname === "/dashboard";
 
     // Track scroll position to toggle the black background
     useEffect(() => {
@@ -187,7 +180,7 @@ export const Navbar = () => {
                             <CartDrawer>
                                 <button
                                     type="button"
-                                    className="relative flex size-9 md:size-10 shrink-0 items-center justify-center rounded-full bg-black/90 md:bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors focus:outline-none cursor-pointer"
+                                    className="relative flex size-9 md:size-10 shrink-0 items-center justify-center rounded-full bg-black-900 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors focus:outline-none cursor-pointer"
                                 >
                                     <ShoppingCart className="size-4 md:size-5" />
                                     <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold-gradient text-[0.6rem] font-black text-black-900">
@@ -200,11 +193,22 @@ export const Navbar = () => {
                             <DropdownMenu>
                                 <DropdownMenuTrigger
                                     render={
-                                        <button className="shrink-0 flex size-9 md:size-10 items-center justify-center rounded-full bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors focus:outline-none cursor-pointer" />
+                                        <button
+                                            type="button"
+                                            className="shrink-0 flex size-9 md:size-10 items-center justify-center rounded-full bg-black-900 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors focus:outline-none cursor-pointer"
+                                        />
                                     }
                                 >
-                                    <User className="size-3.5 md:size-5" />
-                                    <ChevronDown className="size-1.5 md:size-2 text-gray-400" />
+                                    <img
+                                        alt="user icon"
+                                        src={
+                                            isOverview
+                                                ? "/icon/userActive.svg"
+                                                : "/icon/user.svg"
+                                        }
+                                        className="size-3.5 md:size-4"
+                                    />
+                                    <ChevronDown className="size-1.5 md:size-2 text-white" />
                                 </DropdownMenuTrigger>
 
                                 {isAuthenticated ? (
@@ -300,8 +304,14 @@ export const Navbar = () => {
                                 modal={false}
                             >
                                 <SheetTrigger>
-                                    <button className="lg:hidden flex size-9 items-center justify-center rounded-full bg-black/90 border border-neutral-800 text-white focus:outline-none cursor-pointer">
-                                        <Menu className="size-4" />
+                                    <button
+                                        type="button"
+                                        className="lg:hidden flex size-9 items-center justify-center rounded-full bg-black-900 border border-neutral-800 text-white focus:outline-none cursor-pointer"
+                                    >
+                                        <img
+                                            src="/icon/menu.svg"
+                                            className="size-4"
+                                        />
                                     </button>
                                 </SheetTrigger>
 

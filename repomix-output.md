@@ -3941,17 +3941,17 @@ const QUICK_LINKS = [
 
 // Shop Categories Data Array
 const SHOP_CATEGORIES = [
-    { label: "Champagne", href: "/catalog?category=champagne" },
-    { label: "Wine", href: "/catalog?category=wine" },
-    { label: "Whiskey", href: "/catalog?category=whiskey" },
-    { label: "Cognac", href: "/catalog?category=cognac" },
-    { label: "Tequila", href: "/catalog?category=tequila" },
-    { label: "Gin", href: "/catalog?category=gin" },
-    { label: "Rum", href: "/catalog?category=rum" },
-    { label: "Bottled Water", href: "/catalog?category=bottled-water" },
+    { label: "Champagne", href: "/shop?category=champagne" },
+    { label: "Wine", href: "/shop?category=wine" },
+    { label: "Whiskey", href: "/shop?category=whiskey" },
+    { label: "Cognac", href: "/shop?category=cognac" },
+    { label: "Tequila", href: "/shop?category=tequila" },
+    { label: "Gin", href: "/shop?category=gin" },
+    { label: "Rum", href: "/shop?category=rum" },
+    { label: "Bottled Water", href: "/shop?category=bottled-water" },
     {
         label: "Drinks Accessories",
-        href: "/catalog?category=drinks-accessories",
+        href: "/shop?category=drinks-accessories",
     },
 ];
 
@@ -4080,7 +4080,7 @@ export const Footer = () => {
                         <ul className="flex flex-col space-y-3 font-hanken text-body-c1 sm:text-body-b2 text-neutral-300 font-light">
                             <li>
                                 <Link
-                                    to="/catalog?category=champagne"
+                                    to="/shop?category=champagne"
                                     className="hover:text-gold-500 transition-colors"
                                 >
                                     Champagne
@@ -4088,7 +4088,7 @@ export const Footer = () => {
                             </li>
                             <li>
                                 <Link
-                                    to="/catalog?category=wine"
+                                    to="/shop?category=wine"
                                     className="hover:text-gold-500 transition-colors"
                                 >
                                     Wine
@@ -4096,7 +4096,7 @@ export const Footer = () => {
                             </li>
                             <li>
                                 <Link
-                                    to="/catalog?category=whiskey"
+                                    to="/shop?category=whiskey"
                                     className="hover:text-gold-500 transition-colors"
                                 >
                                     Whiskey
@@ -4104,7 +4104,7 @@ export const Footer = () => {
                             </li>
                             <li>
                                 <Link
-                                    to="/catalog?category=cognac"
+                                    to="/shop?category=cognac"
                                     className="hover:text-gold-500 transition-colors"
                                 >
                                     Cognac
@@ -4112,7 +4112,7 @@ export const Footer = () => {
                             </li>
                             <li>
                                 <Link
-                                    to="/catalog?category=tequila"
+                                    to="/shop?category=tequila"
                                     className="hover:text-gold-500 transition-colors"
                                 >
                                     Tequila
@@ -4120,7 +4120,7 @@ export const Footer = () => {
                             </li>
                             <li>
                                 <Link
-                                    to="/catalog?category=gin"
+                                    to="/shop?category=gin"
                                     className="hover:text-gold-500 transition-colors"
                                 >
                                     Gin
@@ -4128,7 +4128,7 @@ export const Footer = () => {
                             </li>
                             <li>
                                 <Link
-                                    to="/catalog?category=rum"
+                                    to="/shop?category=rum"
                                     className="hover:text-gold-500 transition-colors"
                                 >
                                     Rum
@@ -4136,7 +4136,7 @@ export const Footer = () => {
                             </li>
                             <li>
                                 <Link
-                                    to="/catalog?category=bottled-water"
+                                    to="/shop?category=bottled-water"
                                     className="hover:text-gold-500 transition-colors"
                                 >
                                     Bottled Water
@@ -4144,7 +4144,7 @@ export const Footer = () => {
                             </li>
                             <li>
                                 <Link
-                                    to="/catalog?category=drinks-accessories"
+                                    to="/shop?category=drinks-accessories"
                                     className="hover:text-gold-500 transition-colors"
                                 >
                                     Drinks Accessories
@@ -4574,25 +4574,25 @@ export const IconicBrands = () => {
         {
             name: "Glenfiddich",
             logo: glenfiddichLogo,
-            href: "/catalog?brand=glenfiddich",
+            href: "/shop?brand=glenfiddich",
             showMobile: true,
         },
         {
             name: "Dom Pérignon",
             logo: domPerignonLogo,
-            href: "/catalog?brand=dom-perignon",
+            href: "/shop?brand=dom-perignon",
             showMobile: false,
         },
         {
             name: "Veuve Clicquot",
             logo: veuveClicquotLogo,
-            href: "/catalog?brand=veuve-clicquot",
+            href: "/shop?brand=veuve-clicquot",
             showMobile: true,
         },
         {
             name: "Moët & Chandon",
             logo: moetLogo,
-            href: "/catalog?brand=moet-chandon",
+            href: "/shop?brand=moet-chandon",
             showMobile: false,
         },
     ];
@@ -4602,25 +4602,25 @@ export const IconicBrands = () => {
         {
             name: "Hennessy",
             logo: hennessyLogo,
-            href: "/catalog?brand=hennessy",
+            href: "/shop?brand=hennessy",
             showMobile: true,
         },
         {
             name: "Don Julio",
             logo: donJulioLogo,
-            href: "/catalog?brand=don-julio",
+            href: "/shop?brand=don-julio",
             showMobile: false,
         },
         {
             name: "Clase Azul",
             logo: claseAzulLogo,
-            href: "/catalog?brand=clase-azul",
+            href: "/shop?brand=clase-azul",
             showMobile: true,
         },
         {
             name: "Tequila ",
             logo: tequilaLogo,
-            href: "/catalog?brand=tequila",
+            href: "/shop?brand=tequila",
             showMobile: false,
         },
     ];
@@ -5491,25 +5491,25 @@ export const categories = [
     {
         title: "Champagne",
         image: champagneImg,
-        href: "/catalog?category=champagne",
+        href: "/shop?category=champagne",
     },
     {
         title: "Sweetwine",
         image: sweetwineImg,
-        href: "/catalog?category=sweetwine",
+        href: "/shop?category=sweetwine",
     },
     {
         title: "Whiskey",
         image: whiskeyImg,
-        href: "/catalog?category=whiskey",
+        href: "/shop?category=whiskey",
     },
-    { title: "Cognac", image: cognacImg, href: "/catalog?category=cognac" },
+    { title: "Cognac", image: cognacImg, href: "/shop?category=cognac" },
     {
         title: "Tequila",
         image: tequilaImg,
-        href: "/catalog?category=tequila",
+        href: "/shop?category=tequila",
     },
-    { title: "Rum", image: rumImg, href: "/catalog?category=rum" },
+    { title: "Rum", image: rumImg, href: "/shop?category=rum" },
 ];
 
 export const glenfiddichLogo = "/icon/I_1.svg";

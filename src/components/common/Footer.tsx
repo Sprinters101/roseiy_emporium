@@ -16,17 +16,17 @@ const QUICK_LINKS = [
 
 // Shop Categories Data Array
 const SHOP_CATEGORIES = [
-    { label: "Champagne", href: "/catalog?category=champagne" },
-    { label: "Wine", href: "/catalog?category=wine" },
-    { label: "Whiskey", href: "/catalog?category=whiskey" },
-    { label: "Cognac", href: "/catalog?category=cognac" },
-    { label: "Tequila", href: "/catalog?category=tequila" },
-    { label: "Gin", href: "/catalog?category=gin" },
-    { label: "Rum", href: "/catalog?category=rum" },
-    { label: "Bottled Water", href: "/catalog?category=bottled-water" },
+    { label: "Champagne", href: "/shop?category=champagne" },
+    { label: "Wine", href: "/shop?category=wine" },
+    { label: "Whiskey", href: "/shop?category=whiskey" },
+    { label: "Cognac", href: "/shop?category=cognac" },
+    { label: "Tequila", href: "/shop?category=tequila" },
+    { label: "Gin", href: "/shop?category=gin" },
+    { label: "Rum", href: "/shop?category=rum" },
+    { label: "Bottled Water", href: "/shop?category=bottled-water" },
     {
         label: "Drinks Accessories",
-        href: "/catalog?category=drinks-accessories",
+        href: "/shop?category=drinks-accessories",
     },
 ];
 
