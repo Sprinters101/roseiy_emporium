@@ -25,7 +25,7 @@ import { useAuth } from "@/context/AuthContext";
 const NavSearch = () => {
     const [searchQuery, setSearchQuery] = useState("");
     return (
-        <div className="relative flex items-center bg-black/40 rounded-full px-3.5 py-1.5 w-full transition-colors">
+        <div className="relative hidden  lg:flex items-center bg-black/40 rounded-full px-3.5 py-1.5 w-full transition-colors">
             <Search className="size-4 text-black-300 mr-1 shrink-0" />
             <Input
                 type="text"
@@ -160,7 +160,7 @@ export const Navbar = () => {
 
                         {/* Integrated Right Action Pod */}
                         <div className="bg-po bg-white/10 backdrop-blur-md flex items-center h-14 md:h-15 gap-3 md:gap-4 rounded-xl py-2 px-3 md:px-8 border-[0.5px] border-ivory-400/60 shadow-xl lg:w-full max-w-116">
-                            <div className="hidden lg:flex items-center gap-4">
+                            <div className="flex items-center gap-4">
                                 <NavSearch />
                                 <Link
                                     to="/wishlist"
