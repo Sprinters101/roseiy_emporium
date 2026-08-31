@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { createBrowserRouter } from "react-router";
 import { PublicLayout } from "@/layouts/PublicLayout";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
+import { ClientDashboardLayout } from "@/layouts/ClientDashboardLayout";
 import { ProtectedRoute, AdminRoute } from "@/routes/guards";
 import Home from "@/components/home/Home";
 import Shop from "@/components/shop/Shop";
@@ -18,14 +19,13 @@ import ForgotPassword from "@/components/auth/ForgotPassword";
 import ResetPassword from "@/components/auth/ResetPassword";
 
 import CustomerOverview from "@/components/dashboard/CustomerOverview";
-
-// Placeholder Views (Replace with actual components)
-
-const ClientOrders = () => <div>List of client orders</div>;
+import CustomerOrders from "@/components/dashboard/CustomerOrders";
+import CustomerOrderDetails from "@/components/dashboard/CustomerOrderDetails";
+import DashboardTrackOrder from "@/components/dashboard/DashboardTrackOrder";
 
 // Lazy Load Admin Views to drastically optimize initial bundle performance
 // const AdminOverview = React.lazy(() => import("@/features/admin/Overview"));
-const AdminProducts = () => <div>Admin Product Management Table</div>;
+// const AdminProducts = () => <div>Admin Product Management Table</div>;
 
 export const router = createBrowserRouter([
     // 1. Public Domain Paths
@@ -47,13 +47,24 @@ export const router = createBrowserRouter([
             { path: "product/:id", element: <ProductDetails /> },
             { path: "wishlist", element: <Wishlist /> },
             { path: "whitelist", element: <Wishlist /> },
-            { path: "privacy", element: <Privacy /> },
-            { path: "terms", element: <Privacy /> },
+            { path: "privacy-policy", element: <Privacy /> },
             {
-                path: "unauthorized",
+                path: "*",
                 element: (
-                    <div className="text-center py-12">
-                        You do not have access to this page.
+                    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+                        <h1 className="text-4xl font-serif text-gold-500 mb-4">
+                            404 - Page Not Found
+                        </h1>
+                        <p className="text-neutral-400 mb-6">
+                            The vintage or page you are searching for does not
+                            exist in our cellar.
+                        </p>
+                        <a
+                            href="/"
+                            className="px-6 py-2 border border-gold-500 text-gold-500 hover:bg-gold-500 hover:text-black transition-colors rounded-sm"
+                        >
+                            Return Home
+                        </a>
                     </div>
                 ),
             },
@@ -68,11 +79,39 @@ export const router = createBrowserRouter([
             {
                 element: <DashboardLayout isAdmin={false} />, // Inject standard client layout window
                 children: [
-                    { index: true, element: <CustomerOverview /> },
-                    { path: "overview", element: <CustomerOverview /> },
-                    { path: "orders", element: <ClientOrders /> },
-                    { path: "addresses", element: <CustomerOverview /> },
-                    { path: "profile", element: <CustomerOverview /> },
+                    {
+                        element: <ClientDashboardLayout />,
+                        children: [
+                            { index: true, element: <CustomerOverview /> },
+                            { path: "overview", element: <CustomerOverview /> },
+                            { path: "orders", element: <CustomerOrders /> },
+                            {
+                                path: "orders/details",
+                                element: <CustomerOrderDetails />,
+                            },
+                            {
+                                path: "orders/:orderId",
+                                element: <CustomerOrderDetails />,
+                            },
+                            {
+                                path: "order-details",
+                                element: <CustomerOrderDetails />,
+                            },
+                            {
+                                path: "track-order",
+                                element: <DashboardTrackOrder />,
+                            },
+                            {
+                                path: "orders/track",
+                                element: <DashboardTrackOrder />,
+                            },
+                            {
+                                path: "addresses",
+                                element: <CustomerOverview />,
+                            },
+                            { path: "profile", element: <CustomerOverview /> },
+                        ],
+                    },
                 ],
             },
         ],
@@ -83,7 +122,14 @@ export const router = createBrowserRouter([
         children: [
             {
                 element: <DashboardLayout isAdmin={false} />,
-                children: [{ index: true, element: <CustomerOverview /> }],
+                children: [
+                    {
+                        element: <ClientDashboardLayout />,
+                        children: [
+                            { index: true, element: <CustomerOverview /> },
+                        ],
+                    },
+                ],
             },
         ],
     },
@@ -110,7 +156,7 @@ export const router = createBrowserRouter([
                             </Suspense>
                         ),
                     },
-                    { path: "products", element: <AdminProducts /> },
+                    // { path: "products", element: <AdminProducts /> },
                 ],
             },
         ],

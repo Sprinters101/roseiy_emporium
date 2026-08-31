@@ -44,6 +44,13 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         if (exact) {
             return location.pathname === href || location.pathname === `${href}/`;
         }
+        if (href === "/dashboard/orders") {
+            return (
+                location.pathname.startsWith("/dashboard/orders") ||
+                location.pathname.startsWith("/dashboard/order-details") ||
+                location.pathname.startsWith("/dashboard/track-order")
+            );
+        }
         return location.pathname.startsWith(href);
     };
 
