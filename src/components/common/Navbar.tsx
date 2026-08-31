@@ -230,7 +230,7 @@ export const Navbar = () => {
                                         <DropdownMenuItem
                                             render={
                                                 <Link
-                                                    to="/track-order"
+                                                    to="/dashboard/orders"
                                                     className="w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg text-white hover:text-gold-300 hover:bg-white/5 cursor-pointer font-hanken transition-colors"
                                                 />
                                             }
@@ -241,7 +241,7 @@ export const Navbar = () => {
                                         <DropdownMenuItem
                                             render={
                                                 <Link
-                                                    to="/checkout"
+                                                    to="/dashboard/addresses"
                                                     className="w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg text-white hover:text-gold-300 hover:bg-white/5 cursor-pointer font-hanken transition-colors"
                                                 />
                                             }
@@ -252,7 +252,7 @@ export const Navbar = () => {
                                         <DropdownMenuItem
                                             render={
                                                 <Link
-                                                    to="/profile"
+                                                    to="/dashboard/profile"
                                                     className="w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg text-white hover:text-gold-300 hover:bg-white/5 cursor-pointer font-hanken transition-colors"
                                                 />
                                             }

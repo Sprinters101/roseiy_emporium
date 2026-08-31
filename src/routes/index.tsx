@@ -22,6 +22,7 @@ import CustomerOverview from "@/components/dashboard/CustomerOverview";
 import CustomerOrders from "@/components/dashboard/CustomerOrders";
 import CustomerOrderDetails from "@/components/dashboard/CustomerOrderDetails";
 import DashboardTrackOrder from "@/components/dashboard/DashboardTrackOrder";
+import CustomerAddresses from "@/components/dashboard/CustomerAddresses";
 
 // Lazy Load Admin Views to drastically optimize initial bundle performance
 // const AdminOverview = React.lazy(() => import("@/features/admin/Overview"));
@@ -107,7 +108,7 @@ export const router = createBrowserRouter([
                             },
                             {
                                 path: "addresses",
-                                element: <CustomerOverview />,
+                                element: <CustomerAddresses />,
                             },
                             { path: "profile", element: <CustomerOverview /> },
                         ],
