@@ -1,15 +1,26 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
+import { ChevronRight, Info } from "lucide-react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { ChevronRight, Info } from "lucide-react";
 import Container from "@/components/common/Container";
 import { useCart, type CartItem } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/components/ui/sonner";
 import { PersonalInfoSection } from "./PersonalInfoSection";
 import { ShippingInfoSection } from "./ShippingInfoSection";
+import {
+    LoggedInPersonalInfo,
+    type PersonalInfoData,
+} from "./LoggedInPersonalInfo";
+import { LoggedInShippingInfo } from "./LoggedInShippingInfo";
 import { OrderSummarySection } from "./OrderSummarySection";
 import { OrderSuccessModal } from "./OrderSuccessModal";
+import {
+    INITIAL_ADDRESSES,
+    type AddressItem,
+    type AddressFormData,
+} from "@/components/dashboard/addresses/types";
 
 const CheckoutValidationSchema = Yup.object().shape({
     fullName: Yup.string()
@@ -29,7 +40,7 @@ const CheckoutValidationSchema = Yup.object().shape({
         .required("Address is required"),
 });
 
-// Default sample items matching design if cart is currently empty
+// Default sample items matching design if cart is empty
 const SAMPLE_CHECKOUT_ITEMS: CartItem[] = [
     {
         id: "sample-glenfiddich-1",
@@ -68,9 +79,52 @@ const SAMPLE_CHECKOUT_ITEMS: CartItem[] = [
 
 export const Checkout: React.FC = () => {
     const navigate = useNavigate();
+    const { user, isAuthenticated } = useAuth();
     const { cartItems, removeFromCart, clearCart } = useCart();
+
     const [overrideItems, setOverrideItems] = useState<CartItem[] | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+    // Logged-in Personal Information State (derived from user with custom edit override)
+    const [customPersonalInfo, setCustomPersonalInfo] =
+        useState<PersonalInfoData | null>(null);
+
+    const personalInfo: PersonalInfoData = useMemo(() => {
+        if (customPersonalInfo) return customPersonalInfo;
+        return {
+            firstName: user?.firstName || "Bola",
+            lastName: user?.lastName || "Roseiy",
+            phoneNumber: "090 123 456 7890",
+            emailAddress: user?.email || "Rosebola@gmail.com",
+        };
+    }, [user, customPersonalInfo]);
+
+    // Saved Addresses State
+    const [addresses, setAddresses] = useState<AddressItem[]>(() => {
+        const saved = localStorage.getItem("roseiy_user_addresses");
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch {
+                return INITIAL_ADDRESSES;
+            }
+        }
+        return INITIAL_ADDRESSES;
+    });
+
+    const [selectedAddressId, setSelectedAddressId] = useState<string>(() => {
+        const defaultAddr = addresses.find((a) => a.isDefault);
+        return defaultAddr ? defaultAddr.id : addresses[0]?.id || "addr-1";
+    });
+
+    // Persist addresses updates
+    useEffect(() => {
+        localStorage.setItem(
+            "roseiy_user_addresses",
+            JSON.stringify(addresses),
+        );
+    }, [addresses]);
 
     // Use cart items from context if available, otherwise fallback to sample items
     const displayItems = useMemo(() => {
@@ -103,26 +157,94 @@ export const Checkout: React.FC = () => {
 
     const total = subtotal + deliveryFee;
 
-    const handleSubmitOrder = async (
-        _values: {
-            fullName: string;
-            phoneNumber: string;
-            emailAddress: string;
-            country: string;
-            state: string;
-            city: string;
-            address: string;
-        },
-        { resetForm: _resetForm }: { resetForm: () => void },
-    ) => {
+    const handleSelectAddress = (id: string) => {
+        setSelectedAddressId(id);
+        setAddresses((prev) =>
+            prev.map((addr) => ({
+                ...addr,
+                isDefault: addr.id === id,
+            })),
+        );
+        const selected = addresses.find((a) => a.id === id);
+        if (selected) {
+            toast.success(`Shipping address set to ${selected.title}`);
+        }
+    };
+
+    const handleAddNewAddress = (formData: AddressFormData) => {
+        const newIndex = addresses.length + 1;
+        const newAddress: AddressItem = {
+            id: `addr-${Date.now()}`,
+            title: formData.title || `Shipping Address ${newIndex}`,
+            country: formData.country,
+            state: formData.state,
+            city: formData.city,
+            address: formData.address,
+            phone:
+                formData.phone ||
+                personalInfo.phoneNumber ||
+                "+234 812 345 6789",
+            isDefault: addresses.length === 0,
+        };
+
+        setAddresses((prev) => [...prev, newAddress]);
+        setSelectedAddressId(newAddress.id);
+        toast.success("New address added and selected!");
+    };
+
+    const handleEditAddress = (formData: AddressFormData, editId?: string) => {
+        if (!editId) return;
+        setAddresses((prev) =>
+            prev.map((addr) => {
+                if (addr.id === editId) {
+                    return {
+                        ...addr,
+                        country: formData.country,
+                        state: formData.state,
+                        city: formData.city,
+                        address: formData.address,
+                        phone: formData.phone || addr.phone,
+                    };
+                }
+                return addr;
+            }),
+        );
+        toast.success("Address updated successfully!");
+    };
+
+    // Logged-in direct payment handler
+    const handlePayOrder = async () => {
+        if (displayItems.length === 0) {
+            toast.error("Your cart is empty.");
+            return;
+        }
+
+        setIsProcessing(true);
         try {
-            // Simulate payment processing delay
+            await new Promise((resolve) => setTimeout(resolve, 800));
+            toast.success("Payment successful! Your order has been placed.");
+            clearCart();
+            setShowSuccessModal(true);
+        } catch {
+            toast.error("Failed to process payment. Please try again.");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    // Guest checkout submission handler
+    const handleSubmitGuestOrder = async () => {
+        if (displayItems.length === 0) {
+            toast.error("Your cart is empty.");
+            return;
+        }
+
+        try {
             await new Promise((resolve) => setTimeout(resolve, 800));
             toast.success(
                 "Order placed successfully! Thank you for your purchase.",
             );
             clearCart();
-            // resetForm();
             setShowSuccessModal(true);
         } catch {
             toast.error("Failed to process payment. Please try again.");
@@ -130,10 +252,10 @@ export const Checkout: React.FC = () => {
     };
 
     return (
-        <div className="w-full bg-black-900 min-h-screen text-white pt-28 md:pt-36 pb-24 ">
-            <Container className="">
+        <div className="w-full bg-black-900 min-h-screen text-white pt-28 md:pt-36 pb-24">
+            <Container>
                 {/* Header & Breadcrumbs */}
-                <div className="flex items-center gap-2 text-xs text-neutral-400 uppercase  font-hanken mb-2">
+                <div className="flex items-center gap-2 text-xs text-neutral-400 uppercase font-hanken mb-3">
                     <Link to="/" className="hover:text-white transition-colors">
                         HOME
                     </Link>
@@ -145,62 +267,114 @@ export const Checkout: React.FC = () => {
                         CART
                     </Link>
                     <ChevronRight className="size-3.5" />
-                    <span className="text-gold-500 font-medium">CHECKOUT</span>
-                </div>
-
-                {/* Page Title */}
-                <h1 className="text-3xl md:text-hg-b2 font-playfair font-bold text-white tracking-tight uppercase mb-3">
-                    CHECKOUT
-                </h1>
-
-                {/* Guest Checkout Banner */}
-                <div className="flex items-center gap-2.5 text-gold-500 text-sm font-medium mb-8 sm:mb-10">
-                    <Info className="size-4 shrink-0" />
-                    <span className="text-neutral-300">
-                        You are currently checking out as a guest
+                    <span className="text-gold-400 font-semibold">
+                        CHECKOUT
                     </span>
                 </div>
 
-                {/* Formik Form Container */}
-                <Formik
-                    initialValues={{
-                        fullName: "",
-                        phoneNumber: "",
-                        emailAddress: "",
-                        country: "Nigeria",
-                        state: "",
-                        city: "",
-                        address: "",
-                    }}
-                    validationSchema={CheckoutValidationSchema}
-                    onSubmit={handleSubmitOrder}
-                >
-                    {({ isSubmitting }) => (
-                        <Form className="w-full">
-                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                                {/* Left Column: Personal Info & Shipping Info Sections */}
-                                <div className="lg:col-span-7 flex flex-col gap-8">
-                                    <PersonalInfoSection />
-                                    <ShippingInfoSection
-                                        totalAmount={total}
-                                        isSubmitting={isSubmitting}
-                                    />
-                                </div>
+                {/* Page Title */}
+                <h1 className="text-3xl md:text-hg-b2 font-playfair font-bold text-white tracking-tight uppercase mb-6 sm:mb-8">
+                    CHECKOUT
+                </h1>
 
-                                {/* Right Column: Order Summary Sidebar Section */}
-                                <div className="lg:col-span-5">
-                                    <OrderSummarySection
-                                        items={displayItems}
-                                        onRemoveItem={handleRemoveItem}
-                                        subtotal={subtotal}
-                                        deliveryFee={deliveryFee}
-                                        total={total}
-                                    />
-                                </div>
-                            </div>
-                        </Form>
-                    )}
-                </Formik>
+                {/* 1. Logged-in User Checkout Flow */}
+                {isAuthenticated ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
+                        {/* Left Column: Personal Info & Shipping Address Selection */}
+                        <div className="lg:col-span-7 flex flex-col gap-6 w-full">
+                            {/* Personal Information Card */}
+                            <LoggedInPersonalInfo
+                                personalInfo={personalInfo}
+                                onSave={setCustomPersonalInfo}
+                            />
+
+                            {/* Shipping Information Card */}
+                            <LoggedInShippingInfo
+                                addresses={addresses}
+                                selectedAddressId={selectedAddressId}
+                                onSelectAddress={handleSelectAddress}
+                                onAddNewAddress={handleAddNewAddress}
+                                onEditAddress={handleEditAddress}
+                            />
+
+                            {/* Bottom Full-Width Pay Button */}
+                            <button
+                                type="button"
+                                onClick={handlePayOrder}
+                                disabled={
+                                    isProcessing || displayItems.length === 0
+                                }
+                                className="w-full mt-2 bg-gold-gradient text-black-900 font-bold font-hanken text-sm sm:text-base py-3.5 sm:py-4 px-6 rounded-sm sm:rounded-md shadow-xl hover:opacity-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-center"
+                            >
+                                {isProcessing
+                                    ? "Processing Payment..."
+                                    : `Pay ₦${total.toLocaleString()}`}
+                            </button>
+                        </div>
+
+                        {/* Right Column: Sticky Order Summary Section */}
+                        <div className="lg:col-span-5 w-full sticky top-28">
+                            <OrderSummarySection
+                                items={displayItems}
+                                onRemoveItem={handleRemoveItem}
+                                subtotal={subtotal}
+                                deliveryFee={deliveryFee}
+                                total={total}
+                            />
+                        </div>
+                    </div>
+                ) : (
+                    /* 2. Guest User Checkout Flow */
+                    <div className="w-full">
+                        {/* Guest Checkout Banner */}
+                        <div className="flex items-center gap-2.5 text-gold-400 text-sm font-medium mb-8">
+                            <Info className="size-4 shrink-0" />
+                            <span className="text-neutral-300">
+                                You are currently checking out as a guest
+                            </span>
+                        </div>
+
+                        <Formik
+                            initialValues={{
+                                fullName: "",
+                                phoneNumber: "",
+                                emailAddress: "",
+                                country: "Nigeria",
+                                state: "",
+                                city: "",
+                                address: "",
+                            }}
+                            validationSchema={CheckoutValidationSchema}
+                            onSubmit={handleSubmitGuestOrder}
+                        >
+                            {({ isSubmitting }) => (
+                                <Form className="w-full">
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
+                                        {/* Left Column: Guest Inputs */}
+                                        <div className="lg:col-span-7 flex flex-col gap-6 w-full">
+                                            <PersonalInfoSection />
+                                            <ShippingInfoSection
+                                                totalAmount={total}
+                                                isSubmitting={isSubmitting}
+                                            />
+                                        </div>
+
+                                        {/* Right Column: Order Summary */}
+                                        <div className="lg:col-span-5 w-full sticky top-28">
+                                            <OrderSummarySection
+                                                items={displayItems}
+                                                onRemoveItem={handleRemoveItem}
+                                                subtotal={subtotal}
+                                                deliveryFee={deliveryFee}
+                                                total={total}
+                                            />
+                                        </div>
+                                    </div>
+                                </Form>
+                            )}
+                        </Formik>
+                    </div>
+                )}
 
                 {/* Order Success & Rating Modal */}
                 <OrderSuccessModal

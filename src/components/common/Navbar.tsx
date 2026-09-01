@@ -21,6 +21,7 @@ import Container from "./Container";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
 
 const NavSearch = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -98,11 +99,12 @@ export const Navbar = () => {
         <header className="w-full bg-transparent">
             {/* Smooth transition for background when scrolling */}
             <div
-                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 pointer-events-none ${
-                    isScrolled
-                        ? "bg-black-900 md:bg-transparent md:backdrop-blur-none md:border-0 md:shadow-none backdrop-blur-md border-b border-white/10 shadow-2xl py-3 md:py-4"
-                        : "bg-transparent py-4 md:py-6"
-                }`}
+                className={cn(
+                    "fixed top-0 left-0 right-0 z-50 pointer-events-none",
+                    "bg-transparent py-4 md:py-6 transition-all duration-300",
+                    isScrolled &&
+                        "bg-black-900 md:bgs-transparent md:backdrop-blur-none md:border-0 md:shadow-none backdrop-blur-md border-b border-white/10 shadow-2xl py-3 md:py-2",
+                )}
             >
                 <motion.div
                     initial={{ y: -40, opacity: 0 }}

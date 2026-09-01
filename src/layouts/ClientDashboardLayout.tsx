@@ -4,6 +4,8 @@ import Container from "@/components/common/Container";
 import { useAuth } from "@/context/AuthContext";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { Menu, X } from "lucide-react";
+import { HiMenuAlt1 } from "react-icons/hi";
+
 import {
     Sheet,
     SheetContent,
@@ -48,10 +50,10 @@ export const ClientDashboardLayout: React.FC = () => {
                             <SheetTrigger>
                                 <button
                                     type="button"
-                                    className="p-2.5 rounded-lg bg-black-700 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors cursor-pointer"
+                                    className=" size-8 flex items-center justify-center rounded-full bg-black-700 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors cursor-pointer"
                                     aria-label="Open Navigation Menu"
                                 >
-                                    <Menu className="size-5" />
+                                    <HiMenuAlt1 className="size-5 rotate-180" />
                                 </button>
                             </SheetTrigger>
                             <SheetContent

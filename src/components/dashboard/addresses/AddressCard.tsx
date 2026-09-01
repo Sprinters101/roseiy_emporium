@@ -22,10 +22,10 @@ export const AddressCard: React.FC<AddressCardProps> = ({
         <div
             onClick={() => onSelect(address.id)}
             className={cn(
-                "bg-black-700 rounded-xl sm:rounded-2xl p-5 sm:p-6 transition-all duration-200 cursor-pointer flex items-start justify-between gap-4 relative",
+                "bg-black-700 rounded-lg p-5 sm:p-6 transition-all duration-200 cursor-pointer flex items-start justify-between gap-4 relative",
                 isSelected
                     ? "border border-gold-400 shadow-[0_0_16px_rgba(228,196,91,0.08)]"
-                    : "border border-neutral-800/60 hover:border-neutral-700/80"
+                    : "border border-neutral-800/60 hover:border-neutral-700/80",
             )}
         >
             {/* Left: Radio Selector & Address Details */}
@@ -49,13 +49,13 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 
                 {/* Address Information Stack */}
                 <div className="flex flex-col min-w-0">
-                    <h3 className="font-hanken font-bold text-base sm:text-lg text-white">
+                    <h3 className="font-hanken font-bold text-base sm:text-xl text-white">
                         {address.title}
                     </h3>
-                    <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1 leading-relaxed">
+                    <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1 leading-relaxed max-w-58.5 line-clamp-2">
                         {address.address}
                     </p>
-                    <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1.5">
+                    <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1.5 pb-[17px]">
                         {address.phone}
                     </p>
                 </div>
