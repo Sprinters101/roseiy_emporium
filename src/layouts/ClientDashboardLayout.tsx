@@ -3,7 +3,7 @@ import { Outlet } from "react-router";
 import Container from "@/components/common/Container";
 import { useAuth } from "@/context/AuthContext";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
-import { Menu, X } from "lucide-react";
+import { X } from "lucide-react";
 import { HiMenuAlt1 } from "react-icons/hi";
 
 import {
