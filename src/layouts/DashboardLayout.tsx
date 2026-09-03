@@ -1,8 +1,8 @@
-// src/layouts/DashboardLayout.tsx (Shared by Client & Admin, or adapt into two separate files)
 import { BackToTop } from "@/components/common/BackToTop";
 import { Footer } from "@/components/common/Footer";
 import { Hero } from "@/components/common/Hero";
 import { Navbar } from "@/components/common/Navbar";
+import ScrollToTop from "@/components/common/ScrollToTop";
 import { Outlet } from "react-router";
 
 interface DashboardLayoutProps {
@@ -12,6 +12,7 @@ interface DashboardLayoutProps {
 export const DashboardLayout = ({ isAdmin = false }: DashboardLayoutProps) => {
     return (
         <div className="flex min-h-screen flex-col antialiased bg-black-900 text-white">
+            <ScrollToTop />
             <header className="sticky top-0 z-40 w-full">
                 <Navbar />
             </header>
