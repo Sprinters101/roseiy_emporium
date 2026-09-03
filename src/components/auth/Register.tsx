@@ -4,7 +4,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Container from "@/components/common/Container";
 import { CustomInput } from "@/components/common/CustomInput";
-import { toast } from "@/components/ui/sonner";
+import { useRegisterCustomer, type RegisterPayload } from "@/service";
 import { AuthHeader } from "./AuthHeader";
 import { AuthFooter } from "./AuthFooter";
 import { heroBg } from "@/lib/site_data";
@@ -16,7 +16,7 @@ const RegisterValidationSchema = Yup.object().shape({
     lastName: Yup.string()
         .min(2, "Last name must be at least 2 characters")
         .required("Last name is required"),
-    phone: Yup.string()
+    phoneNumber: Yup.string()
         .min(7, "Please enter a valid phone number")
         .required("Phone number is required"),
     email: Yup.string()
@@ -32,27 +32,22 @@ const RegisterValidationSchema = Yup.object().shape({
 
 export const Register: React.FC = () => {
     const navigate = useNavigate();
+    const { mutate: registerCustomer, isPending } = useRegisterCustomer();
 
-    const handleSubmit = async (
-        values: {
-            firstName: string;
-            lastName: string;
-            phone: string;
-            email: string;
-            password: string;
-            confirmPassword: string;
-        },
+    const handleSubmit = (
+        values: RegisterPayload,
         { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
     ) => {
-        try {
-            await new Promise((resolve) => setTimeout(resolve, 800));
-            toast.success("Account created! Please verify your email address.");
-            navigate("/verify-otp", { state: { email: values.email } });
-        } catch {
-            toast.error("Registration failed. Please try again.");
-        } finally {
-            setSubmitting(false);
-        }
+        registerCustomer(values, {
+            onSuccess: (response) => {
+                navigate("/verify-otp", {
+                    state: { email: response.data?.email || values.email },
+                });
+            },
+            onSettled: () => {
+                setSubmitting(false);
+            },
+        });
     };
 
     return (
@@ -70,7 +65,7 @@ export const Register: React.FC = () => {
                         initialValues={{
                             firstName: "",
                             lastName: "",
-                            phone: "",
+                            phoneNumber: "",
                             email: "",
                             password: "",
                             confirmPassword: "",
@@ -78,69 +73,72 @@ export const Register: React.FC = () => {
                         validationSchema={RegisterValidationSchema}
                         onSubmit={handleSubmit}
                     >
-                        {({ isSubmitting }) => (
-                            <Form className="flex flex-col gap-4">
-                                {/* First Name & Last Name Grid */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {({ isSubmitting }) => {
+                            const isLoading = isSubmitting || isPending;
+                            return (
+                                <Form className="flex flex-col gap-4">
+                                    {/* First Name & Last Name Grid */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <CustomInput
+                                            name="firstName"
+                                            label="FIRST NAME"
+                                            placeholder="Enter First Name"
+                                        />
+                                        <CustomInput
+                                            name="lastName"
+                                            label="LAST NAME"
+                                            placeholder="Enter Last Name"
+                                        />
+                                    </div>
+
                                     <CustomInput
-                                        name="firstName"
-                                        label="FIRST NAME"
-                                        placeholder="Enter Full Name"
+                                        name="phoneNumber"
+                                        type="tel"
+                                        label="PHONE NUMBER"
+                                        placeholder="Enter Phone Number"
                                     />
+
                                     <CustomInput
-                                        name="lastName"
-                                        label="LAST NAME"
-                                        placeholder="Enter Full Name"
+                                        name="email"
+                                        type="email"
+                                        label="EMAIL ADDRESS"
+                                        placeholder="Enter Email Address"
                                     />
-                                </div>
 
-                                <CustomInput
-                                    name="phone"
-                                    type="tel"
-                                    label="PHONE NUMBER"
-                                    placeholder="Enter Phone Number"
-                                />
+                                    <CustomInput
+                                        name="password"
+                                        type="password"
+                                        label="PASSWORD"
+                                        placeholder="Enter Password"
+                                    />
 
-                                <CustomInput
-                                    name="email"
-                                    type="email"
-                                    label="EMAIL ADDRESS"
-                                    placeholder="Enter Email Address"
-                                />
+                                    <CustomInput
+                                        name="confirmPassword"
+                                        type="password"
+                                        label="CONFIRM PASSWORD"
+                                        placeholder="Confirm Password"
+                                    />
 
-                                <CustomInput
-                                    name="password"
-                                    type="password"
-                                    label="PASSWORD"
-                                    placeholder="Enter Password"
-                                />
-
-                                <CustomInput
-                                    name="confirmPassword"
-                                    type="password"
-                                    label="CONFIRM PASSWORD"
-                                    placeholder="Enter Password"
-                                />
-
-                                <button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="w-full mt-2 h-10 md:h-12 bg-gold-g hover:opacity-95 text-black font-semibold text-sm sm:text-base py-3.5 px-6 rounded-sm transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center font-hanken"
-                                >
-                                    {isSubmitting ? "Signing Up..." : "Sign Up"}
-                                </button>
-
-                                <div className="text-xs sm:text-sm text-center text-white mt-4 font-hanken">
-                                    Already Have an Account?{" "}
-                                    <Link
-                                        to="/login"
-                                        className="text-gold-500 font-semibold hover:underline"
+                                    <button
+                                        type="submit"
+                                        disabled={isLoading}
+                                        className="w-full mt-2 h-10 md:h-12 bg-gold-g hover:opacity-95 text-black font-semibold text-sm sm:text-base py-3.5 px-6 rounded-sm transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center font-hanken"
                                     >
-                                        Log In
-                                    </Link>
-                                </div>
-                            </Form>
-                        )}
+                                        {isLoading ? "Signing Up..." : "Sign Up"}
+                                    </button>
+
+                                    <div className="text-xs sm:text-sm text-center text-white mt-4 font-hanken">
+                                        Already Have an Account?{" "}
+                                        <Link
+                                            to="/login"
+                                            className="text-gold-500 font-semibold hover:underline"
+                                        >
+                                            Log In
+                                        </Link>
+                                    </div>
+                                </Form>
+                            );
+                        }}
                     </Formik>
                 </div>
 

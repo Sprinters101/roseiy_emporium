@@ -1,6 +1,7 @@
 import { Footer } from "@/components/common/Footer";
 import { Navbar } from "@/components/common/Navbar";
 import { BackToTop } from "@/components/common/BackToTop";
+import ScrollToTop from "@/components/common/ScrollToTop";
 import { Outlet, useLocation } from "react-router";
 
 const AUTH_PATHS = [
@@ -18,6 +19,7 @@ export const PublicLayout = () => {
 
     return (
         <div className="flex min-h-screen flex-col antialiased">
+            <ScrollToTop />
             {!isAuthPage && (
                 <header className="sticky top-0 z-40 w-full">
                     <Navbar />

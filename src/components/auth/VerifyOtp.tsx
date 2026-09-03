@@ -2,18 +2,21 @@ import React, { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import Container from "@/components/common/Container";
 import { toast } from "@/components/ui/sonner";
+import { useVerifyEmail, useResendOtp } from "@/service";
 import { AuthHeader } from "./AuthHeader";
 import { heroBg } from "@/lib/site_data";
 
 export const VerifyOtp: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const email = location.state?.email || "roesbola907@gmail.com";
+    const email = location.state?.email || "";
 
     const [otp, setOtp] = useState<string[]>(["", "", "", ""]);
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [timer, setTimer] = useState<number>(30);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+    const { mutate: verifyEmail, isPending: isVerifying } = useVerifyEmail();
+    const { mutate: resendOtp, isPending: isResending } = useResendOtp();
 
     useEffect(() => {
         if (timer > 0) {
@@ -48,29 +51,46 @@ export const VerifyOtp: React.FC = () => {
         }
     };
 
-    const handleVerify = async () => {
+    const handleVerify = () => {
         const fullOtp = otp.join("");
         if (fullOtp.length < 4) {
             toast.error("Please enter the complete 4-digit OTP code");
             return;
         }
 
-        setIsSubmitting(true);
-        try {
-            await new Promise((resolve) => setTimeout(resolve, 800));
-            toast.success("Email verified successfully!");
-            navigate("/login");
-        } catch {
-            toast.error("Invalid verification code. Please try again.");
-        } finally {
-            setIsSubmitting(false);
+        if (!email) {
+            toast.error("Email address missing. Please register again.");
+            navigate("/register");
+            return;
         }
+
+        verifyEmail(
+            { email, otp: fullOtp },
+            {
+                onSuccess: () => {
+                    navigate("/login");
+                },
+            },
+        );
     };
 
     const handleResend = () => {
-        if (timer > 0) return;
-        setTimer(30);
-        toast.info(`Verification code resent to ${email}`);
+        if (timer > 0 || isResending) return;
+
+        if (!email) {
+            toast.error("Email address missing. Please register again.");
+            navigate("/register");
+            return;
+        }
+
+        resendOtp(
+            { email },
+            {
+                onSuccess: () => {
+                    setTimer(30);
+                },
+            },
+        );
     };
 
     const formatTimer = (seconds: number) => {
@@ -122,10 +142,10 @@ export const VerifyOtp: React.FC = () => {
                     <button
                         type="button"
                         onClick={handleVerify}
-                        disabled={isSubmitting}
+                        disabled={isVerifying || isResending}
                         className="w-full mt-6 h-10 md:h-12 bg-gold-g hover:opacity-95 text-black font-semibold text-sm sm:text-base py-3.5 px-6 rounded-sm transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center font-hanken"
                     >
-                        {isSubmitting ? "Verifying..." : "Verify OTP"}
+                        {isVerifying ? "Verifying..." : "Verify OTP"}
                     </button>
 
                     {/* Resend Code Timer */}
@@ -133,14 +153,14 @@ export const VerifyOtp: React.FC = () => {
                         <button
                             type="button"
                             onClick={handleResend}
-                            disabled={timer > 0}
+                            disabled={timer > 0 || isResending}
                             className={`font-semibold md:text-base text-sm gradient-text transition-colors ${
-                                timer > 0
+                                timer > 0 || isResending
                                     ? " cursor-not-allowed opacity-80"
                                     : " hover:underline cursor-pointer"
                             }`}
                         >
-                            Resend Code
+                            {isResending ? "Resending..." : "Resend Code"}
                         </button>{" "}
                         <span className="text-white">
                             {timer > 0 ? `in ${formatTimer(timer)}` : ""}

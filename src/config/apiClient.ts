@@ -2,12 +2,14 @@ import axios, {
     type InternalAxiosRequestConfig,
     type AxiosResponse,
 } from "axios";
+import Cookies from "js-cookie";
 
 // Create custom axios instance
 export const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || "https://api.example.com/v1",
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     headers: {
         "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
     },
 });
 
@@ -33,7 +35,8 @@ const processQueue = (error: unknown, token: string | null = null) => {
 /* Request Interceptor: Auto-inject access token into headers */
 apiClient.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-        const token = localStorage.getItem("accessToken");
+        const token =
+            Cookies.get("accessToken") || localStorage.getItem("accessToken");
         if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
         }

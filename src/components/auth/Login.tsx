@@ -4,8 +4,8 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Container from "@/components/common/Container";
 import { CustomInput } from "@/components/common/CustomInput";
-import { toast } from "@/components/ui/sonner";
 import { useAuth } from "@/context/AuthContext";
+import { useLogin, type LoginPayload } from "@/service";
 import { AuthHeader } from "./AuthHeader";
 import { AuthFooter } from "./AuthFooter";
 import { heroBg } from "@/lib/site_data";
@@ -22,21 +22,23 @@ const LoginValidationSchema = Yup.object().shape({
 export const Login: React.FC = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
+    const { mutate: loginMutation, isPending } = useLogin();
 
-    const handleSubmit = async (
-        values: { email: string; password: string },
+    const handleSubmit = (
+        values: LoginPayload,
         { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
     ) => {
-        try {
-            await new Promise((resolve) => setTimeout(resolve, 800));
-            login("mock_token_rosiey_emporium_2026", { email: values.email });
-            toast.success("Logged in successfully!");
-            navigate("/");
-        } catch {
-            toast.error("Invalid email or password. Please try again.");
-        } finally {
-            setSubmitting(false);
-        }
+        loginMutation(values, {
+            onSuccess: (response) => {
+                if (response.data) {
+                    login(response.data.token, response.data.customer);
+                }
+                navigate("/");
+            },
+            onSettled: () => {
+                setSubmitting(false);
+            },
+        });
     };
 
     return (
@@ -58,51 +60,56 @@ export const Login: React.FC = () => {
                         validationSchema={LoginValidationSchema}
                         onSubmit={handleSubmit}
                     >
-                        {({ isSubmitting }) => (
-                            <Form className="flex flex-col gap-4">
-                                <CustomInput
-                                    name="email"
-                                    type="email"
-                                    label="EMAIL ADDRESS"
-                                    placeholder="Enter Email Address"
-                                />
-
-                                <div>
+                        {({ isSubmitting }) => {
+                            const isLoading = isSubmitting || isPending;
+                            return (
+                                <Form className="flex flex-col gap-4">
                                     <CustomInput
-                                        name="password"
-                                        type="password"
-                                        label="PASSWORD"
-                                        placeholder="Enter Password"
+                                        name="email"
+                                        type="email"
+                                        label="EMAIL ADDRESS"
+                                        placeholder="Enter Email Address"
                                     />
-                                    <div className="text-right mt-1.5">
+
+                                    <div>
+                                        <CustomInput
+                                            name="password"
+                                            type="password"
+                                            label="PASSWORD"
+                                            placeholder="Enter Password"
+                                        />
+                                        <div className="text-right mt-1.5">
+                                            <Link
+                                                to="/forgot-password"
+                                                className="text-gold-500 text-xs font-semibold hover:underline inline-block"
+                                            >
+                                                Forgot Password?
+                                            </Link>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={isLoading}
+                                        className="w-full mt-2 h-10 md:h-12 bg-gold-g hover:opacity-95 text-black font-semibold text-sm sm:text-base py-3.5 px-6 rounded-sm transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center font-hanken"
+                                    >
+                                        {isLoading
+                                            ? "Logging In..."
+                                            : "Log In"}
+                                    </button>
+
+                                    <div className="text-xs sm:text-sm text-center text-white mt-4 font-hanken">
+                                        Don't Have an Account?{" "}
                                         <Link
-                                            to="/forgot-password"
-                                            className="text-gold-500 text-xs font-semibold hover:underline inline-block"
+                                            to="/register"
+                                            className="text-gold-500 font-semibold hover:underline"
                                         >
-                                            Forgot Password?
+                                            Sign Up
                                         </Link>
                                     </div>
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="w-full mt-2 h-10 md:h-12 bg-gold-g hover:opacity-95 text-black font-semibold text-sm sm:text-base py-3.5 px-6 rounded-sm transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center font-hanken"
-                                >
-                                    {isSubmitting ? "Logging In..." : "Log In"}
-                                </button>
-
-                                <div className="text-xs sm:text-sm text-center text-white mt-4 font-hanken">
-                                    Don't Have an Account?{" "}
-                                    <Link
-                                        to="/register"
-                                        className="text-gold-500 font-semibold hover:underline"
-                                    >
-                                        Sign Up
-                                    </Link>
-                                </div>
-                            </Form>
-                        )}
+                                </Form>
+                            );
+                        }}
                     </Formik>
                 </div>
 

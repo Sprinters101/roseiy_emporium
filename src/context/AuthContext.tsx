@@ -3,9 +3,11 @@ import Cookies from "js-cookie";
 
 export interface UserProfile {
     id?: string;
+    customerId?: string;
     email?: string;
     firstName?: string;
     lastName?: string;
+    phoneNumber?: string;
     role?: string;
 }
 
