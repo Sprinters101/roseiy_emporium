@@ -51,8 +51,28 @@ apiClient.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // Guard: Trigger refresh only on 401 errors and ensure we don't loop infinitely
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Skip refresh logic for authentication endpoints
+        const requestUrl = originalRequest?.url || "";
+        const isAuthEndpoint =
+            requestUrl.includes("/auth/login") ||
+            requestUrl.includes("/auth/register") ||
+            requestUrl.includes("/auth/verify-email") ||
+            requestUrl.includes("/auth/resend-otp") ||
+            requestUrl.includes("/auth/refresh");
+
+        // Guard: Trigger refresh only on 401 errors on protected routes, ensuring we don't loop
+        if (
+            error.response?.status === 401 &&
+            !originalRequest._retry &&
+            !isAuthEndpoint
+        ) {
+            const refreshToken = localStorage.getItem("refreshToken");
+
+            // If user doesn't have a refresh token, reject immediately without reloading the page
+            if (!refreshToken) {
+                return Promise.reject(error);
+            }
+
             // If a refresh is already in progress, queue this request until it's done
             if (isRefreshing) {
                 return new Promise((resolve, reject) => {
@@ -69,8 +89,6 @@ apiClient.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                const refreshToken = localStorage.getItem("refreshToken");
-
                 // Call the silent refresh endpoint (using basic axios to bypass main interceptors)
                 const response = await axios.post(
                     `${apiClient.defaults.baseURL}/auth/refresh`,
@@ -86,6 +104,10 @@ apiClient.interceptors.response.use(
 
                 localStorage.setItem("accessToken", newAccessToken);
                 localStorage.setItem("refreshToken", newRefreshToken);
+                Cookies.set("accessToken", newAccessToken, {
+                    expires: 7,
+                    path: "/",
+                });
 
                 // Clear queue and retry the initial failed request
                 processQueue(null, newAccessToken);
@@ -95,7 +117,10 @@ apiClient.interceptors.response.use(
                 // Refresh token failed/expired -> Log user out completely
                 processQueue(refreshError, null);
                 localStorage.clear();
-                window.location.href = "/login";
+                Cookies.remove("accessToken", { path: "/" });
+                if (window.location.pathname !== "/login") {
+                    window.location.href = "/login";
+                }
                 return Promise.reject(refreshError);
             } finally {
                 isRefreshing = false;
