@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Container from "@/components/common/Container";
@@ -21,8 +21,28 @@ const LoginValidationSchema = Yup.object().shape({
 
 export const Login: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { login } = useAuth();
     const { mutate: loginMutation, isPending } = useLogin();
+
+    // Determine target redirect destination
+    const fromState = location.state?.from;
+    const searchParams = new URLSearchParams(location.search);
+    const redirectParam = searchParams.get("redirect") || searchParams.get("from");
+
+    let fromPath = "";
+    if (typeof fromState === "string") {
+        fromPath = fromState;
+    } else if (fromState && typeof fromState === "object" && "pathname" in fromState) {
+        fromPath = fromState.pathname;
+    } else if (redirectParam) {
+        fromPath = redirectParam;
+    }
+
+    // Default to Profile, unless redirected from Checkout
+    const targetDestination = fromPath.includes("/checkout")
+        ? "/checkout"
+        : "/dashboard/profile";
 
     const handleSubmit = (
         values: LoginPayload,
@@ -33,7 +53,7 @@ export const Login: React.FC = () => {
                 if (response.data) {
                     login(response.data.token, response.data.customer);
                 }
-                navigate("/");
+                navigate(targetDestination, { replace: true });
             },
             onSettled: () => {
                 setSubmitting(false);

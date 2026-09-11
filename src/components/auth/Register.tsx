@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Container from "@/components/common/Container";
@@ -32,6 +32,7 @@ const RegisterValidationSchema = Yup.object().shape({
 
 export const Register: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { mutate: registerCustomer, isPending } = useRegisterCustomer();
 
     const handleSubmit = (
@@ -41,7 +42,10 @@ export const Register: React.FC = () => {
         registerCustomer(values, {
             onSuccess: (response) => {
                 navigate("/verify-otp", {
-                    state: { email: response.data?.email || values.email },
+                    state: {
+                        email: response.data?.email || values.email,
+                        from: location.state?.from,
+                    },
                 });
             },
             onSettled: () => {

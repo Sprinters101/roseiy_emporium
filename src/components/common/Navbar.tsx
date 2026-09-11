@@ -40,7 +40,7 @@ const NavSearch = () => {
 };
 
 export const Navbar = () => {
-    const { totalItems } = useCart();
+    const { cartItems } = useCart();
     const { wishlistCount } = useWishlist();
     const { isAuthenticated, logout } = useAuth();
     const location = useLocation();
@@ -186,7 +186,7 @@ export const Navbar = () => {
                                 >
                                     <ShoppingCart className="size-4 md:size-5" />
                                     <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold-gradient text-[0.6rem] font-black text-black-900">
-                                        {totalItems}
+                                        {cartItems?.length}
                                     </span>
                                 </button>
                             </CartDrawer>
@@ -278,6 +278,7 @@ export const Navbar = () => {
                                             render={
                                                 <Link
                                                     to="/login"
+                                                    state={{ from: location }}
                                                     className="w-full text-center flex items-center justify-center text-sm font-medium py-2 rounded-lg text-gray-300 hover:text-white cursor-pointer focus:bg-neutral-800"
                                                 />
                                             }
@@ -289,6 +290,7 @@ export const Navbar = () => {
                                             render={
                                                 <Link
                                                     to="/register"
+                                                    state={{ from: location }}
                                                     className="w-full text-center flex items-center justify-center text-sm font-bold py-2 rounded-lg bg-gold-g text-black cursor-pointer shadow-md tracking-wide hover:opacity-90 active:scale-98 transition-all"
                                                 />
                                             }
