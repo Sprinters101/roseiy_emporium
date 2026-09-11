@@ -2672,7 +2672,7 @@ export const ContactSection = () => {
                             </h3>
                             <div className="flex items-center gap-4">
                                 <a
-                                    href="https://instagram.com"
+                                    href="https://www.instagram.com/roseiy_emporium?igsi=MTcxcm1lcnQ0aDM0YQ%3D%3D&utm_source=qr"
                                     target="_blank"
                                     rel="noreferrer"
                                     className="size-12 rounded-full bg-black-900 flex items-center justify-center hover:bg-gold-500/20 hover:border-gold-500 transition-all cursor-pointer"
@@ -2681,7 +2681,7 @@ export const ContactSection = () => {
                                     <IoLogoInstagram className="size-5 text-white" />
                                 </a>
                                 <a
-                                    href="https://snapchat.com"
+                                    href="https://snapchat.com/t/R2aqxifD"
                                     target="_blank"
                                     rel="noreferrer"
                                     className="size-12 rounded-full bg-black-900 flex items-center justify-center hover:bg-gold-500/20 hover:border-gold-500 transition-all cursor-pointer"
@@ -4206,7 +4206,7 @@ export const Footer = () => {
                             </h4>
                             <div className="flex items-center gap-3">
                                 <a
-                                    href="https://instagram.com"
+                                    href="https://www.instagram.com/roseiy_emporium?igsi=MTcxcm1lcnQ0aDM0YQ%3D%3D&utm_source=qr"
                                     target="_blank"
                                     rel="noreferrer"
                                     className="size-11 rounded-full bg-black-700 border border-white/10 flex items-center justify-center hover:bg-gold-500/20 hover:border-gold-500 transition-all cursor-pointer"
@@ -4215,7 +4215,7 @@ export const Footer = () => {
                                     <IoLogoInstagram className="size-5 text-white" />
                                 </a>
                                 <a
-                                    href="https://snapchat.com"
+                                    href="https://snapchat.com/t/R2aqxifD"
                                     target="_blank"
                                     rel="noreferrer"
                                     className="size-11 rounded-full bg-black-700 border border-white/10 flex items-center justify-center hover:bg-gold-500/20 hover:border-gold-500 transition-all cursor-pointer"

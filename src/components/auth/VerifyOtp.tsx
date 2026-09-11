@@ -68,7 +68,9 @@ export const VerifyOtp: React.FC = () => {
             { email, otp: fullOtp },
             {
                 onSuccess: () => {
-                    navigate("/login");
+                    navigate("/login", {
+                        state: { from: location.state?.from },
+                    });
                 },
             },
         );

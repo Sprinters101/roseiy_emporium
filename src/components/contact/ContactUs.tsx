@@ -155,7 +155,7 @@ export const ContactUs: React.FC = () => {
                             </h3>
                             <div className="flex items-center gap-3">
                                 <a
-                                    href="https://instagram.com"
+                                    href="https://www.instagram.com/roseiy_emporium?igsi=MTcxcm1lcnQ0aDM0YQ%3D%3D&utm_source=qr"
                                     target="_blank"
                                     rel="noreferrer"
                                     className="w-10 h-10 rounded-full bg-black-900  flex items-center justify-center text-zinc-300 hover:text-gold-500 hover:border-gold-500 transition-all duration-200"
@@ -164,7 +164,7 @@ export const ContactUs: React.FC = () => {
                                     <FaInstagram className="w-5 h-5" />
                                 </a>
                                 <a
-                                    href="https://snapchat.com"
+                                    href="https://snapchat.com/t/R2aqxifD"
                                     target="_blank"
                                     rel="noreferrer"
                                     className="w-10 h-10 rounded-full bg-black-900  flex items-center justify-center text-zinc-300 hover:text-gold-500 hover:border-gold-500 transition-all duration-200"

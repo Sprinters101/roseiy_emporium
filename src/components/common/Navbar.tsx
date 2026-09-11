@@ -278,6 +278,7 @@ export const Navbar = () => {
                                             render={
                                                 <Link
                                                     to="/login"
+                                                    state={{ from: location }}
                                                     className="w-full text-center flex items-center justify-center text-sm font-medium py-2 rounded-lg text-gray-300 hover:text-white cursor-pointer focus:bg-neutral-800"
                                                 />
                                             }
@@ -289,6 +290,7 @@ export const Navbar = () => {
                                             render={
                                                 <Link
                                                     to="/register"
+                                                    state={{ from: location }}
                                                     className="w-full text-center flex items-center justify-center text-sm font-bold py-2 rounded-lg bg-gold-g text-black cursor-pointer shadow-md tracking-wide hover:opacity-90 active:scale-98 transition-all"
                                                 />
                                             }

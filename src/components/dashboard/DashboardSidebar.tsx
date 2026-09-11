@@ -1,6 +1,14 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { LayoutGrid, ShoppingBag, MapPin, User, LogOut } from "lucide-react";
+import {
+    LayoutGrid,
+    ShoppingBag,
+    MapPin,
+    User,
+    LogOut,
+    LucideLayoutDashboard,
+    ShoppingBasket,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export interface DashboardSidebarProps {
@@ -20,13 +28,13 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         {
             name: "Overview",
             href: "/dashboard",
-            icon: LayoutGrid,
+            icon: LucideLayoutDashboard,
             exact: true,
         },
         {
             name: "Orders",
             href: "/dashboard/orders",
-            icon: ShoppingBag,
+            icon: ShoppingBasket,
         },
         {
             name: "Addresses",
@@ -42,7 +50,9 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
     const isActive = (href: string, exact?: boolean) => {
         if (exact) {
-            return location.pathname === href || location.pathname === `${href}/`;
+            return (
+                location.pathname === href || location.pathname === `${href}/`
+            );
         }
         if (href === "/dashboard/orders") {
             return (
@@ -75,7 +85,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                         onClick={onItemClick}
                         className={`flex items-center gap-3.5 px-4 py-3 rounded-lg text-sm font-hanken transition-all cursor-pointer ${
                             active
-                                ? "bg-white/5 text-gold-500 font-semibold border-l-2 border-gold-500 pl-3.5"
+                                ? "bg-white/5 gradient-text font-semibold border-l-2 border-gold-500 pl-3.5"
                                 : "text-neutral-300 hover:text-white font-medium hover:bg-white/5"
                         }`}
                     >

@@ -327,11 +327,20 @@ export const Checkout: React.FC = () => {
                     /* 2. Guest User Checkout Flow */
                     <div className="w-full">
                         {/* Guest Checkout Banner */}
-                        <div className="flex items-center gap-2.5 text-gold-400 text-sm font-medium mb-8">
-                            <Info className="size-4 shrink-0" />
-                            <span className="text-neutral-300">
-                                You are currently checking out as a guest
-                            </span>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-neutral-900/70 border border-neutral-800 rounded-lg p-4 mb-8">
+                            <div className="flex items-center gap-2.5 text-gold-400 text-sm font-medium">
+                                <Info className="size-4 shrink-0" />
+                                <span className="text-neutral-300">
+                                    You are currently checking out as a guest
+                                </span>
+                            </div>
+                            <Link
+                                to="/login"
+                                state={{ from: "/checkout" }}
+                                className="text-xs sm:text-sm font-semibold text-gold-500 hover:text-gold-400 hover:underline shrink-0 font-hanken"
+                            >
+                                Already have an account? Log In &rarr;
+                            </Link>
                         </div>
 
                         <Formik
