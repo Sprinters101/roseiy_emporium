@@ -32,22 +32,42 @@ const processQueue = (error: unknown, token: string | null = null) => {
     failedQueue = [];
 };
 
-/* Request Interceptor: Auto-inject access token into headers */
+/* Request Interceptor: Auto-inject access token or guest cart token into headers */
 apiClient.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         const token =
             Cookies.get("accessToken") || localStorage.getItem("accessToken");
         if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
+        } else if (config.headers) {
+            const guestCartToken =
+                Cookies.get("guestCartToken") ||
+                localStorage.getItem("guestCartToken");
+            if (guestCartToken) {
+                config.headers["X-Cart-Token"] = guestCartToken;
+            }
         }
         return config;
     },
     (error) => Promise.reject(error),
 );
 
-/* Response Interceptor: Seamless 401 interception & request retry */
+/* Response Interceptor: Seamless 401 interception, guest token capture & request retry */
 apiClient.interceptors.response.use(
-    (response: AxiosResponse) => response,
+    (response: AxiosResponse) => {
+        // Automatically capture and store guest cart token from responses in Cookies (30 days) & localStorage
+        const guestToken =
+            response.data?.data?.cart?.guestToken ||
+            response.data?.data?.guestToken;
+        if (guestToken) {
+            Cookies.set("guestCartToken", guestToken, {
+                expires: 30,
+                path: "/",
+            });
+            localStorage.setItem("guestCartToken", guestToken);
+        }
+        return response;
+    },
     async (error) => {
         const originalRequest = error.config;
 
