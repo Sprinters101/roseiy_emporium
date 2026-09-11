@@ -1,8 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import {
-    LayoutGrid,
-    ShoppingBag,
     MapPin,
     User,
     LogOut,
