@@ -142,6 +142,7 @@ export interface GetProductsParams {
 
 export interface ProductsResponseData {
     products: ProductItem[];
+    items?: ProductItem[];
     pagination: PaginationMeta;
 }
 

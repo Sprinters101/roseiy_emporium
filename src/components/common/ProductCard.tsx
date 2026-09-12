@@ -1,10 +1,12 @@
+import React from "react";
 import { Link } from "react-router";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { ProductCardProps } from "@/config/types";
+import type { Product, ProductCardProps } from "@/config/types";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import type { ProductItem } from "@/service/types";
 
 export const ProductCard = ({
     product,
@@ -12,28 +14,97 @@ export const ProductCard = ({
     onToggleWishlist,
     className = "",
     isLandingPage = false,
-}: ProductCardProps) => {
+}: ProductCardProps & { product: Product | ProductItem | any }) => {
     const { cartItems, addToCart } = useCart();
     const { isInWishlist, toggleWishlist } = useWishlist();
-    const isWishlisted = isInWishlist(product.id);
 
-    const cartItem = cartItems.find((item) => item.id === product.id);
+    // Standardize product fields across mock and live API objects
+    const resolvedId = String(
+        product.slug || product.productId || product.id || "",
+    );
+    const cartId = String(product.productId || product.id || resolvedId);
+    const resolvedName = product.name || "Product";
+
+    const isWishlisted = isInWishlist(cartId);
+    const cartItem = cartItems.find(
+        (item) => item.id === cartId || item.id === resolvedId,
+    );
     const inCartQty = cartItem ? cartItem.quantity : 0;
 
-    const maxStock =
+    // Resolve primary image
+    const resolvedImage =
+        product.image ||
+        product.images?.find((img: any) => img.isPrimary)?.imageUrl ||
+        product.images?.[0]?.imageUrl ||
+        "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png";
+
+    // Resolve category name
+    const resolvedCategory =
+        typeof product.category === "object" && product.category !== null
+            ? product.category.name
+            : product.category || "Wine & Spirits";
+
+    // Resolve price
+    const resolvedPrice =
+        product.price !== undefined && typeof product.price === "number"
+            ? product.price
+            : product.sellingUnits?.[0]?.price
+            ? Number(product.sellingUnits[0].price)
+            : 0;
+
+    // Resolve stock metrics
+    const pieceUnit = product.sellingUnits?.find((u: any) =>
+        u.name?.toLowerCase().includes("piece"),
+    );
+    const cartonUnit = product.sellingUnits?.find(
+        (u: any) =>
+            u.name?.toLowerCase().includes("carton") ||
+            u.name?.toLowerCase().includes("case"),
+    );
+    const primaryUnit = product.sellingUnits?.[0];
+
+    const piecesLeft =
         product.piecesLeft !== undefined
             ? product.piecesLeft
-            : product.casesLeft !== undefined
+            : pieceUnit
+            ? pieceUnit.stock
+            : primaryUnit
+            ? primaryUnit.stock
+            : undefined;
+
+    const casesLeft =
+        product.casesLeft !== undefined
             ? product.casesLeft
+            : cartonUnit
+            ? cartonUnit.stock
+            : undefined;
+
+    const maxStock =
+        piecesLeft !== undefined
+            ? piecesLeft
+            : casesLeft !== undefined
+            ? casesLeft
             : Infinity;
 
     const isOutOfStock = maxStock <= 0 || inCartQty >= maxStock;
 
+    // Normalized product object for context handlers
+    const normalizedProduct: Product = {
+        id: cartId,
+        name: resolvedName,
+        category: resolvedCategory,
+        volume: product.volume || "75cl",
+        piecesLeft,
+        casesLeft,
+        price: resolvedPrice,
+        image: resolvedImage,
+    };
+
     const handleWishlist = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        toggleWishlist(product);
-        if (onToggleWishlist) onToggleWishlist(product.id);
+        toggleWishlist(normalizedProduct);
+        if (onToggleWishlist) onToggleWishlist(cartId);
     };
 
     const handleAddToCart = (e: React.MouseEvent) => {
@@ -41,9 +112,9 @@ export const ProductCard = ({
         e.stopPropagation();
         if (isOutOfStock) return;
         if (onAddToCart) {
-            onAddToCart(product);
+            onAddToCart(normalizedProduct);
         } else {
-            addToCart(product);
+            addToCart(normalizedProduct);
         }
     };
 
@@ -53,7 +124,7 @@ export const ProductCard = ({
         currency: "NGN",
         maximumFractionDigits: 0,
     })
-        .format(product.price)
+        .format(resolvedPrice)
         .replace("NGN", "₦");
 
     return (
@@ -88,7 +159,7 @@ export const ProductCard = ({
 
             {/* Product Image Link */}
             <Link
-                to={`/product/${product.id}`}
+                to={`/product/${resolvedId}`}
                 className={cn("block ", isLandingPage && "mt-6.25")}
             >
                 <div
@@ -98,8 +169,8 @@ export const ProductCard = ({
                     )}
                 >
                     <img
-                        src={product.image}
-                        alt={product.name}
+                        src={resolvedImage}
+                        alt={resolvedName}
                         className="max-h-full w-auto object-contain transition-transform duration-500 ease-out group-hover:scale-105"
                     />
                 </div>
@@ -113,17 +184,17 @@ export const ProductCard = ({
                 )}
             >
                 <span className="text-[10px] font-medium tracking-widest text-gold-500 uppercase font-hanken">
-                    {product.category}
+                    {resolvedCategory}
                 </span>
 
-                <Link to={`/product/${product.id}`} className="block mt-0">
+                <Link to={`/product/${resolvedId}`} className="block mt-0">
                     <h3
                         className={cn(
                             "text-white font-playfair text-hg-c3 md:text-base font-bold leading-snug line-clamp-2 min-h-8.5 md:min-h-10.5  transition-colors",
                             isLandingPage && "md:text-[1.5625rem] md:min-h-14",
                         )}
                     >
-                        {product.name}
+                        {resolvedName}
                     </h3>
                 </Link>
 
@@ -133,11 +204,11 @@ export const ProductCard = ({
                         isLandingPage && "md:text-[0.625rem] mt-1.25",
                     )}
                 >
-                    {product.volume}
-                    {product.piecesLeft !== undefined &&
-                        ` • ${product.piecesLeft} Pieces Left`}
-                    {product.casesLeft !== undefined &&
-                        ` • ${product.casesLeft} Cases Left`}
+                    {product.volume || "75cl"}
+                    {piecesLeft !== undefined &&
+                        ` • ${piecesLeft} Pieces Left`}
+                    {casesLeft !== undefined &&
+                        ` • ${casesLeft} Cases Left`}
                 </p>
 
                 <div className={cn("mt-0", isLandingPage && "mt-2")}>
@@ -167,3 +238,5 @@ export const ProductCard = ({
         </div>
     );
 };
+
+export default ProductCard;

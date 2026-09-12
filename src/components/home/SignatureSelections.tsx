@@ -1,11 +1,28 @@
+import { useMemo } from "react";
 import Container from "../common/Container";
 import TitleDecoration from "../common/TitleDecoration";
 import { ProductCard } from "../common/ProductCard";
+import { ProductCardSkeleton } from "../common/ProductCardSkeleton";
 import { Link } from "react-router";
-import { products } from "@/lib/site_data";
+import { products as fallbackProducts } from "@/lib/site_data";
 import { motion } from "framer-motion";
+import { useGetProducts } from "@/service/queries";
 
 export const SignatureSelections = () => {
+    const { data: apiResponse, isLoading } = useGetProducts({
+        limit: 8,
+        sort: "newest",
+    });
+
+    const displayProducts = useMemo(() => {
+        const liveItems =
+            apiResponse?.data?.products || apiResponse?.data?.items;
+        if (liveItems && liveItems.length > 0) {
+            return liveItems.slice(0, 8);
+        }
+        return fallbackProducts.slice(0, 8);
+    }, [apiResponse]);
+
     return (
         <section
             className="w-full bg-black-900 py-16 md:py-24 overflow-hidden"
@@ -49,13 +66,24 @@ export const SignatureSelections = () => {
                         }}
                         className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full mt-4 md:mt-16"
                     >
-                        {products?.slice(0, 8)?.map((product) => (
-                            <ProductCard
-                                key={product.id}
-                                product={product}
-                                isLandingPage={true}
-                            />
-                        ))}
+                        {isLoading
+                            ? Array.from({ length: 8 }).map((_, idx) => (
+                                  <ProductCardSkeleton
+                                      key={idx}
+                                      isLandingPage={true}
+                                  />
+                              ))
+                            : displayProducts?.map((product: any) => (
+                                  <ProductCard
+                                      key={
+                                          product.productId ||
+                                          product.slug ||
+                                          product.id
+                                      }
+                                      product={product}
+                                      isLandingPage={true}
+                                  />
+                              ))}
                     </motion.div>
 
                     {/* CTA Button */}
@@ -82,3 +110,5 @@ export const SignatureSelections = () => {
         </section>
     );
 };
+
+export default SignatureSelections;
