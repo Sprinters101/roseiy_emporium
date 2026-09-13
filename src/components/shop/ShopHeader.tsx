@@ -1,6 +1,6 @@
 import { X, ChevronRight, SlidersHorizontal } from "lucide-react";
 import { CustomDropdown } from "../common/CustomDropdown";
-import { CATEGORIES, BRANDS, PRICE_RANGES } from "./data/shopData";
+import { PRICE_RANGES, type FilterOption } from "./data/shopData";
 
 interface ShopHeaderProps {
     sortBy: string;
@@ -8,6 +8,8 @@ interface ShopHeaderProps {
     selectedCategories?: string[];
     selectedBrands?: string[];
     selectedPriceRanges?: string[];
+    categoriesList?: FilterOption[];
+    brandsList?: FilterOption[];
     onSortChange: (value: string) => void;
     onOpenMobileFilters: () => void;
     onRemoveCategory?: (id: string) => void;
@@ -22,6 +24,8 @@ export const ShopHeader = ({
     selectedCategories = [],
     selectedBrands = [],
     selectedPriceRanges = [],
+    categoriesList = [],
+    brandsList = [],
     onSortChange,
     onOpenMobileFilters,
     onRemoveCategory,
@@ -40,7 +44,7 @@ export const ShopHeader = ({
     ];
 
     return (
-        <div className="flex flex-col gap-4 mb-6 md:mb-">
+        <div className="flex flex-col gap-4 mb-6">
             {/* Controls Bar: Filters Button (Mobile) + Sort By (All Screens) */}
             <div className="grid grid-cols-2 lg:flex lg:justify-between gap-3 w-full">
                 <div className="col-span-2">
@@ -77,18 +81,18 @@ export const ShopHeader = ({
 
             {/* Filtered active brand & category list horizontally scrollable */}
             {totalActiveFilters > 0 && (
-                <div className="md:flex items-center gap-3 overflow-x-auto  scrollbar-none max-w-full hidden">
+                <div className="md:flex items-center gap-3 overflow-x-auto scrollbar-none max-w-full hidden">
                     <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
                         {selectedCategories.map((catId) => {
                             const label =
-                                CATEGORIES.find((c) => c.id === catId)?.label ||
-                                catId;
+                                categoriesList.find((c) => c.id === catId)
+                                    ?.label || catId;
                             return (
                                 <button
                                     key={`cat-${catId}`}
                                     type="button"
                                     onClick={() => onRemoveCategory?.(catId)}
-                                    className="flex flex-row-reverse items-center gap-1.5 bg-black-700 border-none rounded-[8px] text-white text-xs font-hanken  px-2 py-1.5 hover:border-gold-500/80 hover:text-gold-300 transition-all shrink-0 cursor-pointer group"
+                                    className="flex flex-row-reverse items-center gap-1.5 bg-black-700 border-none rounded-[8px] text-white text-xs font-hanken px-2 py-1.5 hover:border-gold-500/80 hover:text-gold-300 transition-all shrink-0 cursor-pointer group"
                                 >
                                     <X className="size-3.5 text-white group-hover:text-gold-500 transition-colors" />
                                     <span>{label}</span>
@@ -98,14 +102,14 @@ export const ShopHeader = ({
 
                         {selectedBrands.map((brandId) => {
                             const label =
-                                BRANDS.find((b) => b.id === brandId)?.label ||
-                                brandId;
+                                brandsList.find((b) => b.id === brandId)
+                                    ?.label || brandId;
                             return (
                                 <button
                                     key={`brand-${brandId}`}
                                     type="button"
                                     onClick={() => onRemoveBrand?.(brandId)}
-                                    className="flex flex-row-reverse items-center gap-1.5 bg-black-700 border-none rounded-[8px] text-white text-xs font-hanken  px-2 py-1.5 hover:border-gold-500/80 hover:text-gold-300 transition-all shrink-0 cursor-pointer group"
+                                    className="flex flex-row-reverse items-center gap-1.5 bg-black-700 border-none rounded-[8px] text-white text-xs font-hanken px-2 py-1.5 hover:border-gold-500/80 hover:text-gold-300 transition-all shrink-0 cursor-pointer group"
                                 >
                                     <X className="size-3.5 text-white group-hover:text-gold-500 transition-colors" />
                                     <span>{label}</span>
@@ -122,7 +126,7 @@ export const ShopHeader = ({
                                     key={`price-${priceId}`}
                                     type="button"
                                     onClick={() => onRemovePrice?.(priceId)}
-                                    className="flex flex-row-reverse items-center gap-1.5 bg-black-700 border-none rounded-[8px] text-white text-xs font-hanken  px-2 py-1.5 hover:border-gold-500/80 hover:text-gold-300 transition-all shrink-0 cursor-pointer group"
+                                    className="flex flex-row-reverse items-center gap-1.5 bg-black-700 border-none rounded-[8px] text-white text-xs font-hanken px-2 py-1.5 hover:border-gold-500/80 hover:text-gold-300 transition-all shrink-0 cursor-pointer group"
                                 >
                                     <X className="size-3.5 text-white group-hover:text-gold-500 transition-colors" />
                                     <span>{label}</span>
@@ -145,3 +149,5 @@ export const ShopHeader = ({
         </div>
     );
 };
+
+export default ShopHeader;

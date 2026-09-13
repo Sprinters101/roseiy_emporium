@@ -1,8 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useAuth } from "@/context/AuthContext";
-import { ProfilePersonalInfoCard, type ProfilePersonalInfoData } from "./profile/ProfilePersonalInfoCard";
+import {
+    ProfilePersonalInfoCard,
+    type ProfilePersonalInfoData,
+} from "./profile/ProfilePersonalInfoCard";
 import { ProfilePasswordCard } from "./profile/ProfilePasswordCard";
 import { ProfileSkeleton } from "./profile/ProfileSkeleton";
+import { useGetAccountProfile } from "@/service/queries";
+import {
+    useUpdateAccountProfile,
+    useChangePassword,
+} from "@/service/mutation";
+import type { ChangePasswordPayload } from "@/service/types";
 
 export interface CustomerProfileProps {
     isLoading?: boolean;
@@ -12,68 +21,51 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
     isLoading: propIsLoading,
 }) => {
     const { user, login, token } = useAuth();
+    const { data: profileResponse, isLoading: queryLoading } =
+        useGetAccountProfile();
 
-    const [simulatedLoading, setSimulatedLoading] = useState<boolean>(
-        propIsLoading === undefined
-    );
-
-    // Personal Info state (initialized from user context or design defaults)
-    const [personalInfo, setPersonalInfo] = useState<ProfilePersonalInfoData>(() => {
-        const saved = localStorage.getItem("roseiy_user_profile");
-        if (saved) {
-            try {
-                return JSON.parse(saved);
-            } catch {
-                // Ignore parse errors
-            }
-        }
-        return {
-            firstName: user?.firstName || "Roseiy",
-            lastName: user?.lastName || "Bola",
-            phoneNumber: "090 123 456 7890",
-            emailAddress: user?.email || "Rosebola@gmail.com",
-        };
-    });
-
-    const [password, setPassword] = useState<string>(() => {
-        return localStorage.getItem("roseiy_user_password") || "IamaCustomer";
-    });
-
-    useEffect(() => {
-        if (propIsLoading !== undefined) return;
-
-        const timer = setTimeout(() => {
-            setSimulatedLoading(false);
-        }, 500);
-
-        return () => clearTimeout(timer);
-    }, [propIsLoading]);
+    const updateProfileMutation = useUpdateAccountProfile();
+    const changePasswordMutation = useChangePassword();
 
     const loading =
-        propIsLoading !== undefined ? propIsLoading : simulatedLoading;
+        propIsLoading !== undefined ? propIsLoading : queryLoading;
 
     if (loading) {
         return <ProfileSkeleton />;
     }
 
-    const handleSavePersonalInfo = (updatedData: ProfilePersonalInfoData) => {
-        setPersonalInfo(updatedData);
-        localStorage.setItem("roseiy_user_profile", JSON.stringify(updatedData));
+    const profile = profileResponse?.data;
 
-        // Also update AuthContext user profile if logged in
+    const personalInfo: ProfilePersonalInfoData = {
+        firstName: profile?.firstName || user?.firstName || "",
+        lastName: profile?.lastName || user?.lastName || "",
+        phoneNumber: profile?.phoneNumber || user?.phoneNumber || "",
+        emailAddress: profile?.email || user?.email || "",
+    };
+
+    const handleSavePersonalInfo = async (
+        updatedData: ProfilePersonalInfoData,
+    ) => {
+        const res = await updateProfileMutation.mutateAsync({
+            firstName: updatedData.firstName,
+            lastName: updatedData.lastName,
+            phoneNumber: updatedData.phoneNumber,
+        });
+
+        // Sync AuthContext user profile
         if (token) {
             login(token, {
                 ...user,
-                firstName: updatedData.firstName,
-                lastName: updatedData.lastName,
-                email: updatedData.emailAddress,
+                email: personalInfo.emailAddress,
+                firstName: res?.data?.firstName || updatedData.firstName,
+                lastName: res?.data?.lastName || updatedData.lastName,
+                phoneNumber: res?.data?.phoneNumber || updatedData.phoneNumber,
             });
         }
     };
 
-    const handleSavePassword = (newPassword: string) => {
-        setPassword(newPassword);
-        localStorage.setItem("roseiy_user_password", newPassword);
+    const handleSavePassword = async (payload: ChangePasswordPayload) => {
+        await changePasswordMutation.mutateAsync(payload);
     };
 
     return (
@@ -87,15 +79,17 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
             <ProfilePersonalInfoCard
                 initialData={personalInfo}
                 onSave={handleSavePersonalInfo}
+                isLoading={updateProfileMutation.isPending}
             />
 
             {/* Password Card */}
             <ProfilePasswordCard
-                initialPassword={password}
                 onSave={handleSavePassword}
+                isLoading={changePasswordMutation.isPending}
             />
         </div>
     );
 };
 
 export default CustomerProfile;
+

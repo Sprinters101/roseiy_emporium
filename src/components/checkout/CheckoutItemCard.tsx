@@ -1,5 +1,5 @@
 import React from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Package } from "lucide-react";
 import type { CartItem } from "@/context/CartContext";
 
 export interface CheckoutItemCardProps {
@@ -33,15 +33,26 @@ export const CheckoutItemCard: React.FC<CheckoutItemCardProps> = ({
         (item.price || 0) * (item.quantity || 1)
     ).toLocaleString();
 
+    const displayImage =
+        item.image && item.image.trim() !== ""
+            ? item.image.trim()
+            : "";
+
     return (
         <div className="flex items-center justify-between gap-3 sm:gap-4 py-2 w-full">
             {/* Left: Product Image */}
             <div className="size-20 sm:size-24 bg-black-900 border border-neutral-800 rounded-lg flex items-center justify-center p-2 shrink-0 overflow-hidden shadow-sm">
-                <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-contain"
-                />
+                {displayImage ? (
+                    <img
+                        src={displayImage}
+                        alt={item.name}
+                        className="w-full h-full object-contain"
+                    />
+                ) : (
+                    <div className="flex flex-col items-center justify-center text-neutral-600">
+                        <Package className="size-6" />
+                    </div>
+                )}
             </div>
 
             {/* Middle: Info */}

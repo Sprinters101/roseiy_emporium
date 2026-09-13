@@ -1,10 +1,12 @@
+import React from "react";
 import { Link } from "react-router";
-import { Heart } from "lucide-react";
+import { Heart, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { ProductCardProps } from "@/config/types";
+import type { Product, ProductCardProps } from "@/config/types";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import type { ProductItem } from "@/service/types";
 
 export const ProductCard = ({
     product,
@@ -12,38 +14,122 @@ export const ProductCard = ({
     onToggleWishlist,
     className = "",
     isLandingPage = false,
-}: ProductCardProps) => {
-    const { cartItems, addToCart } = useCart();
+}: ProductCardProps & { product: Product | ProductItem | any }) => {
+    const { cartItems, addToCart, isAddingProduct } = useCart();
     const { isInWishlist, toggleWishlist } = useWishlist();
-    const isWishlisted = isInWishlist(product.id);
 
-    const cartItem = cartItems.find((item) => item.id === product.id);
+    // Standardize product fields across mock and live API objects
+    const resolvedId = String(
+        product.slug || product.productId || product.id || "",
+    );
+    const cartId = String(product.productId || product.id || resolvedId);
+    const resolvedName = product.name || "Product";
+
+    const isWishlisted = isInWishlist(cartId);
+    const cartItem = cartItems.find(
+        (item) => item.id === cartId || item.id === resolvedId,
+    );
     const inCartQty = cartItem ? cartItem.quantity : 0;
 
-    const maxStock =
+    // Resolve primary image
+    const resolvedImage =
+        product.image ||
+        product.images?.find((img: any) => img.isPrimary)?.imageUrl ||
+        product.images?.[0]?.imageUrl ||
+        "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png";
+
+    // Resolve category name
+    const resolvedCategory =
+        typeof product.category === "object" && product.category !== null
+            ? product.category.name
+            : product.category || "";
+
+    // Resolve price
+    const resolvedPrice =
+        product.price !== undefined && typeof product.price === "number"
+            ? product.price
+            : product.sellingUnits?.[0]?.price
+              ? Number(product.sellingUnits[0].price)
+              : 0;
+
+    // Resolve stock metrics
+    const pieceUnit = product.sellingUnits?.find((u: any) =>
+        u.name?.toLowerCase().includes("piece"),
+    );
+    const cartonUnit = product.sellingUnits?.find(
+        (u: any) =>
+            u.name?.toLowerCase().includes("carton") ||
+            u.name?.toLowerCase().includes("case"),
+    );
+    const primaryUnit = product.sellingUnits?.[0];
+
+    const piecesLeft =
         product.piecesLeft !== undefined
             ? product.piecesLeft
-            : product.casesLeft !== undefined
-            ? product.casesLeft
-            : Infinity;
+            : pieceUnit
+              ? pieceUnit.stock
+              : primaryUnit
+                ? primaryUnit.stock
+                : undefined;
 
-    const isOutOfStock = maxStock <= 0 || inCartQty >= maxStock;
+    const casesLeft =
+        product.casesLeft !== undefined
+            ? product.casesLeft
+            : cartonUnit
+              ? cartonUnit.stock
+              : undefined;
+
+    const maxStock =
+        piecesLeft !== undefined
+            ? piecesLeft
+            : casesLeft !== undefined
+              ? casesLeft
+              : Infinity;
+
+    const isAdding =
+        isAddingProduct(cartId) ||
+        isAddingProduct(resolvedId) ||
+        isAddingProduct(product.productId || "") ||
+        isAddingProduct(product.slug || "");
+
+    const isOutOfStock = maxStock <= 0;
+    const isMaxInCart = inCartQty >= maxStock;
+    const isButtonDisabled = isOutOfStock || isMaxInCart || isAdding;
+
+    // Normalized product object for context handlers
+    const normalizedProduct: Product & {
+        sellingUnits?: any[];
+        productId?: string;
+        slug?: string;
+    } = {
+        id: cartId,
+        productId: product.productId,
+        slug: product.slug,
+        name: resolvedName,
+        category: resolvedCategory,
+        volume: product.volume || "75cl",
+        piecesLeft,
+        casesLeft,
+        price: resolvedPrice,
+        image: resolvedImage,
+        sellingUnits: product.sellingUnits,
+    };
 
     const handleWishlist = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        toggleWishlist(product);
-        if (onToggleWishlist) onToggleWishlist(product.id);
+        toggleWishlist(normalizedProduct);
+        if (onToggleWishlist) onToggleWishlist(cartId);
     };
 
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        if (isOutOfStock) return;
+        if (isOutOfStock || isMaxInCart) return;
         if (onAddToCart) {
-            onAddToCart(product);
+            onAddToCart(normalizedProduct);
         } else {
-            addToCart(product);
+            addToCart(normalizedProduct);
         }
     };
 
@@ -53,7 +139,7 @@ export const ProductCard = ({
         currency: "NGN",
         maximumFractionDigits: 0,
     })
-        .format(product.price)
+        .format(resolvedPrice)
         .replace("NGN", "₦");
 
     return (
@@ -88,7 +174,7 @@ export const ProductCard = ({
 
             {/* Product Image Link */}
             <Link
-                to={`/product/${product.id}`}
+                to={`/product/${resolvedId}`}
                 className={cn("block ", isLandingPage && "mt-6.25")}
             >
                 <div
@@ -98,8 +184,8 @@ export const ProductCard = ({
                     )}
                 >
                     <img
-                        src={product.image}
-                        alt={product.name}
+                        src={resolvedImage}
+                        alt={resolvedName}
                         className="max-h-full w-auto object-contain transition-transform duration-500 ease-out group-hover:scale-105"
                     />
                 </div>
@@ -113,17 +199,17 @@ export const ProductCard = ({
                 )}
             >
                 <span className="text-[10px] font-medium tracking-widest text-gold-500 uppercase font-hanken">
-                    {product.category}
+                    {resolvedCategory}
                 </span>
 
-                <Link to={`/product/${product.id}`} className="block mt-0">
+                <Link to={`/product/${resolvedId}`} className="block mt-0">
                     <h3
                         className={cn(
                             "text-white font-playfair text-hg-c3 md:text-base font-bold leading-snug line-clamp-2 min-h-8.5 md:min-h-10.5  transition-colors",
                             isLandingPage && "md:text-[1.5625rem] md:min-h-14",
                         )}
                     >
-                        {product.name}
+                        {resolvedName}
                     </h3>
                 </Link>
 
@@ -133,11 +219,9 @@ export const ProductCard = ({
                         isLandingPage && "md:text-[0.625rem] mt-1.25",
                     )}
                 >
-                    {product.volume}
-                    {product.piecesLeft !== undefined &&
-                        ` • ${product.piecesLeft} Pieces Left`}
-                    {product.casesLeft !== undefined &&
-                        ` • ${product.casesLeft} Cases Left`}
+                    {product.volume || "75cl"}
+                    {piecesLeft !== undefined && ` • ${piecesLeft} Pieces Left`}
+                    {casesLeft !== undefined && ` • ${casesLeft} Cases Left`}
                 </p>
 
                 <div className={cn("mt-0", isLandingPage && "mt-2")}>
@@ -149,21 +233,40 @@ export const ProductCard = ({
 
             {/* Add to Cart CTA */}
             <div className={cn("mt-4", isLandingPage && "mt-2")}>
-                <Button
-                    type="button"
-                    disabled={isOutOfStock}
-                    onClick={handleAddToCart}
-                    className={cn(
-                        "w-full h-10 md:h-11 font-hanken font-medium text-body-c1 rounded-sm transition-all duration-300",
-                        isLandingPage && "h-12 md:text-body-b3",
-                        isOutOfStock
-                            ? "bg-neutral-800/80 border border-neutral-800 text-neutral-500 cursor-not-allowed hover:bg-neutral-800 hover:text-neutral-500"
-                            : "bg-[#1A1A1A] hover:bg-white/20 border border-white text-white cursor-pointer",
-                    )}
-                >
-                    {isOutOfStock ? "Out of Stock" : "Add to Cart"}
-                </Button>
+                {(() => {
+                    return (
+                        <Button
+                            type="button"
+                            disabled={isButtonDisabled}
+                            onClick={handleAddToCart}
+                            className={cn(
+                                "w-full h-10 md:h-11 font-hanken font-medium text-body-c1 rounded-sm transition-all duration-300",
+                                isLandingPage && "h-12 md:text-body-b3",
+                                isAdding
+                                    ? "bg-neutral-800/80 border border-neutral-700 text-neutral-300 cursor-not-allowed"
+                                    : isButtonDisabled
+                                      ? "bg-neutral-800/80 border border-neutral-800 text-neutral-500 cursor-not-allowed hover:bg-neutral-800 hover:text-neutral-500"
+                                      : "bg-[#1A1A1A] hover:bg-white/20 border border-white text-white cursor-pointer",
+                            )}
+                        >
+                            {isAdding ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <Loader2 className="size-4 animate-spin text-gold-500" />
+                                    <span>Adding...</span>
+                                </span>
+                            ) : isOutOfStock ? (
+                                "Out of Stock"
+                            ) : isMaxInCart ? (
+                                "Max in Cart"
+                            ) : (
+                                "Add to Cart"
+                            )}
+                        </Button>
+                    );
+                })()}
             </div>
         </div>
     );
 };
+
+export default ProductCard;

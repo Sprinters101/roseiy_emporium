@@ -67,7 +67,7 @@ export const CustomCheckbox: React.FC<CustomCheckboxProps> = ({
                             : "text-neutral-500",
                     )}
                 >
-                    ({count.toString().padStart(2, "0")})
+                    ({typeof count === "number" ? count.toString().padStart(2, "0") : count})
                 </span>
             )}
         </label>

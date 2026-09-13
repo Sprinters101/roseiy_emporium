@@ -6,6 +6,7 @@ import {
     ShoppingBag,
     Plus,
     Minus,
+    Loader2,
 } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
@@ -21,7 +22,13 @@ interface WishlistItemCardProps {
 }
 
 const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
-    const { addToCart, updateQuantity, removeFromCart, cartItems } = useCart();
+    const {
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        cartItems,
+        isAddingProduct,
+    } = useCart();
 
     const cartItem = cartItems.find((ci) => ci.id === item.id);
     const inCartQty = cartItem ? cartItem.quantity : 0;
@@ -169,19 +176,41 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
                                 </button>
                             </div>
                         ) : (
-                            /* Add to Cart Button */
-                            <button
-                                type="button"
-                                disabled={isOutOfStock}
-                                onClick={handleAddToCart}
-                                className={`h-8 px-4 font-hanken font-medium text-xs rounded-sm border transition-all duration-300 cursor-pointer shadow-md ${
-                                    isOutOfStock
-                                        ? "border-neutral-800 bg-neutral-900/60 text-neutral-500 cursor-not-allowed"
-                                        : "border-white text-white bg-transparent hover:bg-white hover:text-black active:scale-95"
-                                }`}
-                            >
-                                {isOutOfStock ? "Out of Stock" : "Add to Cart"}
-                            </button>
+                            /* Add to Cart Button (Mobile) */
+                            (() => {
+                                const isAdding =
+                                    isAddingProduct(item.id) ||
+                                    isAddingProduct(
+                                        (item as any).productId || "",
+                                    ) ||
+                                    isAddingProduct((item as any).slug || "");
+
+                                return (
+                                    <button
+                                        type="button"
+                                        disabled={isOutOfStock || isAdding}
+                                        onClick={handleAddToCart}
+                                        className={`h-8 px-4 font-hanken font-medium text-xs rounded-sm border transition-all duration-300 cursor-pointer shadow-md flex items-center gap-1.5 ${
+                                            isAdding
+                                                ? "border-neutral-700 bg-neutral-800 text-neutral-300 cursor-not-allowed"
+                                                : isOutOfStock
+                                                ? "border-neutral-800 bg-neutral-900/60 text-neutral-500 cursor-not-allowed"
+                                                : "border-white text-white bg-transparent hover:bg-white hover:text-black active:scale-95"
+                                        }`}
+                                    >
+                                        {isAdding ? (
+                                            <>
+                                                <Loader2 className="size-3 animate-spin text-gold-500" />
+                                                <span>Adding...</span>
+                                            </>
+                                        ) : isOutOfStock ? (
+                                            "Out of Stock"
+                                        ) : (
+                                            "Add to Cart"
+                                        )}
+                                    </button>
+                                );
+                            })()
                         )}
                     </div>
                 </div>
@@ -264,19 +293,41 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
                             </button>
                         </div>
                     ) : (
-                        /* Add to Cart Button */
-                        <button
-                            type="button"
-                            disabled={isOutOfStock}
-                            onClick={handleAddToCart}
-                            className={`h-12 px-8 font-hanken font-medium text-sm rounded-sm border transition-all duration-300 cursor-pointer shadow-md ${
-                                isOutOfStock
-                                    ? "border-neutral-800 bg-neutral-900/60 text-neutral-500 cursor-not-allowed"
-                                    : "border-white text-white bg-transparent hover:bg-white hover:text-black"
-                            }`}
-                        >
-                            {isOutOfStock ? "Out of Stock" : "Add to Cart"}
-                        </button>
+                        /* Add to Cart Button (Desktop) */
+                        (() => {
+                            const isAdding =
+                                isAddingProduct(item.id) ||
+                                isAddingProduct(
+                                    (item as any).productId || "",
+                                ) ||
+                                isAddingProduct((item as any).slug || "");
+
+                            return (
+                                <button
+                                    type="button"
+                                    disabled={isOutOfStock || isAdding}
+                                    onClick={handleAddToCart}
+                                    className={`h-12 px-8 font-hanken font-medium text-sm rounded-sm border transition-all duration-300 cursor-pointer shadow-md flex items-center gap-2 ${
+                                        isAdding
+                                            ? "border-neutral-700 bg-neutral-800 text-neutral-300 cursor-not-allowed"
+                                            : isOutOfStock
+                                            ? "border-neutral-800 bg-neutral-900/60 text-neutral-500 cursor-not-allowed"
+                                            : "border-white text-white bg-transparent hover:bg-white hover:text-black"
+                                    }`}
+                                >
+                                    {isAdding ? (
+                                        <>
+                                            <Loader2 className="size-4 animate-spin text-gold-500" />
+                                            <span>Adding...</span>
+                                        </>
+                                    ) : isOutOfStock ? (
+                                        "Out of Stock"
+                                    ) : (
+                                        "Add to Cart"
+                                    )}
+                                </button>
+                            );
+                        })()
                     )}
                 </div>
             </div>

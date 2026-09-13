@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { DashboardStatsCard } from "./DashboardStatsCard";
 import { RecentOrdersList } from "./RecentOrdersList";
 import { CustomerOverviewSkeleton } from "./CustomerOverviewSkeleton";
+import { useGetCustomerOrders, useGetAddresses } from "@/service/queries";
+import type { OrderSummaryItem, AddressResponseItem } from "@/service/types";
 
 export interface CustomerOverviewProps {
     isLoading?: boolean;
@@ -10,23 +12,61 @@ export interface CustomerOverviewProps {
 export const CustomerOverview: React.FC<CustomerOverviewProps> = ({
     isLoading: propIsLoading,
 }) => {
-    const [simulatedLoading, setSimulatedLoading] = useState<boolean>(
-        propIsLoading === undefined,
-    );
-
-    useEffect(() => {
-        if (propIsLoading !== undefined) return;
-
-        // Simulate data fetching delay so skeleton displays before data populates
-        const timer = setTimeout(() => {
-            setSimulatedLoading(false);
-        }, 600);
-
-        return () => clearTimeout(timer);
-    }, [propIsLoading]);
+    const { data: ordersData, isLoading: isOrdersLoading } =
+        useGetCustomerOrders();
+    const { data: addressesData, isLoading: isAddressesLoading } =
+        useGetAddresses();
 
     const loading =
-        propIsLoading !== undefined ? propIsLoading : simulatedLoading;
+        propIsLoading !== undefined
+            ? propIsLoading
+            : isOrdersLoading || isAddressesLoading;
+
+    const orders: OrderSummaryItem[] = React.useMemo(() => {
+        if (!ordersData?.data) return [];
+        if (Array.isArray(ordersData.data)) return ordersData.data;
+        if (
+            Array.isArray(
+                (ordersData.data as { orders?: OrderSummaryItem[] }).orders,
+            )
+        ) {
+            return (
+                (ordersData.data as { orders: OrderSummaryItem[] }).orders || []
+            );
+        }
+        return [];
+    }, [ordersData]);
+
+    const addressesCount: number = React.useMemo(() => {
+        if (!addressesData?.data) return 0;
+        if (Array.isArray(addressesData.data)) return addressesData.data.length;
+        if (
+            Array.isArray(
+                (addressesData.data as { addresses?: AddressResponseItem[] })
+                    .addresses,
+            )
+        ) {
+            return (
+                (addressesData.data as { addresses: AddressResponseItem[] })
+                    .addresses.length || 0
+            );
+        }
+        return 0;
+    }, [addressesData]);
+
+    const activeOrdersCount = orders.filter(
+        (o) =>
+            o.status === "processing" ||
+            o.status === "shipped" ||
+            o.status === "confirmed" ||
+            o.status === "in_transit" ||
+            o.status === "pending" ||
+            o.status === "placed",
+    ).length;
+
+    const completedOrdersCount = orders.filter(
+        (o) => o.status === "delivered" || o.status === "completed",
+    ).length;
 
     if (loading) {
         return <CustomerOverviewSkeleton />;
@@ -41,13 +81,13 @@ export const CustomerOverview: React.FC<CustomerOverviewProps> = ({
 
             {/* Top Stats Cards Row */}
             <DashboardStatsCard
-                activeOrdersCount={1}
-                completedOrdersCount={15}
-                savedAddressesCount={3}
+                activeOrdersCount={activeOrdersCount}
+                completedOrdersCount={completedOrdersCount}
+                savedAddressesCount={addressesCount}
             />
 
             {/* Recent Orders List Card Container */}
-            <RecentOrdersList />
+            <RecentOrdersList orders={orders} isLoading={false} />
         </div>
     );
 };

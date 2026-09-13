@@ -2,20 +2,159 @@ import React from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { ArrowLeft, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { OrderDetailsItemRow } from "./orders/OrderDetailsItemRow";
 import { OrderDetailsDeliveryInfo } from "./orders/OrderDetailsDeliveryInfo";
-import { DEMO_ORDER_DETAILS, type OrderDetailsData } from "./orders/types";
+import { useGetSingleOrder } from "@/service/queries";
+import type { OrderDetailsData, OrderItemDetail } from "@/service/types";
+import { extractImageFromObject } from "@/context/CartContext";
 
-interface CustomerOrderDetailsProps {
-    order?: OrderDetailsData;
-}
-
-export const CustomerOrderDetails: React.FC<CustomerOrderDetailsProps> = ({
-    order = DEMO_ORDER_DETAILS,
-}) => {
+export const CustomerOrderDetails: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const orderId = searchParams.get("id") || order.orderNumber;
+    const orderId = searchParams.get("id") || "";
+
+    const { data: orderData, isLoading } = useGetSingleOrder(orderId, {
+        enabled: Boolean(orderId),
+    });
+
+    const rawData = orderData?.data;
+    const order: OrderDetailsData | undefined =
+        rawData && typeof rawData === "object" && "order" in rawData && rawData.order
+            ? (rawData as { order: OrderDetailsData }).order
+            : (rawData as OrderDetailsData | undefined);
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col gap-6 w-full">
+                {/* Header Skeleton */}
+                <div className="flex items-center gap-3.5">
+                    <Skeleton className="size-8 rounded-full bg-neutral-800" />
+                    <Skeleton className="h-8 w-40 bg-neutral-800" />
+                </div>
+
+                {/* Card Skeleton */}
+                <div className="bg-black-700 rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-neutral-800/60 shadow-xl flex flex-col gap-6 w-full">
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3.5">
+                            <Skeleton className="size-11 rounded-full bg-neutral-800" />
+                            <div className="flex flex-col gap-2">
+                                <Skeleton className="h-5 w-36 bg-neutral-800" />
+                                <Skeleton className="h-4 w-28 bg-neutral-800" />
+                            </div>
+                        </div>
+                        <Skeleton className="h-10 w-32 bg-neutral-800 rounded-sm" />
+                    </div>
+
+                    <div className="flex flex-col gap-4 pt-4">
+                        {[1, 2, 3].map((i) => (
+                            <div
+                                key={i}
+                                className="flex items-center justify-between gap-4 py-3"
+                            >
+                                <div className="flex items-center gap-3.5">
+                                    <Skeleton className="size-16 rounded-lg bg-neutral-800" />
+                                    <div className="flex flex-col gap-2">
+                                        <Skeleton className="h-3 w-16 bg-neutral-800" />
+                                        <Skeleton className="h-4 w-40 bg-neutral-800" />
+                                        <Skeleton className="h-3 w-24 bg-neutral-800" />
+                                    </div>
+                                </div>
+                                <Skeleton className="h-5 w-24 bg-neutral-800" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Delivery Info Skeleton */}
+                <div className="bg-black-700 rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-neutral-800/60 shadow-xl flex flex-col gap-4 w-full">
+                    <Skeleton className="h-5 w-44 bg-neutral-800" />
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3.5">
+                            <Skeleton className="size-10 rounded-full bg-neutral-800" />
+                            <div className="flex flex-col gap-2">
+                                <Skeleton className="h-4 w-32 bg-neutral-800" />
+                                <Skeleton className="h-3 w-56 bg-neutral-800" />
+                            </div>
+                        </div>
+                        <Skeleton className="h-5 w-16 bg-neutral-800" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    const orderNumber = order?.orderNumber || orderId || "RE-2026";
+    const rawDate = order?.paidAt || order?.createdAt || order?.placedAt;
+    const placedDate = rawDate
+        ? new Date(rawDate).toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+          })
+        : "Recent";
+
+    const itemsCount =
+        order?.items?.reduce((sum: number, item: OrderItemDetail) => sum + (item.quantity || 1), 0) ||
+        order?.items?.length ||
+        0;
+
+    const formattedTotal =
+        typeof order?.total === "number"
+            ? `₦${order.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            : typeof order?.total === "string" && order.total.startsWith("₦")
+              ? order.total
+              : `₦${Number(order?.total || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    const items = (order?.items || []).map((item: OrderItemDetail, idx: number) => ({
+        id: item.orderItemId || `item-${idx}`,
+        category: item.sellingUnitName ? item.sellingUnitName.toUpperCase() : "PIECE",
+        name: item.productName || item.name || "Selected Item",
+        volume: item.volume || (item.sellingUnitName ? item.sellingUnitName : "75cl"),
+        quantityText: `Quantity: ${item.quantity} ${item.sellingUnitName || (item.quantity === 1 ? "Piece" : "Pieces")}`,
+        price:
+            typeof item.lineTotal === "number"
+                ? `₦${item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : typeof item.lineTotal === "string" && item.lineTotal.startsWith("₦")
+                  ? item.lineTotal
+                  : `₦${Number(item.lineTotal || (Number(item.unitPrice || item.price || 0) * (item.quantity || 1))).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        image: extractImageFromObject(item) || "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png",
+    }));
+
+    const fullStreetAddress =
+        [
+            order?.addressLine1,
+            order?.addressLine2,
+            order?.city,
+            order?.state,
+            order?.postalCode,
+            order?.country,
+        ]
+            .filter(Boolean)
+            .join(", ") ||
+        (order?.shippingAddress
+            ? [
+                  order.shippingAddress.addressLine1,
+                  order.shippingAddress.addressLine2,
+                  order.shippingAddress.city,
+                  order.shippingAddress.state,
+                  order.shippingAddress.country,
+              ]
+                  .filter(Boolean)
+                  .join(", ")
+            : "Delivery Address");
+
+    const deliveryFeeFormatted =
+        order?.deliveryFee === 0 ||
+        order?.deliveryFee === "0.00" ||
+        order?.deliveryFee === "0"
+            ? "FREE"
+            : typeof order?.deliveryFee === "number"
+              ? `₦${order.deliveryFee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              : typeof order?.deliveryFee === "string" &&
+                  order.deliveryFee.startsWith("₦")
+                ? order.deliveryFee
+                : `₦${Number(order?.deliveryFee || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     return (
         <div className="flex flex-col gap-6 w-full">
@@ -47,13 +186,14 @@ export const CustomerOrderDetails: React.FC<CustomerOrderDetailsProps> = ({
 
                         <div className="flex flex-col">
                             <span className="text-[0.8125rem] sm:text-xl font-bold font-hanken text-white">
-                                Order {orderId}
+                                Order {orderNumber}
                             </span>
                             <span className="text-[0.625rem] sm:text-sm text-black-200 font-hanken mt-0.5">
-                                Placed on {order.placedDate}
+                                Placed on {placedDate}
                             </span>
                             <span className="text-[0.625rem] sm:text-sm text-neutral-400 font-hanken mt-0.5">
-                                {order.itemsCount} Items
+                                {itemsCount}{" "}
+                                {itemsCount === 1 ? "Item" : "Items"}
                             </span>
                         </div>
                     </div>
@@ -62,9 +202,9 @@ export const CustomerOrderDetails: React.FC<CustomerOrderDetailsProps> = ({
                     <Button
                         type="button"
                         onClick={() =>
-                            navigate(`/dashboard/track-order?id=${orderId}`)
+                            navigate(`/dashboard/track-order?id=${orderNumber}`)
                         }
-                        className="bg-gold-gradient md:h-12 h-7 text-black-900 font-semibold font-hanken text-[0.5rem] sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-sm hover:opacity-90 transition-opacity cursor-pointer border-none w-full max-w-20 md:max-w-49.5 "
+                        className="bg-gold-gradient md:h-12 h-7 text-black-900 font-semibold font-hanken text-[0.5rem] sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-sm hover:opacity-90 transition-opacity cursor-pointer border-none w-full max-w-20 md:max-w-49.5"
                     >
                         Track Order
                     </Button>
@@ -77,24 +217,30 @@ export const CustomerOrderDetails: React.FC<CustomerOrderDetailsProps> = ({
 
                 {/* Items List */}
                 <div className="flex flex-col w-full">
-                    {order.items.map((item) => (
-                        <OrderDetailsItemRow key={item.id} item={item} />
-                    ))}
+                    {items.length === 0 ? (
+                        <div className="py-6 text-center text-neutral-400 text-sm font-hanken">
+                            No items found in this order.
+                        </div>
+                    ) : (
+                        items.map((item: (typeof items)[0]) => (
+                            <OrderDetailsItemRow key={item.id} item={item} />
+                        ))
+                    )}
                 </div>
 
                 {/* Bottom Total Amount */}
                 <div className="flex items-center justify-end pt-2">
                     <span className="font-playfair font-bold text-base sm:text-xl text-gold-400">
-                        Total: {order.totalAmount}
+                        Total: {formattedTotal}
                     </span>
                 </div>
             </div>
 
             {/* Delivery Information Card */}
             <OrderDetailsDeliveryInfo
-                title={order.shippingAddress.title}
-                address={order.shippingAddress.address}
-                deliveryFee={order.shippingAddress.deliveryFee}
+                title="Shipping Address"
+                address={fullStreetAddress}
+                deliveryFee={deliveryFeeFormatted}
             />
         </div>
     );

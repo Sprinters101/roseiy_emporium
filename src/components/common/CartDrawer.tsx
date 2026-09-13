@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Trash2, Plus, Minus, X } from "lucide-react";
+import { Trash2, Plus, Minus, X, Package } from "lucide-react";
 import {
     Sheet,
     SheetContent,
@@ -11,11 +11,54 @@ import {
 import { Link, useNavigate } from "react-router";
 import { useCart } from "@/context/CartContext";
 import { ShopEmptyState } from "@/components/shop/ShopEmptyState";
+import { toast } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 
 interface CartDrawerProps {
     children: React.ReactNode;
 }
+
+export const CartItemSkeleton = () => {
+    return (
+        <div className="bg-[#141415] border-none rounded-2xl flex gap-4 relative items-stretch">
+            {/* Left Product Image Box Skeleton */}
+            <div className="w-28 sm:w-36 md:w-44 h-36 sm:h-44 md:h-52 bg-black-900 rounded-xl flex items-center justify-center shrink-0 overflow-hidden p-2.5">
+                <div className="w-16 sm:w-20 md:w-28 h-28 sm:h-36 md:h-44 bg-neutral-800/70 rounded-lg animate-pulse" />
+            </div>
+
+            {/* Middle Details Column Skeleton */}
+            <div className="flex-1 min-w-0 pr-8 space-y-2 py-2">
+                <div className="h-3 w-16 bg-gold-500/20 rounded animate-pulse" />
+                <div className="h-5 w-40 md:w-56 bg-neutral-800 rounded animate-pulse" />
+                <div className="h-3 w-28 bg-neutral-800/60 rounded animate-pulse" />
+                <div className="h-6 w-24 bg-gold-500/20 rounded animate-pulse mt-2" />
+
+                {/* Counter 1 skeleton */}
+                <div className="pt-2">
+                    <div className="h-2.5 w-24 bg-neutral-800/60 rounded animate-pulse" />
+                    <div className="flex items-center gap-2 mt-1.5">
+                        <div className="size-4 md:size-6 rounded bg-neutral-800 animate-pulse" />
+                        <div className="w-8 h-4 bg-neutral-800/60 rounded animate-pulse" />
+                        <div className="size-4 md:size-6 rounded bg-neutral-800 animate-pulse" />
+                    </div>
+                </div>
+
+                {/* Counter 2 skeleton */}
+                <div className="pt-1">
+                    <div className="h-2.5 w-24 bg-neutral-800/60 rounded animate-pulse" />
+                    <div className="flex items-center gap-2 mt-1.5">
+                        <div className="size-4 md:size-6 rounded bg-neutral-800 animate-pulse" />
+                        <div className="w-8 h-4 bg-neutral-800/60 rounded animate-pulse" />
+                        <div className="size-4 md:size-6 rounded bg-neutral-800 animate-pulse" />
+                    </div>
+                </div>
+            </div>
+
+            {/* Trash button skeleton */}
+            <div className="size-6 md:size-9 rounded-full bg-black-900 absolute top-4 right-4 animate-pulse" />
+        </div>
+    );
+};
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
     const navigate = useNavigate();
@@ -26,6 +69,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
         cartItems,
         totalItems,
         subtotal,
+        isCartFetching,
         updateUnitQuantities,
         removeFromCart,
     } = useCart();
@@ -99,7 +143,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
 
                 {/* Scrollable Body Content */}
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 space-y-4">
-                    {cartItems.length === 0 ? (
+                    {isCartFetching && cartItems.length === 0 ? (
+                        <>
+                            <CartItemSkeleton />
+                            <CartItemSkeleton />
+                        </>
+                    ) : cartItems.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full py-8">
                             <ShopEmptyState
                                 isCartEmpty={true}
@@ -113,69 +162,129 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                         cartItems.map((item) => {
                             const pQty = item.piecesQty ?? item.quantity ?? 1;
                             const cQty = item.casesQty ?? 0;
-                            const piecesLeft = item.piecesLeft ?? Infinity;
-                            const casesLeft = item.casesLeft ?? Infinity;
+                            const piecesLeft =
+                                item.piecesLeft !== undefined ? item.piecesLeft : 0;
+                            const casesLeft =
+                                item.casesLeft !== undefined ? item.casesLeft : 0;
 
-                            const categoryName = item.category || "Champagne";
-                            const volumeText = item.volume || "75cl";
+                            const isPieceOutOfStock = piecesLeft <= 0;
+                            const isCaseOutOfStock = casesLeft <= 0;
+                            const isPieceMaxInStock =
+                                piecesLeft > 0 && pQty >= piecesLeft;
+                            const isCaseMaxInStock =
+                                casesLeft > 0 && cQty >= casesLeft;
+
+                            const categoryName = item.category || "";
+                            const volumeText = item.volume || "";
+
+                            const cartonUnit = item.sellingUnits?.find(
+                                (u: any) =>
+                                    u.name?.toLowerCase().includes("carton") ||
+                                    u.name?.toLowerCase().includes("case"),
+                            );
+                            const piecePrice = item.price;
+                            const casePrice =
+                                item.casePrice ||
+                                (cartonUnit ? Number(cartonUnit.price) : piecePrice);
+                            const itemTotal =
+                                pQty * piecePrice + cQty * casePrice;
+
+                            const displayImage =
+                                item.image && item.image.trim() !== ""
+                                    ? item.image.trim()
+                                    : "";
 
                             return (
                                 <div
                                     key={item.id}
-                                    className="bsg-[#141415] border-none rounded-2xl  flex gap-4 relative items-stretch hover:border-neutral-700 transition-all md:max-h-56"
+                                    className="bg-[#141415] border-none rounded-2xl flex gap-4 relative items-stretch hover:border-neutral-700 transition-all"
                                 >
                                     {/* Left Product Image Thumbnail Box */}
-                                    <div className="w-full h-41.25 md:h-56 md:max-w-56 max-w-36.25 max-h-41.25 md:max-h-56  min-h-full  bg-black-900 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
-                                        <img
-                                            src={item.image}
-                                            alt={item.name}
-                                            className="h-full max-h-26.25 md:max-h-40 w-auto object-contain drop-shadow-md"
-                                        />
+                                    <div className="w-28 sm:w-36 md:w-44 h-36 sm:h-44 md:h-52 bg-black-900 rounded-xl flex items-center justify-center shrink-0 overflow-hidden p-2.5">
+                                        {displayImage ? (
+                                            <img
+                                                src={displayImage}
+                                                alt={item.name}
+                                                className="max-h-full max-w-full object-contain drop-shadow-md"
+                                            />
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center text-neutral-600 gap-1">
+                                                <Package className="size-8" />
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Middle Details Column */}
                                     <div className="flex-1 min-w-0 pr-8 ">
                                         <div>
-                                            <span className="text-gold-500 leading-0 font-hanken text-[0.5rem] md:text-[0.625rem] sm:text-[0.8125rem] font-semibold tracking-widest uppercase">
-                                                {categoryName.toUpperCase()}
-                                            </span>
+                                            {categoryName ? (
+                                                <span className="text-gold-500 leading-0 font-hanken text-[0.5rem] md:text-[0.625rem] sm:text-[0.8125rem] font-semibold tracking-widest uppercase">
+                                                    {categoryName.toUpperCase()}
+                                                </span>
+                                            ) : null}
 
                                             <h4 className="text-[0.8125rem] leading-[120%] sm:text-base md:text-hg-c1 font-playfair font-bold text-white  mt-0.5  line clamp-2 md:line-clamp-2 max-w-28.5 md:max-w-59.5">
                                                 {item.name}
                                             </h4>
 
                                             <p className="text-[0.5rem] md:text-[0.625rem]  text-black-200 font-hanken mt-0.5">
-                                                {volumeText} • Quantity:{" "}
+                                                {volumeText ? `${volumeText} • ` : ""}Quantity:{" "}
                                                 {getQuantitySummary(item)}
                                             </p>
 
                                             <div className="mt-1">
                                                 <span className="text-gold-500 leading-0 leading font-playfair text-base sm:text-xl md:text-[1.5625rem] font-bold">
-                                                    {formatPrice(
-                                                        item.price *
-                                                            item.quantity,
-                                                    )}
+                                                    {formatPrice(itemTotal)}
                                                 </span>
                                             </div>
                                         </div>
 
                                         {/* Counter 1: QUANTITY IN PIECES */}
                                         <div className="pt-2 md:pt-3">
-                                            <label className="block text-white text-[0.375rem] md:text-[0.625rem] font-semibold tracking-wider uppercase font-hanken">
-                                                QUANTITY IN PIECES
-                                            </label>
+                                            <div className="flex items-center justify-between">
+                                                <label className="block text-white text-[0.375rem] md:text-[0.625rem] font-semibold tracking-wider uppercase font-hanken">
+                                                    QUANTITY IN PIECES
+                                                </label>
+                                                {piecesLeft !== Infinity && (
+                                                    <span className="text-[0.5rem] md:text-[0.625rem] font-hanken">
+                                                        {isPieceOutOfStock ? (
+                                                            <span className="text-red-400 font-medium">
+                                                                Out of stock
+                                                            </span>
+                                                        ) : isPieceMaxInStock ? (
+                                                            <span className="text-amber-400 font-medium">
+                                                                Max in Stock ({piecesLeft})
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-neutral-400">
+                                                                {piecesLeft} available
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </div>
                                             <div className="flex items-center gap-2 mt-1 md:mt-2">
                                                 <button
                                                     type="button"
-                                                    onClick={() =>
-                                                        updateUnitQuantities(
-                                                            item.id,
-                                                            pQty - 1,
-                                                            cQty,
-                                                        )
-                                                    }
-                                                    disabled={pQty <= 0}
-                                                    className="size-4 md:size-6 rounded border border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                                    onClick={() => {
+                                                        if (isPieceOutOfStock && pQty <= 0) {
+                                                            toast.error("Pieces are out of stock");
+                                                            return;
+                                                        }
+                                                        if (pQty > 0) {
+                                                            updateUnitQuantities(
+                                                                item.id,
+                                                                pQty - 1,
+                                                                cQty,
+                                                            );
+                                                        }
+                                                    }}
+                                                    className={cn(
+                                                        "size-4 md:size-6 rounded border flex items-center justify-center transition-all",
+                                                        pQty <= 0
+                                                            ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
+                                                            : "border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 cursor-pointer",
+                                                    )}
                                                     aria-label="Decrease pieces quantity"
                                                 >
                                                     <Minus className="size-3" />
@@ -188,16 +297,33 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                 <button
                                                     type="button"
                                                     disabled={
+                                                        isPieceMaxInStock ||
+                                                        isPieceOutOfStock ||
                                                         pQty >= piecesLeft
                                                     }
-                                                    onClick={() =>
+                                                    onClick={() => {
+                                                        if (isPieceOutOfStock) {
+                                                            toast.error("Pieces are out of stock");
+                                                            return;
+                                                        }
+                                                        if (isPieceMaxInStock || pQty >= piecesLeft) {
+                                                            toast.warning(
+                                                                `Maximum available pieces in stock is ${piecesLeft}`,
+                                                            );
+                                                            return;
+                                                        }
                                                         updateUnitQuantities(
                                                             item.id,
                                                             pQty + 1,
                                                             cQty,
-                                                        )
-                                                    }
-                                                    className="size-4 md:size-6 rounded border border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                                        );
+                                                    }}
+                                                    className={cn(
+                                                        "size-4 md:size-6 rounded border flex items-center justify-center transition-all",
+                                                        isPieceMaxInStock || isPieceOutOfStock || pQty >= piecesLeft
+                                                            ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
+                                                            : "border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 cursor-pointer",
+                                                    )}
                                                     aria-label="Increase pieces quantity"
                                                 >
                                                     <Plus className="size-3" />
@@ -207,21 +333,49 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
 
                                         {/* Counter 2: QUANTITY IN CASES */}
                                         <div className="pt-2 md:pt-3">
-                                            <label className="block text-white text-[0.375rem] md:text-[0.625rem] font-semibold tracking-wider uppercase font-hanken">
-                                                QUANTITY IN CASES
-                                            </label>
+                                            <div className="flex items-center justify-between">
+                                                <label className="block text-white text-[0.375rem] md:text-[0.625rem] font-semibold tracking-wider uppercase font-hanken">
+                                                    QUANTITY IN CASES
+                                                </label>
+                                                <span className="text-[0.5rem] md:text-[0.625rem] font-hanken">
+                                                    {isCaseOutOfStock ? (
+                                                        <span className="text-red-400 font-medium">
+                                                            Out of stock
+                                                        </span>
+                                                    ) : isCaseMaxInStock ? (
+                                                        <span className="text-amber-400 font-medium">
+                                                            Max in Stock ({casesLeft})
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-neutral-400">
+                                                            {casesLeft} available
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            </div>
                                             <div className="flex items-center gap-2 mt-1 md:mt-2">
                                                 <button
                                                     type="button"
-                                                    onClick={() =>
-                                                        updateUnitQuantities(
-                                                            item.id,
-                                                            pQty,
-                                                            cQty - 1,
-                                                        )
-                                                    }
                                                     disabled={cQty <= 0}
-                                                    className="size-4 md:size-6 rounded border border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                                    onClick={() => {
+                                                        if (isCaseOutOfStock && cQty <= 0) {
+                                                            toast.error("Cases are out of stock");
+                                                            return;
+                                                        }
+                                                        if (cQty > 0) {
+                                                            updateUnitQuantities(
+                                                                item.id,
+                                                                pQty,
+                                                                cQty - 1,
+                                                            );
+                                                        }
+                                                    }}
+                                                    className={cn(
+                                                        "size-4 md:size-6 rounded border flex items-center justify-center transition-all",
+                                                        cQty <= 0
+                                                            ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
+                                                            : "border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 cursor-pointer",
+                                                    )}
                                                     aria-label="Decrease cases quantity"
                                                 >
                                                     <Minus className="size-3" />
@@ -233,15 +387,34 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
 
                                                 <button
                                                     type="button"
-                                                    disabled={cQty >= casesLeft}
-                                                    onClick={() =>
+                                                    disabled={
+                                                        isCaseMaxInStock ||
+                                                        isCaseOutOfStock ||
+                                                        cQty >= casesLeft
+                                                    }
+                                                    onClick={() => {
+                                                        if (isCaseOutOfStock) {
+                                                            toast.error("Cases are out of stock");
+                                                            return;
+                                                        }
+                                                        if (isCaseMaxInStock || cQty >= casesLeft) {
+                                                            toast.warning(
+                                                                `Maximum available cases in stock is ${casesLeft}`,
+                                                            );
+                                                            return;
+                                                        }
                                                         updateUnitQuantities(
                                                             item.id,
                                                             pQty,
                                                             cQty + 1,
-                                                        )
-                                                    }
-                                                    className="size-4 md:size-6 rounded border border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                                        );
+                                                    }}
+                                                    className={cn(
+                                                        "size-4 md:size-6 rounded border flex items-center justify-center transition-all",
+                                                        isCaseMaxInStock || isCaseOutOfStock || cQty >= casesLeft
+                                                            ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
+                                                            : "border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 cursor-pointer",
+                                                    )}
                                                     aria-label="Increase cases quantity"
                                                 >
                                                     <Plus className="size-3" />

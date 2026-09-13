@@ -2,66 +2,49 @@ import React from "react";
 import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { ShopEmptyState } from "@/components/shop/ShopEmptyState";
-import {
-    donJulioReposadoImg,
-    hennessyXoImg,
-    claseAzulImg,
-} from "@/lib/site_data";
-
-export interface OrderItem {
-    id: string;
-    orderNumber: string;
-    itemsCount: number;
-    date: string;
-    totalAmount: string;
-    thumbnails: string[];
-}
+import { RecentOrdersSkeleton } from "./RecentOrdersSkeleton";
+import { useGetCustomerOrders } from "@/service/queries";
+import type { OrderSummaryItem } from "@/service/types";
+import { extractImageFromObject } from "@/context/CartContext";
 
 export interface RecentOrdersListProps {
-    orders?: OrderItem[];
+    orders?: OrderSummaryItem[];
+    isLoading?: boolean;
 }
 
-// Default mock orders matching design
-const DEMO_ORDERS: OrderItem[] = [
-    {
-        id: "1",
-        orderNumber: "RE-2026-7890",
-        itemsCount: 5,
-        date: "May 15, 2026",
-        totalAmount: "₦2,510,000",
-        thumbnails: [donJulioReposadoImg, hennessyXoImg, claseAzulImg],
-    },
-    {
-        id: "2",
-        orderNumber: "RE-2026-7890",
-        itemsCount: 1,
-        date: "June 10, 2025",
-        totalAmount: "₦180,000",
-        thumbnails: [donJulioReposadoImg],
-    },
-    {
-        id: "3",
-        orderNumber: "RE-2026-7890",
-        itemsCount: 2,
-        date: "August 22, 2027",
-        totalAmount: "₦75,000",
-        thumbnails: [hennessyXoImg, claseAzulImg],
-    },
-    {
-        id: "4",
-        orderNumber: "RE-2026-7890",
-        itemsCount: 2,
-        date: "June 10, 2025",
-        totalAmount: "₦180,000",
-        thumbnails: [donJulioReposadoImg, hennessyXoImg],
-    },
-];
-
 export const RecentOrdersList: React.FC<RecentOrdersListProps> = ({
-    orders = DEMO_ORDERS,
+    orders: propOrders,
+    isLoading: propIsLoading,
 }) => {
     const navigate = useNavigate();
-    const hasOrders = orders && orders.length > 0;
+    const { data: ordersData, isLoading: queryIsLoading } =
+        useGetCustomerOrders();
+
+    const isLoading =
+        propIsLoading !== undefined ? propIsLoading : queryIsLoading;
+
+    const orders: OrderSummaryItem[] = React.useMemo(() => {
+        if (propOrders !== undefined) return propOrders;
+        if (!ordersData?.data) return [];
+        if (Array.isArray(ordersData.data)) return ordersData.data;
+        if (
+            Array.isArray(
+                (ordersData.data as { orders?: OrderSummaryItem[] }).orders,
+            )
+        ) {
+            return (
+                (ordersData.data as { orders: OrderSummaryItem[] }).orders || []
+            );
+        }
+        return [];
+    }, [propOrders, ordersData]);
+
+    if (isLoading) {
+        return <RecentOrdersSkeleton />;
+    }
+
+    const recentOrders = orders.slice(0, 4);
+    const hasOrders = recentOrders.length > 0;
 
     return (
         <div className="bg-black-700 rounded-xl p-6 sm:p-8 border border-neutral-800/60 shadow-xl flex flex-col gap-6 w-full mt-2">
@@ -90,69 +73,114 @@ export const RecentOrdersList: React.FC<RecentOrdersListProps> = ({
             ) : (
                 /* Recent Orders Items List */
                 <div className="flex flex-col gap-3 w-full">
-                    {orders.map((order, idx) => (
-                        <div
-                            key={order.id || idx}
-                            className="border-y border-y-neutral-800/80 py-2.5 flex flex-row sm:items-center justify-between gap-4 transition-all"
-                        >
-                            {/* Thumbnails & Order ID */}
-                            <div className="flex items-center gap-4 min-w-0 max-w-106.25 w-full">
-                                {/* Product Thumbnails Container */}
-                                <div className="flex items-center gap-1 shrink-0">
-                                    {order?.thumbnails
-                                        ?.slice(0, 3)
-                                        .map((thumb, tIdx) => (
-                                            <div
-                                                key={tIdx}
-                                                className="size-10 md:size-16 rounded-lg bg-black-900 flex items-center justify-center overflow-hidden p-1 shadow-md border border-neutral-800/40"
-                                            >
-                                                <img
-                                                    src={thumb}
-                                                    alt="Product thumbnail"
-                                                    className="w-full h-full object-contain"
-                                                />
+                    {recentOrders.map((order, idx) => {
+                        const itemsCount =
+                            order.items?.reduce(
+                                (sum, i) => sum + (i.quantity || 1),
+                                0,
+                            ) ||
+                            order.itemsCount ||
+                            order.items?.length ||
+                            1;
+
+                        const dateString = order.createdAt
+                            ? new Date(order.createdAt).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                      month: "long",
+                                      day: "numeric",
+                                      year: "numeric",
+                                  },
+                              )
+                            : order.date || "Recent";
+
+                        const formattedTotal =
+                            typeof order.total === "number"
+                                ? `₦${order.total.toLocaleString()}`
+                                : typeof order.total === "string" &&
+                                    order.total.startsWith("₦")
+                                  ? order.total
+                                  : `₦${Number(order.total || 0).toLocaleString()}`;
+
+                        // Extract thumbnails from items or fallback
+                        const thumbnails: string[] = (
+                            order.thumbnails ||
+                            order.items?.map((item) =>
+                                extractImageFromObject(item),
+                            ) ||
+                            []
+                        ).filter(Boolean);
+
+                        return (
+                            <div
+                                key={order.orderId || order.orderNumber || idx}
+                                className="border-y border-y-neutral-800/80 py-2.5 flex flex-row sm:items-center justify-between gap-4 transition-all"
+                            >
+                                {/* Thumbnails & Order ID */}
+                                <div className="flex items-center gap-4 min-w-0 max-w-106.25 w-full">
+                                    {/* Product Thumbnails Container */}
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        {thumbnails.length > 0 ? (
+                                            thumbnails
+                                                .slice(0, 3)
+                                                .map((thumb, tIdx) => (
+                                                    <div
+                                                        key={tIdx}
+                                                        className="size-10 md:size-16 rounded-lg bg-black-900 flex items-center justify-center overflow-hidden p-1 shadow-md border border-neutral-800/40"
+                                                    >
+                                                        <img
+                                                            src={thumb}
+                                                            alt="Product thumbnail"
+                                                            className="w-full h-full object-contain"
+                                                        />
+                                                    </div>
+                                                ))
+                                        ) : (
+                                            <div className="size-10 md:size-16 rounded-lg bg-black-900 flex items-center justify-center overflow-hidden p-1 shadow-md border border-neutral-800/40 text-[10px] text-neutral-500 font-mono">
+                                                Order
                                             </div>
-                                        ))}
+                                        )}
+                                    </div>
+
+                                    {/* Order Info */}
+                                    <div className="flex flex-col min-w-0">
+                                        <span className="text-sm font-bold font-hanken text-white truncate">
+                                            Order {order.orderNumber}
+                                        </span>
+                                        <span className="text-xs text-neutral-400 font-hanken mt-0.5">
+                                            {itemsCount}{" "}
+                                            {itemsCount === 1
+                                                ? "Item"
+                                                : "Items"}
+                                        </span>
+                                    </div>
                                 </div>
 
-                                {/* Order Info */}
-                                <div className="flex flex-col min-w-0">
-                                    <span className="text-sm font-bold font-hanken text-white truncate">
-                                        Order {order.orderNumber}
-                                    </span>
-                                    <span className="text-xs text-neutral-400 font-hanken mt-0.5">
-                                        {order.itemsCount}{" "}
-                                        {order.itemsCount === 1
-                                            ? "Item"
-                                            : "Items"}
-                                    </span>
+                                {/* Date */}
+                                <div className="hidden sm:block w-full max-w-fit text-xs sm:text-sm text-neutral-300 font-hanken">
+                                    {dateString}
+                                </div>
+
+                                {/* Price & Action Link */}
+                                <span className="hidden sm:block text-sm font-bold font-hanken text-white">
+                                    {formattedTotal}
+                                </span>
+                                <div className="w-full max-w-fit flex items-center justify-between sm:justify-end gap-6 shrink-0">
+                                    <Button
+                                        variant="link"
+                                        onClick={() =>
+                                            navigate(
+                                                `/dashboard/orders/details?id=${order.orderNumber}`,
+                                            )
+                                        }
+                                        className="h-auto p-0 text-xs sm:text-sm text-gold-500 hover:text-gold-400 font-semibold font-hanken underline hover:no-underline underline-offset-2"
+                                    >
+                                        View Details
+                                    </Button>
                                 </div>
                             </div>
-
-                            {/* Date */}
-                            <div className="hidden sm:block w-full max-w-fit text-xs sm:text-sm text-neutral-300 font-hanken">
-                                {order.date}
-                            </div>
-
-                            {/* Price & Action Link */}
-                            <span className="hidden sm:block text-sm font-bold font-hanken text-white">
-                                {order.totalAmount}
-                            </span>
-                            <div className="w-full max-w-fit flex items-center justify-between sm:justify-end gap-6 shrink-0">
-                                <Button
-                                    variant="link"
-                                    onClick={() =>
-                                        navigate(
-                                            `/dashboard/orders/details?id=${order.orderNumber}`,
-                                        )
-                                    }
-                                    className="h-auto p-0 text-xs sm:text-sm text-gold-500 hover:text-gold-400 font-semibold font-hanken underline hover:no-underline underline-offset-2"
-                                >
-                                    View Details
-                                </Button>
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>

@@ -1,15 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import { Plus } from "lucide-react";
 import { AddressCard } from "./addresses/AddressCard";
 import { AddressModal } from "./addresses/AddressModal";
 import { AddressesSkeleton } from "./addresses/AddressesSkeleton";
 import { AddressesEmptyState } from "./addresses/AddressesEmptyState";
+import { type AddressItem, type AddressFormData } from "./addresses/types";
+import { useGetAddresses } from "@/service/queries";
 import {
-    INITIAL_ADDRESSES,
-    type AddressItem,
-    type AddressFormData,
-} from "./addresses/types";
+    useCreateAddress,
+    useUpdateAddress,
+    useDeleteAddress,
+} from "@/service/mutation";
+import type {
+    AddressResponseItem,
+    CreateAddressPayload,
+} from "@/service/types";
 
 export interface CustomerAddressesProps {
     isLoading?: boolean;
@@ -18,60 +24,81 @@ export interface CustomerAddressesProps {
 export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
     isLoading: propIsLoading,
 }) => {
-    const [addresses, setAddresses] = useState<AddressItem[]>(() => {
-        const saved = localStorage.getItem("roseiy_user_addresses");
-        if (saved) {
-            try {
-                return JSON.parse(saved);
-            } catch {
-                return INITIAL_ADDRESSES;
-            }
-        }
-        return INITIAL_ADDRESSES;
-    });
-
-    const [selectedAddressId, setSelectedAddressId] = useState<string>(() => {
-        const defaultAddr = addresses.find((a) => a.isDefault);
-        return defaultAddr ? defaultAddr.id : addresses[0]?.id || "";
-    });
+    const { data: addressesData, isLoading: queryLoading } = useGetAddresses();
+    const createAddressMutation = useCreateAddress();
+    const updateAddressMutation = useUpdateAddress();
+    const deleteAddressMutation = useDeleteAddress();
 
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingAddress, setEditingAddress] = useState<AddressItem | null>(null);
-
-    const [simulatedLoading, setSimulatedLoading] = useState<boolean>(
-        propIsLoading === undefined
+    const [editingAddress, setEditingAddress] = useState<AddressItem | null>(
+        null,
     );
+    const [selectedAddressId, setSelectedAddressId] = useState<string>("");
 
-    // Persist changes to localStorage
-    useEffect(() => {
-        localStorage.setItem("roseiy_user_addresses", JSON.stringify(addresses));
-    }, [addresses]);
+    // Normalizing addresses from backend response
+    const addresses: AddressItem[] = React.useMemo(() => {
+        if (!addressesData?.data) return [];
+        const rawData = addressesData.data;
+        const rawList: AddressResponseItem[] = Array.isArray(rawData)
+            ? rawData
+            : Array.isArray(
+                    (rawData as { addresses?: AddressResponseItem[] })
+                        .addresses,
+                )
+              ? (rawData as { addresses: AddressResponseItem[] }).addresses
+              : [];
 
-    useEffect(() => {
-        if (propIsLoading !== undefined) return;
+        return rawList.map((raw, idx) => {
+            const id = raw.addressId || (raw as any).id || `addr-${idx}`;
+            const street = raw.addressLine1 || (raw as any).address || "";
+            const fullStreet = [street, raw.addressLine2]
+                .filter(Boolean)
+                .join(", ");
+            const phone = raw.phoneNumber || (raw as any).phone || "";
+            const title =
+                raw.label ||
+                (raw.firstName && raw.lastName
+                    ? `${raw.firstName} ${raw.lastName}`
+                    : `Shipping Address ${idx + 1}`);
 
-        const timer = setTimeout(() => {
-            setSimulatedLoading(false);
-        }, 500);
+            return {
+                id,
+                addressId: raw.addressId || id,
+                title,
+                country: raw.country || "Nigeria",
+                state: raw.state || "",
+                city: raw.city || "",
+                address: fullStreet,
+                addressLine1: raw.addressLine1 || street,
+                addressLine2: raw.addressLine2 || null,
+                phone: phone || "+234 812 345 6789",
+                phoneNumber: phone,
+                firstName: raw.firstName,
+                lastName: raw.lastName,
+                postalCode: raw.postalCode,
+                isDefault: Boolean(raw.isDefault),
+            };
+        });
+    }, [addressesData]);
 
-        return () => clearTimeout(timer);
-    }, [propIsLoading]);
+    // Initialize default selected address
+    React.useEffect(() => {
+        if (addresses.length > 0 && !selectedAddressId) {
+            const defaultAddr = addresses.find((a) => a.isDefault);
+            setSelectedAddressId(
+                defaultAddr ? defaultAddr.id : addresses[0].id,
+            );
+        }
+    }, [addresses, selectedAddressId]);
 
-    const loading =
-        propIsLoading !== undefined ? propIsLoading : simulatedLoading;
+    const loading = propIsLoading !== undefined ? propIsLoading : queryLoading;
 
     if (loading) {
         return <AddressesSkeleton />;
     }
 
-    const handleSelectAddress = (id: string) => {
+    const handleSelectAddress = async (id: string) => {
         setSelectedAddressId(id);
-        setAddresses((prev) =>
-            prev.map((addr) => ({
-                ...addr,
-                isDefault: addr.id === id,
-            }))
-        );
         const selected = addresses.find((a) => a.id === id);
         if (selected) {
             toast.success(`Active address set to ${selected.title}`);
@@ -88,62 +115,72 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
         setIsModalOpen(true);
     };
 
-    const handleDeleteAddress = (id: string) => {
-        const target = addresses.find((a) => a.id === id);
-        setAddresses((prev) => {
-            const next = prev.filter((a) => a.id !== id);
-            // If the deleted one was selected, select the first remaining
-            if (selectedAddressId === id && next.length > 0) {
-                setSelectedAddressId(next[0].id);
-                next[0].isDefault = true;
+    const handleDeleteAddress = async (id: string) => {
+        try {
+            await deleteAddressMutation.mutateAsync(id);
+            if (selectedAddressId === id && addresses.length > 1) {
+                const remaining = addresses.filter((a) => a.id !== id);
+                if (remaining.length > 0) {
+                    setSelectedAddressId(remaining[0].id);
+                }
             }
-            return next;
-        });
-        toast.success(
-            target
-                ? `${target.title} deleted successfully.`
-                : "Address deleted."
-        );
+        } catch {
+            // Handled in mutation onError toast
+        }
     };
 
-    const handleSaveAddress = (formData: AddressFormData, editId?: string) => {
+    const handleSaveAddress = async (
+        formData: AddressFormData,
+        editId?: string,
+        successCallback?: () => void,
+    ) => {
         if (editId) {
             // Update existing address
-            setAddresses((prev) =>
-                prev.map((addr) => {
-                    if (addr.id === editId) {
-                        return {
-                            ...addr,
-                            country: formData.country,
-                            state: formData.state,
-                            city: formData.city,
-                            address: formData.address,
-                            phone: formData.phone || addr.phone,
-                        };
-                    }
-                    return addr;
-                })
-            );
-            toast.success("Address updated successfully!");
+            try {
+                await updateAddressMutation.mutateAsync({
+                    addressId: editId,
+                    data: {
+                        label: formData.title,
+                        firstName: formData.firstName || "",
+                        lastName: formData.lastName || "",
+                        phoneNumber: formData.phone || "",
+                        addressLine1: formData.address,
+                        city: formData.city,
+                        state: formData.state,
+                        postalCode: formData.postalCode || "",
+                        country: formData.country,
+                    },
+                });
+                successCallback?.();
+            } catch {
+                // Handled in mutation onError toast
+            }
         } else {
             // Create new address
-            const newIndex = addresses.length + 1;
-            const newAddress: AddressItem = {
-                id: `addr-${Date.now()}`,
-                title: formData.title || `Shipping Address ${newIndex}`,
-                country: formData.country,
-                state: formData.state,
-                city: formData.city,
-                address: formData.address,
-                phone: formData.phone || "+234 812 345 6789",
-                isDefault: addresses.length === 0,
-            };
+            try {
+                const newIndex = addresses.length + 1;
+                const payload: CreateAddressPayload = {
+                    label: formData.title || `Shipping Address ${newIndex}`,
+                    firstName: formData.firstName || "Customer",
+                    lastName: formData.lastName || `Address ${newIndex}`,
+                    phoneNumber: formData.phone || "",
+                    addressLine1: formData.address,
+                    addressLine2: null,
+                    city: formData.city,
+                    state: formData.state,
+                    postalCode: formData.postalCode || "",
+                    country: formData.country,
+                    isDefault: addresses.length === 0,
+                };
 
-            setAddresses((prev) => [...prev, newAddress]);
-            if (addresses.length === 0) {
-                setSelectedAddressId(newAddress.id);
+                const res = await createAddressMutation.mutateAsync(payload);
+                if (addresses.length === 0 && res?.data?.addressId) {
+                    setSelectedAddressId(res.data.addressId);
+                }
+                successCallback?.();
+            } catch {
+                // Handled in mutation onError toast
             }
-            toast.success("New address added successfully!");
         }
     };
 

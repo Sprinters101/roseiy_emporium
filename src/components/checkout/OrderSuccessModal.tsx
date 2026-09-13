@@ -9,6 +9,7 @@ export interface OrderSuccessModalProps {
     onOpenChange: (open: boolean) => void;
     onTrackOrder?: () => void;
     onSubmitReview?: (rating: number, review: string) => void;
+    orderNumber?: string;
 }
 
 export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
@@ -16,6 +17,7 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
     onOpenChange,
     onTrackOrder,
     onSubmitReview,
+    orderNumber,
 }) => {
     const [rating, setRating] = useState<number>(0);
     const [hoverRating, setHoverRating] = useState<number>(0);
@@ -74,6 +76,18 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
                 <h2 className="text-[1.5625rem] sm:text-3xl md:text-[3.0625rem] font-playfair font-bold text-white text-center ">
                     Your Order is on the Way
                 </h2>
+
+                {/* Order Reference Badge (if available) */}
+                {orderNumber && (
+                    <div className="flex items-center justify-center gap-2 -mt-1 mb-2">
+                        <span className="text-xs sm:text-sm text-neutral-400 font-hanken">
+                            Order Reference:
+                        </span>
+                        <span className="text-xs sm:text-sm font-mono font-semibold text-gold-400 bg-black-900/90 px-3 py-1 rounded border border-gold-400/40">
+                            {orderNumber}
+                        </span>
+                    </div>
+                )}
 
                 {/* Subtitle Message */}
                 <p className="text-xs sm:text-[1rem] text-white font-hanken text-center max-w-xs sm:max-w-sm md:max-w-[28.75rem] mx-auto ">

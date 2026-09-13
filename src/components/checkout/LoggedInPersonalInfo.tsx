@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { toast } from "@/components/ui/sonner";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from "lucide-react";
 
 export interface PersonalInfoData {
     firstName: string;
@@ -10,14 +11,20 @@ export interface PersonalInfoData {
 
 export interface LoggedInPersonalInfoProps {
     personalInfo: PersonalInfoData;
-    onSave: (info: PersonalInfoData) => void;
+    onSave: (
+        info: PersonalInfoData,
+        successCallback?: () => void,
+    ) => Promise<void> | void;
+    isLoading?: boolean;
 }
 
 export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
     personalInfo,
     onSave,
+    isLoading = false,
 }) => {
     const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [formData, setFormData] = useState<PersonalInfoData>(personalInfo);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -27,11 +34,20 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
         setIsEditing(true);
     };
 
+    const handleCancel = () => {
+        setFormData(personalInfo);
+        setErrors({});
+        setIsEditing(false);
+    };
+
     const validate = () => {
         const newErrors: { [key: string]: string } = {};
-        if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
-        if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-        if (!formData.phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required";
+        if (!formData.firstName.trim())
+            newErrors.firstName = "First name is required";
+        if (!formData.lastName.trim())
+            newErrors.lastName = "Last name is required";
+        if (!formData.phoneNumber.trim())
+            newErrors.phoneNumber = "Phone number is required";
         if (!formData.emailAddress.trim()) {
             newErrors.emailAddress = "Email address is required";
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailAddress)) {
@@ -42,32 +58,53 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!validate()) return;
 
-        onSave(formData);
-        setIsEditing(false);
-        toast.success("Personal information updated successfully!");
+        setIsSubmitting(true);
+        try {
+            await onSave(formData, () => {
+                setIsEditing(false);
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const fullName = `${personalInfo.firstName} ${personalInfo.lastName}`.trim() || "Bola Roseiy";
+    const fullName =
+        `${personalInfo.firstName} ${personalInfo.lastName}`.trim() ||
+        "Bola Roseiy";
 
     return (
         <div className="bg-black-700 rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-neutral-800/60 shadow-xl flex flex-col gap-5 w-full">
-            {/* Header: Title & Action Button */}
+            {/* Header: Title & Action Buttons */}
             <div className="flex items-center justify-between w-full">
                 <h2 className="font-playfair font-bold text-xl sm:text-[1.25rem] text-white">
                     Personal Information
                 </h2>
 
                 {isEditing ? (
-                    <button
-                        type="button"
-                        onClick={handleSave}
-                        className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer"
-                    >
-                        Save Changes
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            disabled={isSubmitting}
+                            className="bg-transparent border border-neutral-700/80 text-neutral-300 rounded-md text-xs font-hanken px-3 py-1.5 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleSave}
+                            disabled={isSubmitting}
+                            className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                        >
+                            {isSubmitting && (
+                                <Loader2 className="size-3 animate-spin" />
+                            )}
+                            {isSubmitting ? "Saving..." : "Save Changes"}
+                        </button>
+                    </div>
                 ) : (
                     <button
                         type="button"
@@ -79,8 +116,23 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                 )}
             </div>
 
-            {/* Content: View Mode vs Edit Mode */}
-            {!isEditing ? (
+            {/* Content: Loading Skeleton vs View Mode vs Edit Mode */}
+            {isLoading ? (
+                <div className="flex flex-col gap-4 pt-1">
+                    <div className="flex flex-col gap-1.5">
+                        <Skeleton className="h-3 w-16 bg-neutral-800" />
+                        <Skeleton className="h-5 w-40 bg-neutral-800" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                        <Skeleton className="h-3 w-24 bg-neutral-800" />
+                        <Skeleton className="h-5 w-36 bg-neutral-800" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                        <Skeleton className="h-3 w-24 bg-neutral-800" />
+                        <Skeleton className="h-5 w-48 bg-neutral-800" />
+                    </div>
+                </div>
+            ) : !isEditing ? (
                 <div className="flex flex-col gap-4 pt-1">
                     {/* Full Name */}
                     <div className="flex flex-col">
@@ -127,6 +179,7 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                             <input
                                 id="checkout-first-name"
                                 type="text"
+                                disabled={isSubmitting}
                                 value={formData.firstName}
                                 onChange={(e) =>
                                     setFormData((prev) => ({
@@ -135,7 +188,7 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                                     }))
                                 }
                                 placeholder="Enter Full Name"
-                                className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken"
+                                className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken disabled:opacity-60"
                             />
                             {errors.firstName && (
                                 <span className="text-xs text-red-400 font-medium">
@@ -155,6 +208,7 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                             <input
                                 id="checkout-last-name"
                                 type="text"
+                                disabled={isSubmitting}
                                 value={formData.lastName}
                                 onChange={(e) =>
                                     setFormData((prev) => ({
@@ -163,7 +217,7 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                                     }))
                                 }
                                 placeholder="Enter Full Name"
-                                className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken"
+                                className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken disabled:opacity-60"
                             />
                             {errors.lastName && (
                                 <span className="text-xs text-red-400 font-medium">
@@ -184,6 +238,7 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                         <input
                             id="checkout-phone-number"
                             type="tel"
+                            disabled={isSubmitting}
                             value={formData.phoneNumber}
                             onChange={(e) =>
                                 setFormData((prev) => ({
@@ -192,7 +247,7 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                                 }))
                             }
                             placeholder="Enter Phone Number"
-                            className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken"
+                            className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken disabled:opacity-60"
                         />
                         {errors.phoneNumber && (
                             <span className="text-xs text-red-400 font-medium">
@@ -212,6 +267,7 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                         <input
                             id="checkout-email-address"
                             type="email"
+                            disabled={isSubmitting}
                             value={formData.emailAddress}
                             onChange={(e) =>
                                 setFormData((prev) => ({
@@ -220,7 +276,7 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                                 }))
                             }
                             placeholder="Enter Email Address"
-                            className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken"
+                            className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken disabled:opacity-60"
                         />
                         {errors.emailAddress && (
                             <span className="text-xs text-red-400 font-medium">

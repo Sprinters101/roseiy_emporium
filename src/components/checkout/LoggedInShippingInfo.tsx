@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { PenLine } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AddressModal } from "@/components/dashboard/addresses/AddressModal";
 import type {
     AddressItem,
@@ -11,8 +12,16 @@ export interface LoggedInShippingInfoProps {
     addresses: AddressItem[];
     selectedAddressId: string;
     onSelectAddress: (id: string) => void;
-    onAddNewAddress: (data: AddressFormData) => void;
-    onEditAddress: (data: AddressFormData, editId?: string) => void;
+    onAddNewAddress: (
+        data: AddressFormData,
+        successCallback?: () => void,
+    ) => Promise<void> | void;
+    onEditAddress: (
+        data: AddressFormData,
+        editId?: string,
+        successCallback?: () => void,
+    ) => Promise<void> | void;
+    isLoading?: boolean;
 }
 
 export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
@@ -21,6 +30,7 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
     onSelectAddress,
     onAddNewAddress,
     onEditAddress,
+    isLoading = false,
 }) => {
     const [isMultiView, setIsMultiView] = useState<boolean>(false);
     const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -41,12 +51,27 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
         setModalOpen(true);
     };
 
-    const handleSaveAddress = (data: AddressFormData, editId?: string) => {
+    const handleSaveAddress = async (
+        data: AddressFormData,
+        editId?: string,
+        successCallback?: () => void,
+    ) => {
         if (editId) {
-            onEditAddress(data, editId);
+            await onEditAddress(data, editId, () => {
+                successCallback?.();
+                setIsMultiView(false);
+            });
         } else {
-            onAddNewAddress(data);
+            await onAddNewAddress(data, () => {
+                successCallback?.();
+                setIsMultiView(false);
+            });
         }
+    };
+
+    const handleSelectAddress = (id: string) => {
+        onSelectAddress(id);
+        setIsMultiView(false); // Collapses list to hide other addresses after selection
     };
 
     return (
@@ -58,13 +83,22 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                 </h2>
 
                 {isMultiView ? (
-                    <button
-                        type="button"
-                        onClick={handleOpenAddModal}
-                        className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer"
-                    >
-                        Add New Address
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setIsMultiView(false)}
+                            className="bg-transparent border border-neutral-700/80 text-neutral-300 rounded-md text-xs font-hanken px-3 py-1.5 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleOpenAddModal}
+                            className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer"
+                        >
+                            Add New Address
+                        </button>
+                    </div>
                 ) : (
                     <button
                         type="button"
@@ -76,8 +110,20 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                 )}
             </div>
 
-            {/* Address View: Single Default (Screenshot 1) vs All Addresses (Screenshot 2) */}
-            {!isMultiView ? (
+            {/* Address View: Loading Skeleton vs Single Default vs All Addresses */}
+            {isLoading ? (
+                <div className="bg-black-700 rounded-xl sm:rounded-2xl p-5 sm:p-6 border border-neutral-800/80 flex items-start justify-between gap-4 w-full">
+                    <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
+                        <Skeleton className="size-5 rounded-full bg-neutral-800 shrink-0 mt-0.5" />
+                        <div className="flex flex-col gap-2 min-w-0 flex-1">
+                            <Skeleton className="h-5 w-32 bg-neutral-800" />
+                            <Skeleton className="h-4 w-3/4 bg-neutral-800" />
+                            <Skeleton className="h-4 w-28 bg-neutral-800" />
+                        </div>
+                    </div>
+                    <Skeleton className="size-8 sm:size-9 rounded-full bg-neutral-800 shrink-0" />
+                </div>
+            ) : !isMultiView ? (
                 selectedAddress ? (
                     <div className="bg-black-700 rounded-xl sm:rounded-2xl p-5 sm:p-6 border border-gold-400 shadow-[0_0_16px_rgba(228,196,91,0.08)] flex items-start justify-between gap-4 w-full">
                         {/* Left: Radio Dot & Details */}
@@ -110,8 +156,17 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                         </button>
                     </div>
                 ) : (
-                    <div className="py-6 text-center text-neutral-400 text-sm font-hanken">
-                        No shipping address saved yet.
+                    <div className="py-6 flex flex-col items-center justify-center gap-3 text-center">
+                        <p className="text-neutral-400 text-sm font-hanken">
+                            No shipping address saved yet.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={handleOpenAddModal}
+                            className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer"
+                        >
+                            Add Shipping Address
+                        </button>
                     </div>
                 )
             ) : (
@@ -122,15 +177,12 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                         return (
                             <div
                                 key={address.id}
-                                onClick={() => {
-                                    onSelectAddress(address.id);
-                                    // Keep list visible or allow clicking
-                                }}
+                                onClick={() => handleSelectAddress(address.id)}
                                 className={cn(
                                     "bg-black-700 rounded-xl sm:rounded-2xl p-5 sm:p-6 transition-all duration-200 cursor-pointer flex items-start justify-between gap-4 relative",
                                     isSelected
                                         ? "border border-gold-400 shadow-[0_0_16px_rgba(228,196,91,0.08)]"
-                                        : "border border-neutral-800/60 hover:border-neutral-700/80"
+                                        : "border border-neutral-800/60 hover:border-neutral-700/80",
                                 )}
                             >
                                 {/* Left: Radio Dot & Details */}
@@ -139,7 +191,7 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                                         type="button"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            onSelectAddress(address.id);
+                                            handleSelectAddress(address.id);
                                         }}
                                         className="size-5 rounded-full border-2 border-gold-400 flex items-center justify-center shrink-0 mt-0.5 cursor-pointer focus:outline-none"
                                         aria-label={`Select ${address.title}`}

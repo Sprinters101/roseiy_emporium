@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Container from "@/components/common/Container";
 import { ProductCard } from "@/components/common/ProductCard";
+import { ProductCardSkeleton } from "@/components/common/ProductCardSkeleton";
 import { Hero } from "@/components/common/Hero";
 import { products as mockProducts } from "@/lib/site_data";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -8,10 +9,150 @@ import { useShopFilters } from "./data/useShopFilters";
 import { ShopHeader } from "./ShopHeader";
 import { ShopSidebar } from "./ShopSidebar";
 import { ShopEmptyState } from "./ShopEmptyState";
+import { useGetProducts, useGetCategories, useGetBrands } from "@/service/queries";
+import type { FilterOption } from "./data/shopData";
+import type { ProductItem } from "@/service/types";
 
 export const Shop = () => {
     const [visibleCount, setVisibleCount] = useState(12);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+    // 1. Fetch live categories & brands from backend
+    const { data: categoriesApi, isLoading: isLoadingCategories } =
+        useGetCategories();
+    const { data: brandsApi, isLoading: isLoadingBrands } = useGetBrands();
+
+    // 2. Fetch live products from backend
+    const { data: productsApi, isLoading } = useGetProducts({
+        limit: 100,
+    });
+
+    // Map backend products directly into the shop view (with fallback if backend is empty)
+    const allProducts = useMemo(() => {
+        const liveItems =
+            productsApi?.data?.products || productsApi?.data?.items;
+        if (liveItems && liveItems.length > 0) {
+            return liveItems.map((p: ProductItem) => {
+                const pieceUnit = p.sellingUnits?.find((u) =>
+                    u.name.toLowerCase().includes("piece"),
+                );
+                const cartonUnit = p.sellingUnits?.find(
+                    (u) =>
+                        u.name.toLowerCase().includes("carton") ||
+                        u.name.toLowerCase().includes("case"),
+                );
+                const primaryUnit = p.sellingUnits?.[0];
+
+                return {
+                    id: p.productId,
+                    productId: p.productId,
+                    slug: p.slug,
+                    name: p.name,
+                    brand: p.brand?.name || "Glenfiddich",
+                    brandId: p.brandId,
+                    category: p.category?.name || "Whiskey",
+                    categoryId: p.categoryId,
+                    volume: (p as any).volume || "70cl",
+                    piecesLeft: pieceUnit ? pieceUnit.stock : primaryUnit ? primaryUnit.stock : 22,
+                    casesLeft: cartonUnit ? cartonUnit.stock : 10,
+                    price: primaryUnit ? Number(primaryUnit.price) : 0,
+                    image:
+                        p.images?.find((i) => i.isPrimary)?.imageUrl ||
+                        p.images?.[0]?.imageUrl ||
+                        "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png",
+                    gallery: p.images?.map((i) => i.imageUrl) || [],
+                    description: p.description || "",
+                    sellingUnits: p.sellingUnits,
+                };
+            });
+        }
+        return mockProducts;
+    }, [productsApi]);
+
+    // Map backend categories strictly from server
+    const categoriesList: FilterOption[] = useMemo(() => {
+        const rawCategories = Array.isArray(categoriesApi?.data)
+            ? categoriesApi.data
+            : (categoriesApi?.data as any)?.categories ||
+              (categoriesApi?.data as any)?.items ||
+              [];
+
+        if (Array.isArray(rawCategories) && rawCategories.length > 0) {
+            return rawCategories.map((c: any) => {
+                const serverCount =
+                    c.productCount ??
+                    c.productsCount ??
+                    c.count ??
+                    c.totalProducts;
+
+                let count: number | string = "NIL";
+                if (typeof serverCount === "number") {
+                    count = serverCount;
+                } else if (allProducts && allProducts.length > 0) {
+                    const matchedCount = allProducts.filter(
+                        (p: any) =>
+                            p.categoryId === c.categoryId ||
+                            (p.category &&
+                                p.category.toLowerCase() ===
+                                    c.name.toLowerCase()),
+                    ).length;
+                    count = matchedCount;
+                } else {
+                    count = "NIL";
+                }
+
+                return {
+                    id: c.categoryId,
+                    label: c.name,
+                    count,
+                };
+            });
+        }
+        return [];
+    }, [categoriesApi, allProducts]);
+
+    // Map backend brands strictly from server
+    const brandsList: FilterOption[] = useMemo(() => {
+        const rawBrands = Array.isArray(brandsApi?.data)
+            ? brandsApi.data
+            : (brandsApi?.data as any)?.brands ||
+              (brandsApi?.data as any)?.items ||
+              [];
+
+        if (Array.isArray(rawBrands) && rawBrands.length > 0) {
+            return rawBrands.map((b: any) => {
+                const serverCount =
+                    b.productCount ??
+                    b.productsCount ??
+                    b.count ??
+                    b.totalProducts;
+
+                let count: number | string = "NIL";
+                if (typeof serverCount === "number") {
+                    count = serverCount;
+                } else if (allProducts && allProducts.length > 0) {
+                    const matchedCount = allProducts.filter(
+                        (p: any) =>
+                            p.brandId === b.brandId ||
+                            (p.brand &&
+                                p.brand.toLowerCase() ===
+                                    b.name.toLowerCase()) ||
+                            p.name.toLowerCase().includes(b.name.toLowerCase()),
+                    ).length;
+                    count = matchedCount;
+                } else {
+                    count = "NIL";
+                }
+
+                return {
+                    id: b.brandId,
+                    label: b.name,
+                    count,
+                };
+            });
+        }
+        return [];
+    }, [brandsApi, allProducts]);
 
     const {
         selectedCategories,
@@ -28,21 +169,13 @@ export const Shop = () => {
         toggleBrand,
         togglePrice,
         clearAllFilters,
-    } = useShopFilters(mockProducts);
+    } = useShopFilters(allProducts as any, brandsList);
 
     return (
         <div className="bg-black-900 min-h-screen pb-24">
             <Hero />
 
             <Container className="pt-8 md:pt-14">
-                {/* Shop Header with Mobile Controls */}
-                {/* <ShopHeader
-                    sortBy={sortBy}
-                    totalActiveFilters={totalActiveFilters}
-                    onSortChange={setSortBy}
-                    onOpenMobileFilters={() => setMobileFiltersOpen(true)}
-                /> */}
-
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
                     {/* Desktop Filter Sidebar */}
                     <ShopSidebar
@@ -52,6 +185,9 @@ export const Shop = () => {
                         brandSearch={brandSearch}
                         totalActiveFilters={totalActiveFilters}
                         filteredBrandList={filteredBrandList}
+                        categoriesList={categoriesList}
+                        isLoadingCategories={isLoadingCategories}
+                        isLoadingBrands={isLoadingBrands}
                         onCategoryToggle={toggleCategory}
                         onBrandToggle={toggleBrand}
                         onPriceToggle={togglePrice}
@@ -80,6 +216,9 @@ export const Shop = () => {
                                 brandSearch={brandSearch}
                                 totalActiveFilters={totalActiveFilters}
                                 filteredBrandList={filteredBrandList}
+                                categoriesList={categoriesList}
+                                isLoadingCategories={isLoadingCategories}
+                                isLoadingBrands={isLoadingBrands}
                                 onCategoryToggle={toggleCategory}
                                 onBrandToggle={toggleBrand}
                                 onPriceToggle={togglePrice}
@@ -90,7 +229,6 @@ export const Shop = () => {
                     </Sheet>
 
                     {/* Product Grid Area */}
-
                     <main className="lg:col-span-3">
                         <ShopHeader
                             sortBy={sortBy}
@@ -98,6 +236,8 @@ export const Shop = () => {
                             selectedCategories={selectedCategories}
                             selectedBrands={selectedBrands}
                             selectedPriceRanges={selectedPriceRanges}
+                            categoriesList={categoriesList}
+                            brandsList={brandsList}
                             onSortChange={setSortBy}
                             onOpenMobileFilters={() =>
                                 setMobileFiltersOpen(true)
@@ -107,7 +247,14 @@ export const Shop = () => {
                             onRemovePrice={togglePrice}
                             onClearAll={clearAllFilters}
                         />
-                        {filteredProducts.length === 0 ? (
+
+                        {isLoading ? (
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+                                {Array.from({ length: 8 }).map((_, idx) => (
+                                    <ProductCardSkeleton key={idx} />
+                                ))}
+                            </div>
+                        ) : filteredProducts.length === 0 ? (
                             <ShopEmptyState
                                 totalActiveFilters={totalActiveFilters}
                                 onClearFilters={clearAllFilters}
