@@ -1,11 +1,18 @@
 export interface AddressItem {
     id: string;
+    addressId?: string;
     title: string;
     country: string;
     state: string;
     city: string;
     address: string;
+    addressLine1?: string;
+    addressLine2?: string | null;
     phone: string;
+    phoneNumber?: string;
+    firstName?: string;
+    lastName?: string;
+    postalCode?: string;
     isDefault?: boolean;
 }
 
@@ -16,6 +23,9 @@ export interface AddressFormData {
     address: string;
     phone?: string;
     title?: string;
+    firstName?: string;
+    lastName?: string;
+    postalCode?: string;
 }
 
 export const COUNTRY_OPTIONS = [

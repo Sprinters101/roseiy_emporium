@@ -29,9 +29,11 @@ const AddressForm: React.FC<AddressFormProps> = ({
     const [state, setState] = useState<string>(addressToEdit?.state || "");
     const [city, setCity] = useState<string>(addressToEdit?.city || "");
     const [address, setAddress] = useState<string>(
-        addressToEdit?.address || "",
+        addressToEdit?.address || addressToEdit?.addressLine1 || "",
     );
-    const phone = addressToEdit?.phone || "+234 812 345 6789";
+    const [phone, setPhone] = useState<string>(
+        addressToEdit?.phone || addressToEdit?.phoneNumber || "",
+    );
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -58,10 +60,13 @@ const AddressForm: React.FC<AddressFormProps> = ({
                     state,
                     city: city.trim(),
                     address: address.trim(),
-                    phone: phone.trim() || "+234 812 345 6789",
+                    phone: phone.trim() || "",
                     title: addressToEdit?.title,
+                    firstName: addressToEdit?.firstName,
+                    lastName: addressToEdit?.lastName,
+                    postalCode: addressToEdit?.postalCode,
                 },
-                addressToEdit?.id,
+                addressToEdit?.id || addressToEdit?.addressId,
                 () => {
                     onClose();
                 },
@@ -198,6 +203,30 @@ const AddressForm: React.FC<AddressFormProps> = ({
                 {errors.address && (
                     <span className="text-xs text-red-400 font-medium">
                         {errors.address}
+                    </span>
+                )}
+            </div>
+
+            {/* Phone Number Field */}
+            <div className="flex flex-col gap-2 w-full">
+                <label
+                    htmlFor="address-phone"
+                    className="text-xs font-semibold text-gold-400 tracking-wider uppercase font-hanken"
+                >
+                    PHONE NUMBER
+                </label>
+                <input
+                    id="address-phone"
+                    type="tel"
+                    disabled={isSubmitting}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="Enter Phone Number (e.g. 08012345678)"
+                    className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken disabled:opacity-60"
+                />
+                {errors.phone && (
+                    <span className="text-xs text-red-400 font-medium">
+                        {errors.phone}
                     </span>
                 )}
             </div>
