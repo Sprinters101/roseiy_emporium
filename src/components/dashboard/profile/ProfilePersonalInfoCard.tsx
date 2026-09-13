@@ -17,7 +17,8 @@ export const ProfilePersonalInfoCard: React.FC<
     ProfilePersonalInfoCardProps
 > = ({ initialData, onSave, isLoading = false }) => {
     const [isEditing, setIsEditing] = useState<boolean>(false);
-    const [formData, setFormData] = useState<ProfilePersonalInfoData>(initialData);
+    const [formData, setFormData] =
+        useState<ProfilePersonalInfoData>(initialData);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isSaving, setIsSaving] = useState<boolean>(false);
 
@@ -36,14 +37,10 @@ export const ProfilePersonalInfoCard: React.FC<
 
     const validate = () => {
         const newErrors: { [key: string]: string } = {};
-        if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
-        if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-        if (!formData.phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required";
-        if (!formData.emailAddress.trim()) {
-            newErrors.emailAddress = "Email address is required";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailAddress)) {
-            newErrors.emailAddress = "Enter a valid email address";
-        }
+        if (!formData.firstName.trim())
+            newErrors.firstName = "First name is required";
+        if (!formData.lastName.trim())
+            newErrors.lastName = "Last name is required";
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -172,14 +169,16 @@ export const ProfilePersonalInfoCard: React.FC<
                     </div>
                 </div>
 
-                {/* Phone Number */}
+                {/* Phone Number (Disabled / Non-editable) */}
                 <div className="flex flex-col gap-1.5">
-                    <label
-                        htmlFor="profile-phone-number"
-                        className="text-[11px] sm:text-xs font-semibold text-gold-400 tracking-wider uppercase font-hanken"
-                    >
-                        PHONE NUMBER
-                    </label>
+                    <div className="flex items-center justify-between">
+                        <label
+                            htmlFor="profile-phone-number"
+                            className="text-[11px] sm:text-xs font-semibold text-gold-400 tracking-wider uppercase font-hanken"
+                        >
+                            PHONE NUMBER
+                        </label>
+                    </div>
                     <input
                         id="profile-phone-number"
                         type="tel"
@@ -205,37 +204,24 @@ export const ProfilePersonalInfoCard: React.FC<
                     )}
                 </div>
 
-                {/* Email Address */}
+                {/* Email Address (Disabled / Non-editable) */}
                 <div className="flex flex-col gap-1.5">
-                    <label
-                        htmlFor="profile-email-address"
-                        className="text-[11px] sm:text-xs font-semibold text-gold-400 tracking-wider uppercase font-hanken"
-                    >
-                        EMAIL ADDRESS
-                    </label>
+                    <div className="flex items-center justify-between">
+                        <label
+                            htmlFor="profile-email-address"
+                            className="text-[11px] sm:text-xs font-semibold text-gold-400 tracking-wider uppercase font-hanken"
+                        >
+                            EMAIL ADDRESS
+                        </label>
+                    </div>
                     <input
                         id="profile-email-address"
                         type="email"
-                        disabled={!isEditing}
+                        disabled={true}
                         value={formData.emailAddress}
-                        onChange={(e) =>
-                            setFormData((prev) => ({
-                                ...prev,
-                                emailAddress: e.target.value,
-                            }))
-                        }
-                        placeholder="Enter Email Address"
-                        className={`w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-white text-sm placeholder:text-neutral-500 font-hanken transition-colors ${
-                            isEditing
-                                ? "focus:border-gold-400 focus:outline-none"
-                                : "cursor-default text-white"
-                        }`}
+                        placeholder="Email Address"
+                        className="w-full bg-black-900/60 border border-neutral-800/80 rounded-lg px-4 py-3.5 text-neutral-400 text-sm font-hanken cursor-not-allowed opacity-75 select-none"
                     />
-                    {errors.emailAddress && (
-                        <span className="text-xs text-red-400 font-medium">
-                            {errors.emailAddress}
-                        </span>
-                    )}
                 </div>
             </div>
         </div>
