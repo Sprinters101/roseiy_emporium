@@ -76,20 +76,28 @@ export interface Category {
     categoryId: string;
     name: string;
     slug: string;
-    description?: string;
+    description?: string | null;
     image?: string;
     status?: string;
+    createdAt?: string;
+    updatedAt?: string;
 }
+
+export type CategoriesResponseData = Category[] | { categories: Category[] };
 
 export interface Brand {
     brandId: string;
     name: string;
     slug: string;
-    description?: string;
+    description?: string | null;
     logo?: string;
     image?: string;
     status?: string;
+    createdAt?: string;
+    updatedAt?: string;
 }
+
+export type BrandsResponseData = Brand[] | { brands: Brand[] };
 
 export interface SellingUnit {
     sellingUnitId: string;
@@ -150,16 +158,42 @@ export interface ProductsResponseData {
 // 3. CART TYPES
 // ==========================================
 
+export interface CartProductImage {
+    imageUrl: string;
+    altText?: string;
+}
+
+export interface CartProductItem {
+    productId: string;
+    name: string;
+    slug: string;
+    status?: string;
+    category?: string | { id?: string; name: string };
+    volume?: string;
+    image?: string | CartProductImage;
+    images?: Array<{ imageUrl: string; isPrimary?: boolean }>;
+    sellingUnits?: SellingUnit[];
+}
+
 export interface CartItemResponse {
     cartItemId: string;
-    sellingUnitId: string;
-    sellingUnit?: SellingUnit;
-    product?: Partial<ProductItem>;
-    name?: string;
-    image?: string;
     quantity: number;
     unitPrice: string | number;
-    totalPrice: string | number;
+    lineTotal?: string | number;
+    totalPrice?: string | number;
+    availableStock?: number;
+    sellingUnitId?: string;
+    sellingUnit?: {
+        sellingUnitId: string;
+        name: string;
+        sku?: string | null;
+        status?: string;
+        price?: string | number;
+        stock?: number;
+    };
+    product?: CartProductItem;
+    name?: string;
+    image?: string | CartProductImage;
 }
 
 export interface CartResponseData {
@@ -233,6 +267,7 @@ export interface ChangePasswordPayload {
 
 export interface AddressResponseItem {
     addressId: string;
+    customerId?: string;
     label?: string; // "Home", "Work", etc.
     firstName: string;
     lastName: string;
@@ -245,7 +280,14 @@ export interface AddressResponseItem {
     country: string;
     isDefault: boolean;
     createdAt?: string;
+    updatedAt?: string;
 }
+
+export interface AddressListData {
+    addresses: AddressResponseItem[];
+}
+
+export type AddressesResponseData = AddressListData | AddressResponseItem[];
 
 export interface CreateAddressPayload {
     label?: string;
@@ -276,15 +318,31 @@ export interface TrackOrderPayload {
 }
 
 export interface OrderItemDetail {
-    orderItemId?: string;
+    orderItemId: string;
+    orderId?: string;
+    productId?: string;
     sellingUnitId?: string;
-    productName?: string;
-    productImage?: string;
-    unitName?: string; // "Piece", "Carton"
+    productName: string;
+    sellingUnitName?: string;
+    sku?: string | null;
+    unitPrice: string | number;
     quantity: number;
-    price: string | number;
-    total: string | number;
+    lineTotal: string | number;
+    createdAt?: string;
+    updatedAt?: string;
+
+    // Optional / legacy aliases or frontend convenience
+    id?: string;
+    name?: string;
+    price?: string | number;
+    total?: string | number;
+    unitName?: string;
+    productImage?: string;
     thumbnails?: string[];
+    image?: string;
+    volume?: string;
+    category?: string;
+    quantityText?: string;
 }
 
 export interface OrderSummaryItem {
@@ -304,11 +362,27 @@ export interface OrderSummaryItem {
 export interface OrderDetailsData {
     orderId: string;
     orderNumber: string;
-    status: "processing" | "shipped" | "delivered" | "cancelled" | string;
+    customerId?: string;
+    paymentReference?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phoneNumber?: string;
+    addressLine1?: string;
+    addressLine2?: string | null;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+    currency?: string;
     subtotal: string | number;
     deliveryFee: string | number;
     total: string | number;
-    currency?: string;
+    status: "cancelled" | "processing" | "shipped" | "delivered" | "pending" | string;
+    paidAt?: string | null;
+    createdAt?: string;
+    updatedAt?: string;
+    placedAt?: string;
     items: OrderItemDetail[];
     shippingAddress?: {
         firstName?: string;
@@ -319,9 +393,8 @@ export interface OrderDetailsData {
         city?: string;
         state?: string;
         country?: string;
+        postalCode?: string;
     };
-    placedAt?: string;
-    createdAt?: string;
     estimatedDelivery?: string;
     timeline?: Array<{
         status: string;
@@ -330,6 +403,10 @@ export interface OrderDetailsData {
         isCompleted?: boolean;
     }>;
 }
+
+export type SingleOrderResponseData =
+    | { order: OrderDetailsData }
+    | OrderDetailsData;
 
 export interface TrackOrderResponseData {
     orderNumber: string;

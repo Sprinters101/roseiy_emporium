@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, Loader2, X } from "lucide-react";
 import {
     COUNTRY_OPTIONS,
     NIGERIA_STATES,
@@ -10,7 +10,11 @@ import {
 
 interface AddressFormProps {
     addressToEdit?: AddressItem | null;
-    onSave: (data: AddressFormData, editId?: string) => void;
+    onSave: (
+        data: AddressFormData,
+        editId?: string,
+        successCallback?: () => void,
+    ) => Promise<void> | void;
     onClose: () => void;
 }
 
@@ -29,6 +33,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
     );
     const phone = addressToEdit?.phone || "+234 812 345 6789";
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     const validate = () => {
         const newErrors: { [key: string]: string } = {};
@@ -41,23 +46,31 @@ const AddressForm: React.FC<AddressFormProps> = ({
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validate()) return;
 
-        onSave(
-            {
-                country,
-                state,
-                city: city.trim(),
-                address: address.trim(),
-                phone: phone.trim() || "+234 812 345 6789",
-                title: addressToEdit?.title,
-            },
-            addressToEdit?.id,
-        );
-
-        onClose();
+        setIsSubmitting(true);
+        try {
+            await onSave(
+                {
+                    country,
+                    state,
+                    city: city.trim(),
+                    address: address.trim(),
+                    phone: phone.trim() || "+234 812 345 6789",
+                    title: addressToEdit?.title,
+                },
+                addressToEdit?.id,
+                () => {
+                    onClose();
+                },
+            );
+        } catch {
+            // Stay open on error
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -73,9 +86,10 @@ const AddressForm: React.FC<AddressFormProps> = ({
                 <div className="relative w-full">
                     <select
                         id="address-country"
+                        disabled={isSubmitting}
                         value={country}
                         onChange={(e) => setCountry(e.target.value)}
-                        className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-white text-sm appearance-none outline-none focus:border-gold-400 transition-colors cursor-pointer pr-10 font-hanken"
+                        className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-white text-sm appearance-none outline-none focus:border-gold-400 transition-colors cursor-pointer pr-10 font-hanken disabled:opacity-60"
                     >
                         {COUNTRY_OPTIONS.map((c) => (
                             <option
@@ -107,9 +121,10 @@ const AddressForm: React.FC<AddressFormProps> = ({
                 <div className="relative w-full">
                     <select
                         id="address-state"
+                        disabled={isSubmitting}
                         value={state}
                         onChange={(e) => setState(e.target.value)}
-                        className={`w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-sm appearance-none outline-none focus:border-gold-400 transition-colors cursor-pointer pr-10 font-hanken ${
+                        className={`w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-sm appearance-none outline-none focus:border-gold-400 transition-colors cursor-pointer pr-10 font-hanken disabled:opacity-60 ${
                             state ? "text-white" : "text-neutral-400"
                         }`}
                     >
@@ -150,10 +165,11 @@ const AddressForm: React.FC<AddressFormProps> = ({
                 <input
                     id="address-city"
                     type="text"
+                    disabled={isSubmitting}
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="Enter City"
-                    className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken"
+                    className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken disabled:opacity-60"
                 />
                 {errors.city && (
                     <span className="text-xs text-red-400 font-medium">
@@ -173,10 +189,11 @@ const AddressForm: React.FC<AddressFormProps> = ({
                 <input
                     id="address-street"
                     type="text"
+                    disabled={isSubmitting}
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="Enter Address"
-                    className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken"
+                    className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken disabled:opacity-60"
                 />
                 {errors.address && (
                     <span className="text-xs text-red-400 font-medium">
@@ -188,9 +205,11 @@ const AddressForm: React.FC<AddressFormProps> = ({
             {/* Confirm Button */}
             <button
                 type="submit"
-                className="w-full mt-2 bg-gold-gradient text-black-900 font-bold font-hanken py-3.5 px-6 rounded-lg hover:opacity-90 transition-opacity cursor-pointer text-sm sm:text-base shadow-md"
+                disabled={isSubmitting}
+                className="w-full mt-2 bg-gold-gradient text-black-900 font-bold font-hanken py-3.5 px-6 rounded-lg hover:opacity-90 transition-opacity cursor-pointer text-sm sm:text-base shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-                Confirm
+                {isSubmitting && <Loader2 className="size-4 animate-spin" />}
+                {isSubmitting ? "Saving..." : "Confirm"}
             </button>
         </form>
     );
@@ -200,7 +219,11 @@ export interface AddressModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     addressToEdit?: AddressItem | null;
-    onSave: (data: AddressFormData, editId?: string) => void;
+    onSave: (
+        data: AddressFormData,
+        editId?: string,
+        successCallback?: () => void,
+    ) => Promise<void> | void;
 }
 
 export const AddressModal: React.FC<AddressModalProps> = ({

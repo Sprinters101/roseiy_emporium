@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router";
-import { Heart } from "lucide-react";
+import { Heart, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Product, ProductCardProps } from "@/config/types";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,7 @@ export const ProductCard = ({
     className = "",
     isLandingPage = false,
 }: ProductCardProps & { product: Product | ProductItem | any }) => {
-    const { cartItems, addToCart } = useCart();
+    const { cartItems, addToCart, isAddingProduct } = useCart();
     const { isInWishlist, toggleWishlist } = useWishlist();
 
     // Standardize product fields across mock and live API objects
@@ -42,15 +42,15 @@ export const ProductCard = ({
     const resolvedCategory =
         typeof product.category === "object" && product.category !== null
             ? product.category.name
-            : product.category || "Wine & Spirits";
+            : product.category || "";
 
     // Resolve price
     const resolvedPrice =
         product.price !== undefined && typeof product.price === "number"
             ? product.price
             : product.sellingUnits?.[0]?.price
-            ? Number(product.sellingUnits[0].price)
-            : 0;
+              ? Number(product.sellingUnits[0].price)
+              : 0;
 
     // Resolve stock metrics
     const pieceUnit = product.sellingUnits?.find((u: any) =>
@@ -67,30 +67,44 @@ export const ProductCard = ({
         product.piecesLeft !== undefined
             ? product.piecesLeft
             : pieceUnit
-            ? pieceUnit.stock
-            : primaryUnit
-            ? primaryUnit.stock
-            : undefined;
+              ? pieceUnit.stock
+              : primaryUnit
+                ? primaryUnit.stock
+                : undefined;
 
     const casesLeft =
         product.casesLeft !== undefined
             ? product.casesLeft
             : cartonUnit
-            ? cartonUnit.stock
-            : undefined;
+              ? cartonUnit.stock
+              : undefined;
 
     const maxStock =
         piecesLeft !== undefined
             ? piecesLeft
             : casesLeft !== undefined
-            ? casesLeft
-            : Infinity;
+              ? casesLeft
+              : Infinity;
 
-    const isOutOfStock = maxStock <= 0 || inCartQty >= maxStock;
+    const isAdding =
+        isAddingProduct(cartId) ||
+        isAddingProduct(resolvedId) ||
+        isAddingProduct(product.productId || "") ||
+        isAddingProduct(product.slug || "");
+
+    const isOutOfStock = maxStock <= 0;
+    const isMaxInCart = inCartQty >= maxStock;
+    const isButtonDisabled = isOutOfStock || isMaxInCart || isAdding;
 
     // Normalized product object for context handlers
-    const normalizedProduct: Product = {
+    const normalizedProduct: Product & {
+        sellingUnits?: any[];
+        productId?: string;
+        slug?: string;
+    } = {
         id: cartId,
+        productId: product.productId,
+        slug: product.slug,
         name: resolvedName,
         category: resolvedCategory,
         volume: product.volume || "75cl",
@@ -98,6 +112,7 @@ export const ProductCard = ({
         casesLeft,
         price: resolvedPrice,
         image: resolvedImage,
+        sellingUnits: product.sellingUnits,
     };
 
     const handleWishlist = (e: React.MouseEvent) => {
@@ -110,7 +125,7 @@ export const ProductCard = ({
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        if (isOutOfStock) return;
+        if (isOutOfStock || isMaxInCart) return;
         if (onAddToCart) {
             onAddToCart(normalizedProduct);
         } else {
@@ -205,10 +220,8 @@ export const ProductCard = ({
                     )}
                 >
                     {product.volume || "75cl"}
-                    {piecesLeft !== undefined &&
-                        ` • ${piecesLeft} Pieces Left`}
-                    {casesLeft !== undefined &&
-                        ` • ${casesLeft} Cases Left`}
+                    {piecesLeft !== undefined && ` • ${piecesLeft} Pieces Left`}
+                    {casesLeft !== undefined && ` • ${casesLeft} Cases Left`}
                 </p>
 
                 <div className={cn("mt-0", isLandingPage && "mt-2")}>
@@ -220,20 +233,37 @@ export const ProductCard = ({
 
             {/* Add to Cart CTA */}
             <div className={cn("mt-4", isLandingPage && "mt-2")}>
-                <Button
-                    type="button"
-                    disabled={isOutOfStock}
-                    onClick={handleAddToCart}
-                    className={cn(
-                        "w-full h-10 md:h-11 font-hanken font-medium text-body-c1 rounded-sm transition-all duration-300",
-                        isLandingPage && "h-12 md:text-body-b3",
-                        isOutOfStock
-                            ? "bg-neutral-800/80 border border-neutral-800 text-neutral-500 cursor-not-allowed hover:bg-neutral-800 hover:text-neutral-500"
-                            : "bg-[#1A1A1A] hover:bg-white/20 border border-white text-white cursor-pointer",
-                    )}
-                >
-                    {isOutOfStock ? "Out of Stock" : "Add to Cart"}
-                </Button>
+                {(() => {
+                    return (
+                        <Button
+                            type="button"
+                            disabled={isButtonDisabled}
+                            onClick={handleAddToCart}
+                            className={cn(
+                                "w-full h-10 md:h-11 font-hanken font-medium text-body-c1 rounded-sm transition-all duration-300",
+                                isLandingPage && "h-12 md:text-body-b3",
+                                isAdding
+                                    ? "bg-neutral-800/80 border border-neutral-700 text-neutral-300 cursor-not-allowed"
+                                    : isButtonDisabled
+                                      ? "bg-neutral-800/80 border border-neutral-800 text-neutral-500 cursor-not-allowed hover:bg-neutral-800 hover:text-neutral-500"
+                                      : "bg-[#1A1A1A] hover:bg-white/20 border border-white text-white cursor-pointer",
+                            )}
+                        >
+                            {isAdding ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <Loader2 className="size-4 animate-spin text-gold-500" />
+                                    <span>Adding...</span>
+                                </span>
+                            ) : isOutOfStock ? (
+                                "Out of Stock"
+                            ) : isMaxInCart ? (
+                                "Max in Cart"
+                            ) : (
+                                "Add to Cart"
+                            )}
+                        </Button>
+                    );
+                })()}
             </div>
         </div>
     );

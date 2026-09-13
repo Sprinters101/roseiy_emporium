@@ -28,6 +28,7 @@ export const TrackOrderForm: React.FC<TrackOrderFormProps> = ({
         <div className="bg-black-700 rounded-lg p-6 sm:p-8 flex flex-col gap-5 border border-neutral-800/60 shadow-xl">
             <Formik
                 initialValues={initialValues}
+                enableReinitialize
                 validationSchema={TrackOrderValidationSchema}
                 onSubmit={async (values, { setSubmitting }) => {
                     onTrack(values);

@@ -1,9 +1,11 @@
+import { useMemo } from "react";
 import { Link } from "react-router";
 import { motion } from "framer-motion";
-import { categoryHeaderDivider, categories } from "@/lib/site_data";
+import { categoryHeaderDivider, categories as mockCategories } from "@/lib/site_data";
 import Container from "../common/Container";
 import TitleDecoration from "../common/TitleDecoration";
 import { Button } from "../ui/button";
+import { useGetCategories } from "@/service/queries";
 
 interface CategoryCardProps {
     title: string;
@@ -49,6 +51,35 @@ const CategoryCard = ({ title, image, href }: CategoryCardProps) => {
 };
 
 export const CategoryGrid = () => {
+    const { data: categoriesApi } = useGetCategories();
+
+    const displayCategories = useMemo(() => {
+        const rawCategories: any[] = Array.isArray(categoriesApi?.data)
+            ? categoriesApi.data
+            : (categoriesApi?.data as any)?.categories ||
+              (categoriesApi?.data as any)?.items ||
+              [];
+
+        if (Array.isArray(rawCategories) && rawCategories.length > 0) {
+            return rawCategories.slice(0, 6).map((cat) => {
+                const fallbackMatch = mockCategories.find(
+                    (mc) =>
+                        mc.title.toLowerCase() === cat.name.toLowerCase() ||
+                        cat.slug?.toLowerCase().includes(mc.title.toLowerCase()),
+                );
+                return {
+                    title: cat.name,
+                    image:
+                        cat.image ||
+                        fallbackMatch?.image ||
+                        mockCategories[0].image,
+                    href: `/shop?category=${cat.slug || cat.categoryId}`,
+                };
+            });
+        }
+        return mockCategories;
+    }, [categoriesApi]);
+
     return (
         <section className="w-full bg-black-900 pt-16 md:pt-24 overflow-hidden">
             <Container className="flex flex-col items-center">
@@ -87,7 +118,7 @@ export const CategoryGrid = () => {
                         }}
                         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-9.25 w-full mt-8 md:mt-16"
                     >
-                        {categories?.map((cat) => (
+                        {displayCategories?.map((cat) => (
                             <CategoryCard
                                 key={cat.title}
                                 title={cat.title}

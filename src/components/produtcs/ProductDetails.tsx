@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router";
-import { Heart, Minus, Plus, Check, ChevronRight } from "lucide-react";
-import { products } from "@/lib/site_data";
+import { Heart, Minus, Plus, Check, ChevronRight, Loader2 } from "lucide-react";
+import { products as mockProducts } from "@/lib/site_data";
 import type { Product } from "@/config/types";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -9,20 +9,93 @@ import { ProductCard } from "@/components/common/ProductCard";
 import { toast } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import Container from "../common/Container";
+import { useGetProductBySlug, useGetProducts } from "@/service/queries";
+import { ProductDetailsSkeleton } from "./ProductDetailsSkeleton";
 
 export const ProductDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { cartItems, setCartItemQuantities } = useCart();
+    const { cartItems, setCartItemQuantities, isAddingProduct } = useCart();
 
-    // Look up product or default to Glenfiddich Single Scotch (ID '10')
+    // 1. Fetch live product by slug or id from the backend
+    const { data: productApi, isLoading: isLoadingProduct } = useGetProductBySlug(
+        id ?? "",
+    );
+
+    const liveProduct = useMemo(() => {
+        const raw = (productApi?.data as any)?.product || productApi?.data;
+        return raw || null;
+    }, [productApi]);
+
+    // Standardize product object with live backend data (or fallback)
     const product: Product = useMemo(() => {
-        const found = products.find((p) => p.id === id);
+        if (liveProduct) {
+            const pieceUnit = liveProduct.sellingUnits?.find((u: any) =>
+                u.name?.toLowerCase().includes("piece"),
+            );
+            const cartonUnit = liveProduct.sellingUnits?.find(
+                (u: any) =>
+                    u.name?.toLowerCase().includes("carton") ||
+                    u.name?.toLowerCase().includes("case"),
+            );
+            const primaryUnit = liveProduct.sellingUnits?.[0];
+
+            const primaryImg =
+                liveProduct.images?.find((img: any) => img.isPrimary)
+                    ?.imageUrl ||
+                liveProduct.images?.[0]?.imageUrl ||
+                "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png";
+
+            const galleryList =
+                liveProduct.images?.map((img: any) => img.imageUrl) || [
+                    primaryImg,
+                ];
+
+            const piecesStock =
+                pieceUnit?.stock !== undefined
+                    ? Number(pieceUnit.stock)
+                    : primaryUnit?.stock !== undefined
+                    ? Number(primaryUnit.stock)
+                    : liveProduct.piecesLeft !== undefined
+                    ? Number(liveProduct.piecesLeft)
+                    : 22;
+
+            const casesStock =
+                cartonUnit?.stock !== undefined
+                    ? Number(cartonUnit.stock)
+                    : liveProduct.casesLeft !== undefined
+                    ? Number(liveProduct.casesLeft)
+                    : liveProduct.sellingUnits && liveProduct.sellingUnits.length > 0
+                    ? 0
+                    : 10;
+
+            return {
+                id: liveProduct.productId || liveProduct.slug || id || "10",
+                productId: liveProduct.productId,
+                slug: liveProduct.slug,
+                name: liveProduct.name,
+                brand: liveProduct.brand?.name || "Glenfiddich",
+                brandId: liveProduct.brandId,
+                category: liveProduct.category?.name || "Whiskey",
+                categoryId: liveProduct.categoryId,
+                volume: (liveProduct as any).volume || "70cl",
+                piecesLeft: piecesStock,
+                casesLeft: casesStock,
+                price: primaryUnit ? Number(primaryUnit.price) : 110000,
+                image: primaryImg,
+                gallery: galleryList.length > 0 ? galleryList : [primaryImg],
+                description:
+                    liveProduct.description ||
+                    "A remarkably rich and luxurious expression with exceptional elegance and depth.",
+                sellingUnits: liveProduct.sellingUnits,
+            };
+        }
+
+        const found = mockProducts.find((p) => p.id === id);
         if (found) return found;
 
-        // Default reference product matching the design exactly
         return (
-            products.find((p) => p.id === "10") || {
+            mockProducts.find((p) => p.id === "10") || {
                 id: "10",
                 name: "Glenfiddich Single Scotch",
                 brand: "Glenfiddich",
@@ -37,24 +110,18 @@ export const ProductDetails: React.FC = () => {
                 ],
                 description:
                     "A remarkably rich and luxurious single malt scotch whiskey, matured in fine Spanish Oloroso wood and American oak casks. Small batch production gives this 18-year-old expression extraordinary depth, complexity, and exceptional elegance.",
-                tastingNotes: {
-                    nose: "A remarkably rich aroma with ripe orchard fruit, baked apple, and robust oakiness.",
-                    taste: "Richly delivers luxurious dried fruit, candy peel, and dates. Overlaid with elegant oak notes.",
-                    finish: "Warming, rewarding, and distinguished long finish.",
-                },
-                details: {
-                    abv: "40%",
-                    country: "Scotland",
-                    region: "Speyside",
-                },
             }
         );
-    }, [id]);
+    }, [liveProduct, id]);
 
     // Check if this product is already in the cart
     const cartItem = useMemo(() => {
         return cartItems.find((item) => item.id === product.id);
     }, [cartItems, product.id]);
+
+    // Stock metrics
+    const piecesLeft = product.piecesLeft ?? 22;
+    const casesLeft = product.casesLeft ?? 10;
 
     // Product Gallery images fallback
     const galleryImages = useMemo(() => {
@@ -69,91 +136,178 @@ export const ProductDetails: React.FC = () => {
         galleryImages[0] || product.image,
     );
 
-    // Multi-unit purchase selection state
-    const [includePieces, setIncludePieces] = useState<boolean>(true);
-    const [includeCases, setIncludeCases] = useState<boolean>(true);
+    // Sync selectedImage when gallery updates
+    useEffect(() => {
+        if (galleryImages.length > 0) {
+            setSelectedImage(galleryImages[0]);
+        }
+    }, [galleryImages]);
+
+    // Multi-unit purchase selection state: default pieces selected (1), cases inactive (0) until chosen
+    const [includePieces, setIncludePieces] = useState<boolean>(
+        () => piecesLeft > 0 || casesLeft <= 0,
+    );
+    const [includeCases, setIncludeCases] = useState<boolean>(
+        () => piecesLeft <= 0 && casesLeft > 0,
+    );
 
     // Independent local quantity states for pieces and cases
-    const [piecesQty, setPiecesQty] = useState<number>(2);
-    const [casesQty, setCasesQty] = useState<number>(1);
+    const [piecesQty, setPiecesQty] = useState<number>(() =>
+        piecesLeft > 0 ? 1 : 0,
+    );
+    const [casesQty, setCasesQty] = useState<number>(() =>
+        piecesLeft <= 0 && casesLeft > 0 ? 1 : 0,
+    );
 
     const { isInWishlist, toggleWishlist } = useWishlist();
     const isWishlisted = isInWishlist(product.id);
 
-    // Sync local quantities with cart item whenever cart state updates
+    // Sync local quantities with cart item whenever cart state or stock updates
     useEffect(() => {
         if (cartItem) {
-            const p = cartItem.piecesQty ?? cartItem.quantity ?? 2;
-            const c = cartItem.casesQty ?? 1;
-            setPiecesQty(p);
-            setCasesQty(c);
-            setIncludePieces(p > 0);
-            setIncludeCases(c > 0);
+            const p = cartItem.piecesQty ?? (cartItem.quantity || 1);
+            const c = cartItem.casesQty ?? 0;
+            const validP = Math.min(p, piecesLeft);
+            const validC = Math.min(c, casesLeft);
+            setPiecesQty(validP);
+            setCasesQty(validC);
+            setIncludePieces(validP > 0 && piecesLeft > 0);
+            setIncludeCases(validC > 0 && casesLeft > 0);
+        } else {
+            if (piecesLeft > 0) {
+                setIncludePieces(true);
+                setPiecesQty(1);
+                setIncludeCases(false);
+                setCasesQty(0);
+            } else if (casesLeft > 0) {
+                setIncludePieces(false);
+                setPiecesQty(0);
+                setIncludeCases(true);
+                setCasesQty(1);
+            } else {
+                setIncludePieces(false);
+                setPiecesQty(0);
+                setIncludeCases(false);
+                setCasesQty(0);
+            }
         }
-    }, [cartItem]);
-
-    // Stock metrics
-    const piecesLeft = product.piecesLeft ?? 22;
-    const casesLeft = product.casesLeft ?? 10;
+    }, [cartItem, piecesLeft, casesLeft]);
 
     const brandName = product.brand || "Glenfiddich";
     const categoryName = product.category || "Whiskey";
 
+    // Unit pricing from sellingUnits
+    const pieceUnit = (product as any).sellingUnits?.find((u: any) =>
+        u.name?.toLowerCase().includes("piece"),
+    );
+    const cartonUnit = (product as any).sellingUnits?.find(
+        (u: any) =>
+            u.name?.toLowerCase().includes("carton") ||
+            u.name?.toLowerCase().includes("case"),
+    );
+    const piecePrice = pieceUnit
+        ? Number(pieceUnit.price)
+        : product.price || 110000;
+    const casePrice = cartonUnit
+        ? Number(cartonUnit.price)
+        : piecePrice * 6;
+
     // Format NGN Currency
     const formattedPrice = useMemo(() => {
+        const total =
+            (includePieces ? piecesQty * piecePrice : 0) +
+            (includeCases ? casesQty * casePrice : 0);
+        const displayAmount = total > 0 ? total : piecePrice;
+
         return new Intl.NumberFormat("en-NG", {
             style: "currency",
             currency: "NGN",
             maximumFractionDigits: 0,
         })
-            .format(product.price)
+            .format(displayAmount)
             .replace("NGN", "₦");
-    }, [product.price]);
+    }, [includePieces, includeCases, piecesQty, casesQty, piecePrice, casePrice]);
 
     // Local Quantity Increment / Decrement Handlers (Does NOT affect cart until Add to Cart is clicked)
     const handleDecrementPieces = () => {
+        if (piecesLeft <= 0) {
+            toast.error("Pieces are out of stock");
+            return;
+        }
         if (piecesQty > 1) {
             setPiecesQty((prev) => prev - 1);
         }
     };
 
     const handleIncrementPieces = () => {
-        if (piecesQty < piecesLeft) {
-            setPiecesQty((prev) => prev + 1);
-        } else {
-            toast.warning(`Maximum available pieces in stock is ${piecesLeft}`);
+        if (piecesLeft <= 0) {
+            toast.error("Pieces are out of stock");
+            return;
         }
+        if (piecesQty >= piecesLeft) {
+            toast.warning(`Maximum available pieces in stock is ${piecesLeft}`);
+            return;
+        }
+        setPiecesQty((prev) => prev + 1);
     };
 
     const handleDecrementCases = () => {
+        if (casesLeft <= 0) {
+            toast.error("Cases are out of stock");
+            return;
+        }
         if (casesQty > 1) {
             setCasesQty((prev) => prev - 1);
         }
     };
 
     const handleIncrementCases = () => {
-        if (casesQty < casesLeft) {
-            setCasesQty((prev) => prev + 1);
-        } else {
-            toast.warning(`Maximum available cases in stock is ${casesLeft}`);
+        if (casesLeft <= 0) {
+            toast.error("Cases are out of stock");
+            return;
         }
+        if (casesQty >= casesLeft) {
+            toast.warning(`Maximum available cases in stock is ${casesLeft}`);
+            return;
+        }
+        setCasesQty((prev) => prev + 1);
     };
 
     // Toggle Checkboxes for Units
     const toggleIncludePieces = () => {
-        if (includePieces && !includeCases) {
-            // Keep at least one checked
+        if (piecesLeft <= 0) {
+            toast.error("Pieces are out of stock");
             return;
         }
-        setIncludePieces((prev) => !prev);
+
+        if (!includePieces) {
+            setIncludePieces(true);
+            if (piecesQty === 0) setPiecesQty(Math.min(1, piecesLeft));
+        } else {
+            if (!includeCases || casesLeft <= 0) {
+                toast.warning("At least one purchase unit must be selected");
+                return;
+            }
+            setIncludePieces(false);
+        }
     };
 
     const toggleIncludeCases = () => {
-        if (includeCases && !includePieces) {
-            // Keep at least one checked
+        if (casesLeft <= 0) {
+            toast.error("Cases are out of stock");
             return;
         }
-        setIncludeCases((prev) => !prev);
+
+        if (!includeCases) {
+            setIncludeCases(true);
+            if (casesQty === 0) setCasesQty(Math.min(1, casesLeft));
+        } else {
+            if (!includePieces || piecesLeft <= 0) {
+                toast.warning("At least one purchase unit must be selected");
+                return;
+            }
+            setIncludeCases(false);
+        }
     };
 
     // Format Total Quantity Summary String (e.g. "1 Case and 2 Pieces")
@@ -188,6 +342,16 @@ export const ProductDetails: React.FC = () => {
             return;
         }
 
+        if (activePieces > piecesLeft) {
+            toast.warning(`Cannot exceed available pieces (${piecesLeft})`);
+            return;
+        }
+
+        if (activeCases > casesLeft) {
+            toast.warning(`Cannot exceed available cases (${casesLeft})`);
+            return;
+        }
+
         // Override cart item quantities with exact local choices
         setCartItemQuantities(product, activePieces, activeCases);
     };
@@ -198,16 +362,38 @@ export const ProductDetails: React.FC = () => {
         navigate("/shop");
     };
 
-    // Filter related products
+    // 2. Fetch live related products
+    const { data: similarProductsApi } = useGetProducts({
+        categoryId: (product as any).categoryId,
+        limit: 8,
+    });
+
     const relatedProducts = useMemo(() => {
-        return products
+        const liveItems =
+            similarProductsApi?.data?.products ||
+            similarProductsApi?.data?.items;
+        if (liveItems && liveItems.length > 0) {
+            return liveItems
+                .filter(
+                    (p: any) =>
+                        (p.productId || p.id) !== product.id &&
+                        (p.slug || "") !== (liveProduct?.slug || ""),
+                )
+                .slice(0, 4);
+        }
+
+        return mockProducts
             .filter(
                 (p) =>
                     p.id !== product.id &&
                     p.category.toLowerCase() === categoryName.toLowerCase(),
             )
             .slice(0, 4);
-    }, [product.id, categoryName]);
+    }, [similarProductsApi, product.id, liveProduct, categoryName]);
+
+    if (isLoadingProduct) {
+        return <ProductDetailsSkeleton />;
+    }
 
     return (
         <div className="">
@@ -352,29 +538,32 @@ export const ProductDetails: React.FC = () => {
                                         <button
                                             type="button"
                                             onClick={toggleIncludePieces}
-                                            className="flex items-center gap-2.5 cursor-pointer group"
+                                            className={cn(
+                                                "flex items-center gap-2.5 group cursor-pointer",
+                                                piecesLeft <= 0 && "opacity-60",
+                                            )}
                                         >
                                             <div
                                                 className={cn(
                                                     "size-4 md:size-5 rounded flex items-center justify-center border transition-all",
-                                                    includePieces
+                                                    includePieces && piecesLeft > 0
                                                         ? "bg-gold-400 border-gold-400 text-black font-bold"
                                                         : "border-gold-500 bg-transparent group-hover:border-neutral-400",
                                                 )}
                                             >
-                                                {includePieces && (
+                                                {includePieces && piecesLeft > 0 && (
                                                     <Check className="size-2 md:size-3.5 stroke-3 text-black" />
                                                 )}
                                             </div>
                                             <span
                                                 className={cn(
                                                     "text-sm font-medium font-hanken transition-colors",
-                                                    includePieces
+                                                    includePieces && piecesLeft > 0
                                                         ? "gradient-text"
                                                         : "text-white",
                                                 )}
                                             >
-                                                Pieces
+                                                Pieces {piecesLeft <= 0 && <span className="text-red-400 text-xs ml-1">(Out of Stock)</span>}
                                             </span>
                                         </button>
 
@@ -382,62 +571,86 @@ export const ProductDetails: React.FC = () => {
                                         <button
                                             type="button"
                                             onClick={toggleIncludeCases}
-                                            className="flex items-center gap-2.5 cursor-pointer group"
+                                            className={cn(
+                                                "flex items-center gap-2.5 group cursor-pointer",
+                                                casesLeft <= 0 && "opacity-60",
+                                            )}
                                         >
                                             <div
                                                 className={cn(
                                                     "size-4 md:size-5 rounded flex items-center justify-center border transition-all",
-                                                    includeCases
+                                                    includeCases && casesLeft > 0
                                                         ? "bg-gold-400 border-gold-400 text-black font-bold"
                                                         : "border-gold-500 bg-transparent group-hover:border-neutral-400",
                                                 )}
                                             >
-                                                {includeCases && (
+                                                {includeCases && casesLeft > 0 && (
                                                     <Check className="size-2 md:size-3.5 stroke-3 text-black" />
                                                 )}
                                             </div>
                                             <span
                                                 className={cn(
                                                     "text-sm font-medium font-hanken transition-colors",
-                                                    includeCases
+                                                    includeCases && casesLeft > 0
                                                         ? "gradient-text"
                                                         : "text-white",
                                                 )}
                                             >
-                                                Cases
+                                                Cases {casesLeft <= 0 && <span className="text-red-400 text-xs ml-1">(Out of Stock)</span>}
                                             </span>
                                         </button>
                                     </div>
                                 </div>
 
                                 {/* QUANTITY IN PIECES Counter */}
-                                {includePieces && (
+                                {(includePieces || piecesLeft <= 0) && (
                                     <div className="space-y-3 mt-6 md:pt-8">
-                                        <label className="block text-white text-xs md:text-base font-semibold tracking-widest uppercase font-hanken">
-                                            QUANTITY IN PIECES
-                                        </label>
+                                        <div className="flex items-center justify-between">
+                                            <label className="block text-white text-xs md:text-base font-semibold tracking-widest uppercase font-hanken">
+                                                QUANTITY IN PIECES
+                                            </label>
+                                            {piecesLeft <= 0 ? (
+                                                <span className="text-red-400 text-xs md:text-sm font-medium font-hanken">
+                                                    Out of Stock
+                                                </span>
+                                            ) : piecesQty >= piecesLeft ? (
+                                                <span className="text-amber-400 text-xs md:text-sm font-medium font-hanken">
+                                                    Max in Stock ({piecesLeft})
+                                                </span>
+                                            ) : (
+                                                <span className="text-neutral-400 text-xs md:text-sm font-hanken">
+                                                    {piecesLeft} available
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="flex items-center mt-3">
                                             <button
                                                 type="button"
                                                 onClick={handleDecrementPieces}
-                                                disabled={piecesQty <= 1}
-                                                className="size-5 sm:size-11 rounded-md border border-gold-500 bg-neutral-900/60 hover:bg-neutral-800 hover:border-gold-400/80 text-gold-500 flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                                className={cn(
+                                                    "size-5 sm:size-11 rounded-md border flex items-center justify-center transition-all",
+                                                    piecesQty <= 1 || piecesLeft <= 0
+                                                        ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
+                                                        : "border-gold-500 bg-neutral-900/60 hover:bg-neutral-800 hover:border-gold-400/80 text-gold-500 cursor-pointer",
+                                                )}
                                                 aria-label="Decrease pieces quantity"
                                             >
                                                 <Minus className="size-3 sm:size-4" />
                                             </button>
 
                                             <span className="w-24 text-center font-bold text-white text-body-c1 md:text-xl font-hanken">
-                                                {piecesQty}
+                                                {piecesLeft <= 0 ? 0 : piecesQty}
                                             </span>
 
                                             <button
                                                 type="button"
                                                 onClick={handleIncrementPieces}
-                                                disabled={
-                                                    piecesQty >= piecesLeft
-                                                }
-                                                className="size-5 sm:size-11 rounded-md border border-gold-500 bg-neutral-900/60 hover:bg-neutral-800 hover:border-gold-400/80 text-gold-500 flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                                className={cn(
+                                                    "size-5 sm:size-11 rounded-md border flex items-center justify-center transition-all",
+                                                    piecesQty >= piecesLeft || piecesLeft <= 0
+                                                        ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
+                                                        : "border-gold-500 bg-neutral-900/60 hover:bg-neutral-800 hover:border-gold-400/80 text-gold-500 cursor-pointer",
+                                                )}
                                                 aria-label="Increase pieces quantity"
                                             >
                                                 <Plus className="size-3 sm:size-4" />
@@ -447,31 +660,54 @@ export const ProductDetails: React.FC = () => {
                                 )}
 
                                 {/* QUANTITY IN CASES Counter */}
-                                {includeCases && (
+                                {(includeCases || casesLeft <= 0) && (
                                     <div className="space-y-3 pt-8">
-                                        <label className="block text-white text-xs md:text-base font-semibold tracking-widest uppercase font-hanken">
-                                            QUANTITY IN CASES
-                                        </label>
+                                        <div className="flex items-center justify-between">
+                                            <label className="block text-white text-xs md:text-base font-semibold tracking-widest uppercase font-hanken">
+                                                QUANTITY IN CASES
+                                            </label>
+                                            {casesLeft <= 0 ? (
+                                                <span className="text-red-400 text-xs md:text-sm font-medium font-hanken">
+                                                    Out of Stock
+                                                </span>
+                                            ) : casesQty >= casesLeft ? (
+                                                <span className="text-amber-400 text-xs md:text-sm font-medium font-hanken">
+                                                    Max in Stock ({casesLeft})
+                                                </span>
+                                            ) : (
+                                                <span className="text-neutral-400 text-xs md:text-sm font-hanken">
+                                                    {casesLeft} available
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="flex items-center mt-3">
                                             <button
                                                 type="button"
                                                 onClick={handleDecrementCases}
-                                                disabled={casesQty <= 1}
-                                                className="size-5 sm:size-11 rounded-md border border-gold-500 bg-neutral-900/60 hover:bg-neutral-800 hover:border-gold-400/80 text-white flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                                className={cn(
+                                                    "size-5 sm:size-11 rounded-md border flex items-center justify-center transition-all",
+                                                    casesQty <= 1 || casesLeft <= 0
+                                                        ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
+                                                        : "border-gold-500 bg-neutral-900/60 hover:bg-neutral-800 hover:border-gold-400/80 text-white cursor-pointer",
+                                                )}
                                                 aria-label="Decrease cases quantity"
                                             >
                                                 <Minus className="size-4" />
                                             </button>
 
                                             <span className="w-24 text-center font-bold text-white text-body-c1 md:text-xl font-hanken">
-                                                {casesQty}
+                                                {casesLeft <= 0 ? 0 : casesQty}
                                             </span>
 
                                             <button
                                                 type="button"
                                                 onClick={handleIncrementCases}
-                                                disabled={casesQty >= casesLeft}
-                                                className="size-5 md:size-11 rounded-md border border-gold-500 bg-neutral-900/60 hover:bg-neutral-800 hover:border-gold-400/80 text-gold-500 flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                                className={cn(
+                                                    "size-5 md:size-11 rounded-md border flex items-center justify-center transition-all",
+                                                    casesQty >= casesLeft || casesLeft <= 0
+                                                        ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
+                                                        : "border-gold-500 bg-neutral-900/60 hover:bg-neutral-800 hover:border-gold-400/80 text-gold-500 cursor-pointer",
+                                                )}
                                                 aria-label="Increase cases quantity"
                                             >
                                                 <Plus className="size-3 md:size-4" />
@@ -492,21 +728,85 @@ export const ProductDetails: React.FC = () => {
 
                                 {/* Action CTA Buttons */}
                                 <div className="space-y-6 md:space-y-8 md:pt-12 pt-8">
-                                    <button
-                                        type="button"
-                                        onClick={handleBuyNow}
-                                        className="w-full h-10 md:h-13 bg-gold-g hover:opacity-95 text-black-900 font-hanken font-bold text-body-c1 md:text-base rounded-lg shadow-lg transition-all cursor-pointer flex items-center justify-center active:scale-[0.99]"
-                                    >
-                                        Buy Now
-                                    </button>
+                                    {(() => {
+                                        const isAdding =
+                                            isAddingProduct(product.id) ||
+                                            isAddingProduct(
+                                                (product as any).productId || "",
+                                            ) ||
+                                            isAddingProduct(
+                                                (product as any).slug || "",
+                                            ) ||
+                                            (id ? isAddingProduct(id) : false);
 
-                                    <button
-                                        type="button"
-                                        onClick={handleAddToCart}
-                                        className="w-full h-10 md:h-13 bg-transparent hover:bg-white/10 border border-white/40 hover:borsder-gold-400 text-white font-hanken font-medium text-body-c1 md:text-base rounded-lg transition-all cursor-pointer flex items-center justify-center active:scale-[0.99]"
-                                    >
-                                        Add to Cart
-                                    </button>
+                                        const isProductOutOfStock =
+                                            piecesLeft <= 0 && casesLeft <= 0;
+                                        const isCurrentSelectionInvalid =
+                                            (!includePieces && !includeCases) ||
+                                            (includePieces &&
+                                                (piecesQty <= 0 ||
+                                                    piecesQty > piecesLeft ||
+                                                    piecesLeft <= 0)) ||
+                                            (includeCases &&
+                                                (casesQty <= 0 ||
+                                                    casesQty > casesLeft ||
+                                                    casesLeft <= 0));
+
+                                        const isBtnDisabled =
+                                            isAdding ||
+                                            isProductOutOfStock ||
+                                            isCurrentSelectionInvalid;
+
+                                        return (
+                                            <>
+                                                <button
+                                                    type="button"
+                                                    disabled={isBtnDisabled}
+                                                    onClick={handleBuyNow}
+                                                    className={cn(
+                                                        "w-full h-10 md:h-13 font-hanken font-bold text-body-c1 md:text-base rounded-lg shadow-lg transition-all flex items-center justify-center active:scale-[0.99] gap-2",
+                                                        isBtnDisabled
+                                                            ? "bg-neutral-800/80 border border-neutral-800 text-neutral-500 cursor-not-allowed opacity-60"
+                                                            : "bg-gold-g hover:opacity-95 text-black-900 cursor-pointer",
+                                                    )}
+                                                >
+                                                    {isAdding ? (
+                                                        <>
+                                                            <Loader2 className="size-4.5 animate-spin text-black-900" />
+                                                            <span>Processing...</span>
+                                                        </>
+                                                    ) : isProductOutOfStock ? (
+                                                        "Out of Stock"
+                                                    ) : (
+                                                        "Buy Now"
+                                                    )}
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    disabled={isBtnDisabled}
+                                                    onClick={handleAddToCart}
+                                                    className={cn(
+                                                        "w-full h-10 md:h-13 font-hanken font-medium text-body-c1 md:text-base rounded-lg transition-all flex items-center justify-center active:scale-[0.99] gap-2",
+                                                        isBtnDisabled
+                                                            ? "bg-neutral-900/60 border border-neutral-800 text-neutral-500 cursor-not-allowed opacity-60"
+                                                            : "bg-transparent hover:bg-white/10 border border-white/40 hover:border-gold-400 text-white cursor-pointer",
+                                                    )}
+                                                >
+                                                    {isAdding ? (
+                                                        <>
+                                                            <Loader2 className="size-4.5 animate-spin text-gold-500" />
+                                                            <span>Adding to Cart...</span>
+                                                        </>
+                                                    ) : isProductOutOfStock ? (
+                                                        "Out of Stock"
+                                                    ) : (
+                                                        "Add to Cart"
+                                                    )}
+                                                </button>
+                                            </>
+                                        );
+                                    })()}
                                 </div>
                             </div>
                         </div>
@@ -522,9 +822,9 @@ export const ProductDetails: React.FC = () => {
                             </div>
 
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-10 md:p-10">
-                                {relatedProducts.map((relProduct) => (
+                                {relatedProducts.map((relProduct: any) => (
                                     <ProductCard
-                                        key={relProduct.id}
+                                        key={relProduct.productId || relProduct.id}
                                         product={relProduct}
                                     />
                                 ))}

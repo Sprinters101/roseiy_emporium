@@ -1,7 +1,7 @@
 export interface FilterOption {
     id: string;
     label: string;
-    count: number;
+    count: number | string;
 }
 
 export interface PriceRangeOption {

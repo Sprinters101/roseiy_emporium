@@ -10,8 +10,8 @@ import type {
     LoginPayload,
     LoginResponseData,
     CustomerUser,
-    Category,
-    Brand,
+    CategoriesResponseData,
+    BrandsResponseData,
     GetProductsParams,
     ProductsResponseData,
     ProductItem,
@@ -24,6 +24,7 @@ import type {
     UpdateProfilePayload,
     ChangePasswordPayload,
     AddressResponseItem,
+    AddressesResponseData,
     CreateAddressPayload,
     UpdateAddressPayload,
     TrackOrderPayload,
@@ -102,9 +103,10 @@ export const loginFunc = async (
  * GET /categories
  */
 export const getCategoriesFunc = async (): Promise<
-    ApiResponse<Category[]>
+    ApiResponse<CategoriesResponseData>
 > => {
-    const response = await apiClient.get<ApiResponse<Category[]>>("/categories");
+    const response =
+        await apiClient.get<ApiResponse<CategoriesResponseData>>("/categories");
     return response.data;
 };
 
@@ -112,8 +114,11 @@ export const getCategoriesFunc = async (): Promise<
  * 6. Get Public Brands List
  * GET /brands
  */
-export const getBrandsFunc = async (): Promise<ApiResponse<Brand[]>> => {
-    const response = await apiClient.get<ApiResponse<Brand[]>>("/brands");
+export const getBrandsFunc = async (): Promise<
+    ApiResponse<BrandsResponseData>
+> => {
+    const response =
+        await apiClient.get<ApiResponse<BrandsResponseData>>("/brands");
     return response.data;
 };
 
@@ -155,9 +160,8 @@ export const getProductBySlugFunc = async (
 export const getCartFunc = async (): Promise<
     ApiResponse<{ cart: CartResponseData }>
 > => {
-    const response = await apiClient.get<
-        ApiResponse<{ cart: CartResponseData }>
-    >("/cart");
+    const response =
+        await apiClient.get<ApiResponse<{ cart: CartResponseData }>>("/cart");
     return response.data;
 };
 
@@ -253,9 +257,8 @@ export const verifyCheckoutFunc = async (
 export const getAccountProfileFunc = async (): Promise<
     ApiResponse<CustomerUser>
 > => {
-    const response = await apiClient.get<ApiResponse<CustomerUser>>(
-        "/account/profile",
-    );
+    const response =
+        await apiClient.get<ApiResponse<CustomerUser>>("/account/profile");
     return response.data;
 };
 
@@ -296,11 +299,12 @@ export const changePasswordFunc = async (
  * GET /account/addresses
  */
 export const getAddressesFunc = async (): Promise<
-    ApiResponse<AddressResponseItem[]>
+    ApiResponse<AddressesResponseData>
 > => {
-    const response = await apiClient.get<ApiResponse<AddressResponseItem[]>>(
-        "/account/addresses",
-    );
+    const response =
+        await apiClient.get<ApiResponse<AddressesResponseData>>(
+            "/account/addresses",
+        );
     return response.data;
 };
 
@@ -370,9 +374,8 @@ export const trackOrderFunc = async (
 export const getCustomerOrdersFunc = async (): Promise<
     ApiResponse<OrderSummaryItem[]>
 > => {
-    const response = await apiClient.get<ApiResponse<OrderSummaryItem[]>>(
-        "/orders",
-    );
+    const response =
+        await apiClient.get<ApiResponse<OrderSummaryItem[]>>("/orders");
     return response.data;
 };
 

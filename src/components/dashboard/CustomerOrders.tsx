@@ -1,17 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { useCart } from "@/context/CartContext";
+import React, { useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import { CustomerOrdersSkeleton } from "./CustomerOrdersSkeleton";
 import { OrdersTabs } from "./orders/OrdersTabs";
 import { OrderItemRow } from "./orders/OrderItemRow";
 import { OrdersEmptyState } from "./orders/OrdersEmptyState";
-import {
-    ONGOING_ORDERS,
-    DELIVERED_ORDERS,
-    type OrderItemData,
-    type OrderTabType,
-} from "./orders/types";
-import { donJulioReposadoImg } from "@/lib/site_data";
+import { type OrderItemData, type OrderTabType } from "./orders/types";
+import { useGetCustomerOrders } from "@/service/queries";
+import { useReorder } from "@/service/mutation";
+import type { OrderSummaryItem } from "@/service/types";
+import { extractImageFromObject } from "@/context/CartContext";
 
 export interface CustomerOrdersProps {
     isLoading?: boolean;
@@ -20,46 +17,101 @@ export interface CustomerOrdersProps {
 export const CustomerOrders: React.FC<CustomerOrdersProps> = ({
     isLoading: propIsLoading,
 }) => {
-    const { addToCart } = useCart();
     const [activeTab, setActiveTab] = useState<OrderTabType>("ongoing");
-    const [simulatedLoading, setSimulatedLoading] = useState<boolean>(
-        propIsLoading === undefined,
-    );
-
-    useEffect(() => {
-        if (propIsLoading !== undefined) return;
-
-        const timer = setTimeout(() => {
-            setSimulatedLoading(false);
-        }, 600);
-
-        return () => clearTimeout(timer);
-    }, [propIsLoading]);
+    const { data: ordersData, isLoading: queryIsLoading } =
+        useGetCustomerOrders();
+    const reorderMutation = useReorder();
 
     const loading =
-        propIsLoading !== undefined ? propIsLoading : simulatedLoading;
+        propIsLoading !== undefined ? propIsLoading : queryIsLoading;
+
+    const rawOrders: OrderSummaryItem[] = React.useMemo(() => {
+        if (!ordersData?.data) return [];
+        if (Array.isArray(ordersData.data)) return ordersData.data;
+        if (
+            Array.isArray(
+                (ordersData.data as { orders?: OrderSummaryItem[] }).orders,
+            )
+        ) {
+            return (
+                (ordersData.data as { orders: OrderSummaryItem[] }).orders || []
+            );
+        }
+        return [];
+    }, [ordersData]);
+
+    const mappedOrders: OrderItemData[] = React.useMemo(() => {
+        return rawOrders.map((order, idx) => {
+            const isDelivered =
+                order.status === "delivered" || order.status === "completed";
+
+            const itemsCount =
+                order.items?.reduce(
+                    (sum, i) => sum + (i.quantity || 1),
+                    0,
+                ) ||
+                order.itemsCount ||
+                order.items?.length ||
+                1;
+
+            const dateString = order.createdAt
+                ? new Date(order.createdAt).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                  })
+                : order.date || "Recent";
+
+            const formattedTotal =
+                typeof order.total === "number"
+                    ? `₦${order.total.toLocaleString()}`
+                    : typeof order.total === "string" &&
+                        order.total.startsWith("₦")
+                      ? order.total
+                      : `₦${Number(order.total || 0).toLocaleString()}`;
+
+            const thumbnails: string[] = (
+                order.thumbnails ||
+                order.items?.map((item) => extractImageFromObject(item)) ||
+                []
+            ).filter(Boolean);
+
+            return {
+                id: order.orderId || `order-${idx}`,
+                orderNumber: order.orderNumber,
+                itemsCount,
+                date: dateString,
+                totalAmount: formattedTotal,
+                status: (isDelivered ? "delivered" : "ongoing") as
+                    | "ongoing"
+                    | "delivered",
+                thumbnails,
+            };
+        });
+    }, [rawOrders]);
 
     if (loading) {
         return <CustomerOrdersSkeleton />;
     }
 
-    const ongoingCount = ONGOING_ORDERS.length;
-    const deliveredCount = 25; // Design mock total
+    const ongoingOrders = mappedOrders.filter((o) => o.status === "ongoing");
+    const deliveredOrders = mappedOrders.filter((o) => o.status === "delivered");
+
+    const ongoingCount = ongoingOrders.length;
+    const deliveredCount = deliveredOrders.length;
 
     const currentOrders =
-        activeTab === "ongoing" ? ONGOING_ORDERS : DELIVERED_ORDERS;
+        activeTab === "ongoing" ? ongoingOrders : deliveredOrders;
 
-    const handleOrderAgain = (order: OrderItemData) => {
-        addToCart(
-            {
-                id: `reorder-${order.id}`,
-                name: `Order ${order.orderNumber} Items`,
-                price: 25000,
-                image: order.thumbnails[0] || donJulioReposadoImg,
-            },
-            1,
-        );
-        toast.success(`Items from Order ${order.orderNumber} added to cart!`);
+    const handleOrderAgain = async (order: OrderItemData) => {
+        try {
+            await reorderMutation.mutateAsync(order.orderNumber);
+            toast.success(
+                `Items from Order ${order.orderNumber} added to cart!`,
+            );
+        } catch {
+            // Handled by onError in reorder mutation hook
+        }
     };
 
     return (
