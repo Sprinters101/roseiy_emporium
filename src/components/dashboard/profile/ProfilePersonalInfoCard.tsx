@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { toast } from "@/components/ui/sonner";
 
 export interface ProfilePersonalInfoData {
     firstName: string;
@@ -10,15 +9,24 @@ export interface ProfilePersonalInfoData {
 
 export interface ProfilePersonalInfoCardProps {
     initialData: ProfilePersonalInfoData;
-    onSave: (data: ProfilePersonalInfoData) => void;
+    onSave: (data: ProfilePersonalInfoData) => Promise<void> | void;
+    isLoading?: boolean;
 }
 
 export const ProfilePersonalInfoCard: React.FC<
     ProfilePersonalInfoCardProps
-> = ({ initialData, onSave }) => {
+> = ({ initialData, onSave, isLoading = false }) => {
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [formData, setFormData] = useState<ProfilePersonalInfoData>(initialData);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isSaving, setIsSaving] = useState<boolean>(false);
+
+    // Sync formData if initialData changes while not editing
+    React.useEffect(() => {
+        if (!isEditing) {
+            setFormData(initialData);
+        }
+    }, [initialData, isEditing]);
 
     const handleStartEditing = () => {
         setFormData(initialData);
@@ -41,12 +49,18 @@ export const ProfilePersonalInfoCard: React.FC<
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!validate()) return;
 
-        onSave(formData);
-        setIsEditing(false);
-        toast.success("Personal information updated successfully!");
+        setIsSaving(true);
+        try {
+            await onSave(formData);
+            setIsEditing(false);
+        } catch {
+            // Handled in mutation onError
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -58,13 +72,24 @@ export const ProfilePersonalInfoCard: React.FC<
                 </h2>
 
                 {isEditing ? (
-                    <button
-                        type="button"
-                        onClick={handleSave}
-                        className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-4 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer"
-                    >
-                        Save Changes
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            disabled={isSaving}
+                            onClick={() => setIsEditing(false)}
+                            className="bg-transparent border border-neutral-700/80 text-neutral-300 rounded-md text-xs font-hanken px-3 py-1.5 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            disabled={isSaving || isLoading}
+                            onClick={handleSave}
+                            className="bg-gold-gradient text-black-900 font-semibold rounded-md text-xs font-hanken px-4 py-1.5 hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
+                        >
+                            {isSaving ? "Saving..." : "Save Changes"}
+                        </button>
+                    </div>
                 ) : (
                     <button
                         type="button"
