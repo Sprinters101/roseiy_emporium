@@ -3,13 +3,13 @@ import { useAuth } from "@/context/AuthContext";
 
 /* Auth Guard: Protects client views from guests */
 export const ProtectedRoute = () => {
-    // const { isAuthenticated } = useAuth();
-    // const location = useLocation();
+    const { isAuthenticated } = useAuth();
+    const location = useLocation();
 
-    // if (!isAuthenticated) {
-    //     // Redirect to login, but save the current URL so we can bounce them back after logging in
-    //     return <Navigate to="/login" state={{ from: location }} replace />;
-    // }
+    if (!isAuthenticated) {
+        // Redirect to login, but save the current URL so we can bounce them back after logging in
+        return <Navigate to="/login" state={{ from: location }} replace />;
+    }
 
     return <Outlet />;
 };
