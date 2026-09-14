@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { PenLine } from "lucide-react";
+import { PenLine, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddressModal } from "@/components/dashboard/addresses/AddressModal";
+import { DeleteAddressModal } from "@/components/dashboard/addresses/DeleteAddressModal";
 import type {
     AddressItem,
     AddressFormData,
@@ -21,6 +22,10 @@ export interface LoggedInShippingInfoProps {
         editId?: string,
         successCallback?: () => void,
     ) => Promise<void> | void;
+    onDeleteAddress?: (
+        id: string,
+        successCallback?: () => void,
+    ) => Promise<void> | void;
     isLoading?: boolean;
 }
 
@@ -30,11 +35,19 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
     onSelectAddress,
     onAddNewAddress,
     onEditAddress,
+    onDeleteAddress,
     isLoading = false,
 }) => {
     const [isMultiView, setIsMultiView] = useState<boolean>(false);
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [addressToEdit, setAddressToEdit] = useState<AddressItem | null>(null);
+
+    // Delete modal states
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+    const [addressToDelete, setAddressToDelete] = useState<AddressItem | null>(
+        null,
+    );
+    const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
     const selectedAddress =
         addresses.find((a) => a.id === selectedAddressId) ||
@@ -49,6 +62,24 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
     const handleOpenEditModal = (addr: AddressItem) => {
         setAddressToEdit(addr);
         setModalOpen(true);
+    };
+
+    const handleOpenDeleteModal = (addr: AddressItem) => {
+        setAddressToDelete(addr);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!addressToDelete || !onDeleteAddress) return;
+        setIsDeleting(true);
+        try {
+            await onDeleteAddress(addressToDelete.id, () => {
+                setIsDeleteModalOpen(false);
+                setAddressToDelete(null);
+            });
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     const handleSaveAddress = async (
@@ -145,15 +176,31 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                             </div>
                         </div>
 
-                        {/* Right: Edit Button */}
-                        <button
-                            type="button"
-                            onClick={() => handleOpenEditModal(selectedAddress)}
-                            className="size-8 sm:size-9 rounded-full bg-black-900 border border-neutral-800/80 flex items-center justify-center text-white hover:bg-neutral-800 hover:text-gold-400 hover:border-gold-400/40 transition-all cursor-pointer shrink-0"
-                            aria-label="Edit address"
-                        >
-                            <PenLine className="size-3.5 sm:size-4" />
-                        </button>
+                        {/* Right: Actions */}
+                        <div className="flex items-center gap-2 shrink-0">
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    handleOpenEditModal(selectedAddress)
+                                }
+                                className="size-8 sm:size-9 rounded-full bg-black-900 border border-neutral-800/80 flex items-center justify-center text-white hover:bg-neutral-800 hover:text-gold-400 hover:border-gold-400/40 transition-all cursor-pointer shrink-0"
+                                aria-label="Edit address"
+                            >
+                                <PenLine className="size-3.5 sm:size-4" />
+                            </button>
+                            {onDeleteAddress && addresses.length > 1 && (
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        handleOpenDeleteModal(selectedAddress)
+                                    }
+                                    className="size-8 sm:size-9 rounded-full bg-black-900 border border-neutral-800/80 flex items-center justify-center text-red-500 hover:bg-red-500/10 hover:border-red-500/30 transition-all cursor-pointer shrink-0"
+                                    aria-label="Delete address"
+                                >
+                                    <Trash2 className="size-3.5 sm:size-4" />
+                                </button>
+                            )}
+                        </div>
                     </div>
                 ) : (
                     <div className="py-6 flex flex-col items-center justify-center gap-3 text-center">
@@ -216,18 +263,36 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                                     </div>
                                 </div>
 
-                                {/* Right: Edit Button */}
-                                <button
-                                    type="button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleOpenEditModal(address);
-                                    }}
-                                    className="size-8 sm:size-9 rounded-full bg-black-900 border border-neutral-800/80 flex items-center justify-center text-white hover:bg-neutral-800 hover:text-gold-400 hover:border-gold-400/40 transition-all cursor-pointer shrink-0"
-                                    aria-label={`Edit ${address.title}`}
-                                >
-                                    <PenLine className="size-3.5 sm:size-4" />
-                                </button>
+                                {/* Right: Action Buttons (Edit & Delete) */}
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleOpenEditModal(address);
+                                        }}
+                                        className="size-8 sm:size-9 rounded-full bg-black-900 border border-neutral-800/80 flex items-center justify-center text-white hover:bg-neutral-800 hover:text-gold-400 hover:border-gold-400/40 transition-all cursor-pointer shrink-0"
+                                        aria-label={`Edit ${address.title}`}
+                                    >
+                                        <PenLine className="size-3.5 sm:size-4" />
+                                    </button>
+                                    {onDeleteAddress &&
+                                        addresses.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleOpenDeleteModal(
+                                                        address,
+                                                    );
+                                                }}
+                                                className="size-8 sm:size-9 rounded-full bg-black-900 border border-neutral-800/80 flex items-center justify-center text-red-500 hover:bg-red-500/10 hover:border-red-500/30 transition-all cursor-pointer shrink-0"
+                                                aria-label={`Delete ${address.title}`}
+                                            >
+                                                <Trash2 className="size-3.5 sm:size-4" />
+                                            </button>
+                                        )}
+                                </div>
                             </div>
                         );
                     })}
@@ -240,6 +305,15 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                 onOpenChange={setModalOpen}
                 addressToEdit={addressToEdit}
                 onSave={handleSaveAddress}
+            />
+
+            {/* Delete Confirmation Modal */}
+            <DeleteAddressModal
+                open={isDeleteModalOpen}
+                onOpenChange={setIsDeleteModalOpen}
+                address={addressToDelete}
+                onConfirm={handleConfirmDelete}
+                isDeleting={isDeleting}
             />
         </div>
     );

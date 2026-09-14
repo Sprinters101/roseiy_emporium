@@ -26,6 +26,7 @@ import {
     useInitializeCheckout,
     useCreateAddress,
     useUpdateAddress,
+    useDeleteAddress,
     useUpdateAccountProfile,
 } from "@/service/mutation";
 import {
@@ -79,6 +80,7 @@ export const Checkout: React.FC = () => {
     const initializeCheckoutMutation = useInitializeCheckout();
     const createAddressMutation = useCreateAddress();
     const updateAddressMutation = useUpdateAddress();
+    const deleteAddressMutation = useDeleteAddress();
     const updateProfileMutation = useUpdateAccountProfile();
 
     const { data: serverAddressesData, isLoading: isAddressesLoading } =
@@ -437,6 +439,36 @@ export const Checkout: React.FC = () => {
         }
     };
 
+    const handleDeleteAddress = async (
+        id: string,
+        successCallback?: () => void,
+    ) => {
+        if (isAuthenticated && !id.startsWith("addr-")) {
+            try {
+                await deleteAddressMutation.mutateAsync(id);
+                if (selectedAddressId === id) {
+                    const remaining = addresses.filter((a) => a.id !== id);
+                    if (remaining.length > 0) {
+                        setSelectedAddressId(remaining[0].id);
+                    }
+                }
+                successCallback?.();
+            } catch {
+                // Handled by mutation onError toast
+            }
+        } else {
+            setLocalAddresses((prev) => prev.filter((a) => a.id !== id));
+            toast.success("Address deleted.");
+            if (selectedAddressId === id) {
+                const remaining = addresses.filter((a) => a.id !== id);
+                if (remaining.length > 0) {
+                    setSelectedAddressId(remaining[0].id);
+                }
+            }
+            successCallback?.();
+        }
+    };
+
     // Logged-in direct payment handler
     const handlePayOrder = async () => {
         if (displayItems.length === 0) {
@@ -604,6 +636,7 @@ export const Checkout: React.FC = () => {
                                 onSelectAddress={handleSelectAddress}
                                 onAddNewAddress={handleAddNewAddress}
                                 onEditAddress={handleEditAddress}
+                                onDeleteAddress={handleDeleteAddress}
                                 isLoading={isAddressesLoading}
                             />
 
