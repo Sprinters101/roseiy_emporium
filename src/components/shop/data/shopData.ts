@@ -1,6 +1,7 @@
 export interface FilterOption {
     id: string;
     label: string;
+    slug?: string;
     count: number | string;
 }
 

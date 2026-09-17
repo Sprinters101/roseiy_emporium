@@ -182,26 +182,11 @@ export const ProfilePersonalInfoCard: React.FC<
                     <input
                         id="profile-phone-number"
                         type="tel"
-                        disabled={!isEditing}
+                        disabled={true}
                         value={formData.phoneNumber}
-                        onChange={(e) =>
-                            setFormData((prev) => ({
-                                ...prev,
-                                phoneNumber: e.target.value,
-                            }))
-                        }
-                        placeholder="Enter Phone Number"
-                        className={`w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-white text-sm placeholder:text-neutral-500 font-hanken transition-colors ${
-                            isEditing
-                                ? "focus:border-gold-400 focus:outline-none"
-                                : "cursor-default text-white"
-                        }`}
+                        placeholder="Phone Number"
+                        className="w-full bg-black-900/60 border border-neutral-800/80 rounded-lg px-4 py-3.5 text-neutral-400 text-sm font-hanken cursor-not-allowed opacity-75 select-none"
                     />
-                    {errors.phoneNumber && (
-                        <span className="text-xs text-red-400 font-medium">
-                            {errors.phoneNumber}
-                        </span>
-                    )}
                 </div>
 
                 {/* Email Address (Disabled / Non-editable) */}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, ChevronDown, X } from "lucide-react";
 import { PRICE_RANGES, type FilterOption } from "./data/shopData";
 import { CustomCheckbox } from "@/components/common/CustomCheckbox";
+import { isCategoryMatch, isBrandMatch } from "./data/useShopFilters";
 
 interface ShopSidebarProps {
     selectedCategories: string[];
@@ -126,8 +127,10 @@ export const ShopSidebar = ({
                             </p>
                         ) : (
                             categoriesList.map((cat) => {
-                                const isChecked = selectedCategories.includes(
-                                    cat.id,
+                                const isChecked = selectedCategories.some(
+                                    (sel) =>
+                                        isCategoryMatch(cat, sel) ||
+                                        sel === cat.id,
                                 );
                                 return (
                                     <CustomCheckbox
@@ -198,8 +201,9 @@ export const ShopSidebar = ({
                             </p>
                         ) : (
                             filteredBrandList.map((b) => {
-                                const isChecked = selectedBrands.includes(
-                                    b.id,
+                                const isChecked = selectedBrands.some(
+                                    (sel) =>
+                                        isBrandMatch(b, sel) || sel === b.id,
                                 );
                                 return (
                                     <CustomCheckbox

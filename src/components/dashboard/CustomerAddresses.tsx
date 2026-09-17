@@ -3,6 +3,7 @@ import { toast } from "@/components/ui/sonner";
 import { Plus } from "lucide-react";
 import { AddressCard } from "./addresses/AddressCard";
 import { AddressModal } from "./addresses/AddressModal";
+import { DeleteAddressModal } from "./addresses/DeleteAddressModal";
 import { AddressesSkeleton } from "./addresses/AddressesSkeleton";
 import { AddressesEmptyState } from "./addresses/AddressesEmptyState";
 import { type AddressItem, type AddressFormData } from "./addresses/types";
@@ -34,6 +35,13 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
         null,
     );
     const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+
+    // Delete Confirmation Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+    const [addressToDelete, setAddressToDelete] = useState<AddressItem | null>(
+        null,
+    );
+    const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
     // Normalizing addresses from backend response
     const addresses: AddressItem[] = React.useMemo(() => {
@@ -115,8 +123,17 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
         setIsModalOpen(true);
     };
 
-    const handleDeleteAddress = async (id: string) => {
+    const handleOpenDeleteModal = (id: string) => {
+        const target = addresses.find((a) => a.id === id) || null;
+        setAddressToDelete(target || ({ id } as any));
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!addressToDelete) return;
+        setIsDeleting(true);
         try {
+            const id = addressToDelete.id || (addressToDelete as any).addressId;
             await deleteAddressMutation.mutateAsync(id);
             if (selectedAddressId === id && addresses.length > 1) {
                 const remaining = addresses.filter((a) => a.id !== id);
@@ -124,8 +141,12 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
                     setSelectedAddressId(remaining[0].id);
                 }
             }
+            setIsDeleteModalOpen(false);
+            setAddressToDelete(null);
         } catch {
             // Handled in mutation onError toast
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -214,7 +235,7 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
                             isSelected={selectedAddressId === address.id}
                             onSelect={handleSelectAddress}
                             onEdit={handleOpenEditModal}
-                            onDelete={handleDeleteAddress}
+                            onDelete={handleOpenDeleteModal}
                         />
                     ))}
                 </div>
@@ -226,6 +247,15 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
                 onOpenChange={setIsModalOpen}
                 addressToEdit={editingAddress}
                 onSave={handleSaveAddress}
+            />
+
+            {/* Delete Confirmation Dialog Modal */}
+            <DeleteAddressModal
+                open={isDeleteModalOpen}
+                onOpenChange={setIsDeleteModalOpen}
+                address={addressToDelete}
+                onConfirm={handleConfirmDelete}
+                isDeleting={isDeleting}
             />
         </div>
     );
