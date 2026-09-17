@@ -1,6 +1,7 @@
 import { X, ChevronRight, SlidersHorizontal } from "lucide-react";
 import { CustomDropdown } from "../common/CustomDropdown";
 import { PRICE_RANGES, type FilterOption } from "./data/shopData";
+import { isCategoryMatch, isBrandMatch } from "./data/useShopFilters";
 
 interface ShopHeaderProps {
     sortBy: string;
@@ -84,9 +85,12 @@ export const ShopHeader = ({
                 <div className="md:flex items-center gap-3 overflow-x-auto scrollbar-none max-w-full hidden">
                     <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
                         {selectedCategories.map((catId) => {
-                            const label =
-                                categoriesList.find((c) => c.id === catId)
-                                    ?.label || catId;
+                            const matched = categoriesList.find(
+                                (c) =>
+                                    isCategoryMatch(c, catId) ||
+                                    c.id === catId,
+                            );
+                            const label = matched?.label || catId;
                             return (
                                 <button
                                     key={`cat-${catId}`}
@@ -101,9 +105,12 @@ export const ShopHeader = ({
                         })}
 
                         {selectedBrands.map((brandId) => {
-                            const label =
-                                brandsList.find((b) => b.id === brandId)
-                                    ?.label || brandId;
+                            const matched = brandsList.find(
+                                (b) =>
+                                    isBrandMatch(b, brandId) ||
+                                    b.id === brandId,
+                            );
+                            const label = matched?.label || brandId;
                             return (
                                 <button
                                     key={`brand-${brandId}`}

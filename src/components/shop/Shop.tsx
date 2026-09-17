@@ -104,6 +104,7 @@ export const Shop = () => {
                 return {
                     id: c.categoryId,
                     label: c.name,
+                    slug: c.slug || c.name?.toLowerCase().replace(/\s+/g, "-"),
                     count,
                 };
             });
@@ -147,6 +148,7 @@ export const Shop = () => {
                 return {
                     id: b.brandId,
                     label: b.name,
+                    slug: b.slug || b.name?.toLowerCase().replace(/\s+/g, "-"),
                     count,
                 };
             });
@@ -169,7 +171,7 @@ export const Shop = () => {
         toggleBrand,
         togglePrice,
         clearAllFilters,
-    } = useShopFilters(allProducts as any, brandsList);
+    } = useShopFilters(allProducts as any, brandsList, categoriesList);
 
     return (
         <div className="bg-black-900 min-h-screen pb-24">
