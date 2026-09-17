@@ -4,8 +4,6 @@ import {
     Heart,
     ChevronRight,
     ShoppingBag,
-    Plus,
-    Minus,
     Loader2,
 } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
@@ -14,7 +12,8 @@ import { products as mockProducts } from "@/lib/site_data";
 import { ProductCard } from "@/components/common/ProductCard";
 import Container from "@/components/common/Container";
 import type { Product } from "@/config/types";
-import { toast } from "@/components/ui/sonner";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface WishlistItemCardProps {
     item: Product;
@@ -22,25 +21,69 @@ interface WishlistItemCardProps {
 }
 
 const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
-    const {
-        addToCart,
-        updateQuantity,
-        removeFromCart,
-        cartItems,
-        isAddingProduct,
-    } = useCart();
+    const { addToCart, cartItems, isAddingProduct } = useCart();
 
-    const cartItem = cartItems.find((ci) => ci.id === item.id);
+    const resolvedId = String(
+        (item as any).slug || (item as any).productId || item.id || "",
+    );
+    const cartId = String((item as any).productId || item.id || resolvedId);
+
+    const cartItem = cartItems.find(
+        (ci) => ci.id === cartId || ci.id === item.id || ci.id === resolvedId,
+    );
     const inCartQty = cartItem ? cartItem.quantity : 0;
-    const isInCart = inCartQty > 0;
 
-    const maxStock =
+    // Resolve stock metrics
+    const pieceUnit = (item as any).sellingUnits?.find((u: any) =>
+        u.name?.toLowerCase().includes("piece"),
+    );
+    const cartonUnit = (item as any).sellingUnits?.find(
+        (u: any) =>
+            u.name?.toLowerCase().includes("carton") ||
+            u.name?.toLowerCase().includes("case"),
+    );
+    const primaryUnit = (item as any).sellingUnits?.[0];
+
+    const piecesLeft =
         item.piecesLeft !== undefined
             ? item.piecesLeft
-            : item.casesLeft !== undefined
-              ? item.casesLeft
+            : pieceUnit
+              ? pieceUnit.stock
+              : primaryUnit
+                ? primaryUnit.stock
+                : undefined;
+
+    const casesLeft =
+        item.casesLeft !== undefined
+            ? item.casesLeft
+            : cartonUnit
+              ? cartonUnit.stock
+              : undefined;
+
+    const maxStock =
+        piecesLeft !== undefined
+            ? piecesLeft
+            : casesLeft !== undefined
+              ? casesLeft
               : Infinity;
-    const isOutOfStock = maxStock <= 0 || inCartQty >= maxStock;
+
+    const isAdding =
+        isAddingProduct(cartId) ||
+        isAddingProduct(item.id) ||
+        isAddingProduct((item as any).productId || "") ||
+        isAddingProduct((item as any).slug || "");
+
+    const isOutOfStock = maxStock <= 0;
+    const isMaxInCart = inCartQty >= maxStock;
+    const isButtonDisabled = isOutOfStock || isMaxInCart || isAdding;
+
+    // Add item to cart
+    const handleAddToCart = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isOutOfStock || isMaxInCart) return;
+        addToCart(item);
+    };
 
     // Format currency
     const formattedPrice = new Intl.NumberFormat("en-NG", {
@@ -51,45 +94,20 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
         .format(item.price)
         .replace("NGN", "₦");
 
-    // Increment quantity in cart
-    const handleCartIncrement = () => {
-        if (inCartQty < maxStock) {
-            updateQuantity(item.id, inCartQty + 1);
-        } else {
-            toast.warning(`Maximum stock limit reached (${maxStock})`);
-        }
-    };
-
-    // Decrement quantity in cart (removes from cart if quantity hits 0)
-    const handleCartDecrement = () => {
-        if (inCartQty > 1) {
-            updateQuantity(item.id, inCartQty - 1);
-        } else {
-            removeFromCart(item.id);
-            toast.info(`${item.name} removed from cart`);
-        }
-    };
-
-    // Add item to cart initially
-    const handleAddToCart = () => {
-        if (isOutOfStock) return;
-        addToCart(item, 1);
-    };
-
     // Subtitle specifications text
     const specs: string[] = [];
     if (item.volume) specs.push(item.volume);
 
-    if (isInCart) {
+    if (inCartQty > 0) {
         specs.push(`In Cart: ${inCartQty}`);
-    } else if (item.piecesLeft !== undefined && item.casesLeft !== undefined) {
+    } else if (piecesLeft !== undefined && casesLeft !== undefined) {
         specs.push(
-            `${item.casesLeft > 0 ? `${item.casesLeft} Case` : ""}${
-                item.casesLeft > 1 ? "s" : ""
-            } ${item.piecesLeft > 0 ? `and ${item.piecesLeft} Pieces` : ""}`,
+            `${casesLeft > 0 ? `${casesLeft} Case` : ""}${
+                casesLeft > 1 ? "s" : ""
+            } ${piecesLeft > 0 ? `and ${piecesLeft} Pieces` : ""}`,
         );
-    } else if (item.piecesLeft !== undefined) {
-        specs.push(`${item.piecesLeft} Pieces Left`);
+    } else if (piecesLeft !== undefined) {
+        specs.push(`${piecesLeft} Pieces Left`);
     } else if (isOutOfStock) {
         specs.push("Out of Stock");
     }
@@ -100,7 +118,7 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
             {/* MOBILE CARD VIEW */}
             <div className="md:hidden group relative w-full bg-black-800 rounded-2xl p-4 shadow-xl border border-white/5 flex gap-3.5 items-center">
                 {/* Product Image Box */}
-                <Link to={`/product/${item.id}`} className="block shrink-0">
+                <Link to={`/product/${resolvedId}`} className="block shrink-0">
                     <div className="w-28 h-32 bg-black-900 rounded-xl p-2 flex items-center justify-center border border-neutral-800/60 overflow-hidden">
                         <img
                             src={item.image}
@@ -115,7 +133,9 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
                     {/* Top Row: Category Label & Trash Icon */}
                     <div className="flex items-center justify-between gap-2">
                         <span className="text-[10px] font-bold text-gold-500 uppercase tracking-widest font-hanken truncate">
-                            {item.category || "Champagne"}
+                            {typeof item.category === "object" && item.category !== null
+                                ? (item.category as any).name
+                                : item.category || "Champagne"}
                         </span>
 
                         {/* Trash Button */}
@@ -131,7 +151,7 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
                     </div>
 
                     {/* Title */}
-                    <Link to={`/product/${item.id}`}>
+                    <Link to={`/product/${resolvedId}`}>
                         <h3 className="font-playfair text-base font-bold text-white leading-snug line-clamp-2 hover:text-gold-300 transition-colors">
                             {item.name}
                         </h3>
@@ -147,71 +167,34 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
                         {formattedPrice}
                     </div>
 
-                    {/* Bottom Action: Show Stepper IF in cart, ELSE show Add to Cart button */}
+                    {/* Bottom Action: Standard Add to Cart button */}
                     <div className="mt-1">
-                        {isInCart ? (
-                            /* Gold Quantity Stepper Counter */
-                            <div className="inline-flex items-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={handleCartDecrement}
-                                    className="size-7 rounded-md border border-gold-500/80 text-gold-500 hover:bg-gold-500/10 flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-                                    aria-label="Decrease quantity"
-                                >
-                                    <Minus className="size-3.5" />
-                                </button>
-
-                                <span className="text-white font-hanken font-bold text-sm min-w-5 text-center">
-                                    {inCartQty}
+                        <Button
+                            type="button"
+                            disabled={isButtonDisabled}
+                            onClick={handleAddToCart}
+                            className={cn(
+                                "h-9 px-4 font-hanken font-medium text-xs rounded-sm transition-all duration-300 w-fit",
+                                isAdding
+                                    ? "bg-neutral-800/80 border border-neutral-700 text-neutral-300 cursor-not-allowed"
+                                    : isButtonDisabled
+                                      ? "bg-neutral-800/80 border border-neutral-800 text-neutral-500 cursor-not-allowed hover:bg-neutral-800 hover:text-neutral-500"
+                                      : "bg-[#1A1A1A] hover:bg-white/20 border border-white text-white cursor-pointer",
+                            )}
+                        >
+                            {isAdding ? (
+                                <span className="flex items-center justify-center gap-1.5">
+                                    <Loader2 className="size-3.5 animate-spin text-gold-500" />
+                                    <span>Adding...</span>
                                 </span>
-
-                                <button
-                                    type="button"
-                                    onClick={handleCartIncrement}
-                                    disabled={inCartQty >= maxStock}
-                                    className="size-7 rounded-md border border-gold-500/80 text-gold-500 hover:bg-gold-500/10 flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-95"
-                                    aria-label="Increase quantity"
-                                >
-                                    <Plus className="size-3.5" />
-                                </button>
-                            </div>
-                        ) : (
-                            /* Add to Cart Button (Mobile) */
-                            (() => {
-                                const isAdding =
-                                    isAddingProduct(item.id) ||
-                                    isAddingProduct(
-                                        (item as any).productId || "",
-                                    ) ||
-                                    isAddingProduct((item as any).slug || "");
-
-                                return (
-                                    <button
-                                        type="button"
-                                        disabled={isOutOfStock || isAdding}
-                                        onClick={handleAddToCart}
-                                        className={`h-8 px-4 font-hanken font-medium text-xs rounded-sm border transition-all duration-300 cursor-pointer shadow-md flex items-center gap-1.5 ${
-                                            isAdding
-                                                ? "border-neutral-700 bg-neutral-800 text-neutral-300 cursor-not-allowed"
-                                                : isOutOfStock
-                                                ? "border-neutral-800 bg-neutral-900/60 text-neutral-500 cursor-not-allowed"
-                                                : "border-white text-white bg-transparent hover:bg-white hover:text-black active:scale-95"
-                                        }`}
-                                    >
-                                        {isAdding ? (
-                                            <>
-                                                <Loader2 className="size-3 animate-spin text-gold-500" />
-                                                <span>Adding...</span>
-                                            </>
-                                        ) : isOutOfStock ? (
-                                            "Out of Stock"
-                                        ) : (
-                                            "Add to Cart"
-                                        )}
-                                    </button>
-                                );
-                            })()
-                        )}
+                            ) : isOutOfStock ? (
+                                "Out of Stock"
+                            ) : isMaxInCart ? (
+                                "Max in Cart"
+                            ) : (
+                                "Add to Cart"
+                            )}
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -232,7 +215,7 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
                     </button>
 
                     {/* Product Image Box */}
-                    <Link to={`/product/${item.id}`} className="block shrink-0">
+                    <Link to={`/product/${resolvedId}`} className="block shrink-0">
                         <div className="size-37.5 bg-black-900 rounded-lg p-2.5 flex items-center justify-center overflow-hidden border border-neutral-900">
                             <img
                                 src={item.image}
@@ -245,10 +228,12 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
                     {/* Item Info */}
                     <div className="flex-1 min-w-0">
                         <span className="block text-xs font-bold text-gold-500 uppercase tracking-widest font-hanken mb-1">
-                            {item.category || "Beverage"}
+                            {typeof item.category === "object" && item.category !== null
+                                ? (item.category as any).name
+                                : item.category || "Beverage"}
                         </span>
 
-                        <Link to={`/product/${item.id}`}>
+                        <Link to={`/product/${resolvedId}`}>
                             <h3 className="font-playfair text-2xl font-bold text-white leading-snug hover:text-gold-300 transition-colors">
                                 {item.name}
                             </h3>
@@ -264,71 +249,34 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
                     </div>
                 </div>
 
-                {/* Right Side: Show Stepper IF in cart, ELSE show Add to Cart button */}
+                {/* Right Side: Standard Add to Cart button */}
                 <div className="shrink-0 flex items-center gap-4">
-                    {isInCart ? (
-                        /* Gold Stepper Counter */
-                        <div className="flex items-center gap-3 bg-black-900  rounded-lg p-2 shadow-inner">
-                            <button
-                                type="button"
-                                onClick={handleCartDecrement}
-                                className="size-8 rounded-md border border-gold-500/80 text-gold-500 hover:bg-gold-500/10 flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-                                aria-label="Decrease quantity"
-                            >
-                                <Minus className="size-4" />
-                            </button>
-
-                            <span className="text-white font-hanken font-bold text-base px-2 min-w-6 text-center">
-                                {inCartQty}
+                    <Button
+                        type="button"
+                        disabled={isButtonDisabled}
+                        onClick={handleAddToCart}
+                        className={cn(
+                            "h-11 px-8 font-hanken font-medium text-sm rounded-sm transition-all duration-300",
+                            isAdding
+                                ? "bg-neutral-800/80 border border-neutral-700 text-neutral-300 cursor-not-allowed"
+                                : isButtonDisabled
+                                  ? "bg-neutral-800/80 border border-neutral-800 text-neutral-500 cursor-not-allowed hover:bg-neutral-800 hover:text-neutral-500"
+                                  : "bg-[#1A1A1A] hover:bg-white/20 border border-white text-white cursor-pointer",
+                        )}
+                    >
+                        {isAdding ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <Loader2 className="size-4 animate-spin text-gold-500" />
+                                <span>Adding...</span>
                             </span>
-
-                            <button
-                                type="button"
-                                onClick={handleCartIncrement}
-                                disabled={inCartQty >= maxStock}
-                                className="size-8 rounded-md border border-gold-500/80 text-gold-500 hover:bg-gold-500/10 flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-95"
-                                aria-label="Increase quantity"
-                            >
-                                <Plus className="size-4" />
-                            </button>
-                        </div>
-                    ) : (
-                        /* Add to Cart Button (Desktop) */
-                        (() => {
-                            const isAdding =
-                                isAddingProduct(item.id) ||
-                                isAddingProduct(
-                                    (item as any).productId || "",
-                                ) ||
-                                isAddingProduct((item as any).slug || "");
-
-                            return (
-                                <button
-                                    type="button"
-                                    disabled={isOutOfStock || isAdding}
-                                    onClick={handleAddToCart}
-                                    className={`h-12 px-8 font-hanken font-medium text-sm rounded-sm border transition-all duration-300 cursor-pointer shadow-md flex items-center gap-2 ${
-                                        isAdding
-                                            ? "border-neutral-700 bg-neutral-800 text-neutral-300 cursor-not-allowed"
-                                            : isOutOfStock
-                                            ? "border-neutral-800 bg-neutral-900/60 text-neutral-500 cursor-not-allowed"
-                                            : "border-white text-white bg-transparent hover:bg-white hover:text-black"
-                                    }`}
-                                >
-                                    {isAdding ? (
-                                        <>
-                                            <Loader2 className="size-4 animate-spin text-gold-500" />
-                                            <span>Adding...</span>
-                                        </>
-                                    ) : isOutOfStock ? (
-                                        "Out of Stock"
-                                    ) : (
-                                        "Add to Cart"
-                                    )}
-                                </button>
-                            );
-                        })()
-                    )}
+                        ) : isOutOfStock ? (
+                            "Out of Stock"
+                        ) : isMaxInCart ? (
+                            "Max in Cart"
+                        ) : (
+                            "Add to Cart"
+                        )}
+                    </Button>
                 </div>
             </div>
         </>
