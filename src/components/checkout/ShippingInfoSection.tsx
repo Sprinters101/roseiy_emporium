@@ -1,10 +1,13 @@
 import React from "react";
 import { CustomInput } from "@/components/common/CustomInput";
 import { CustomSelect } from "@/components/common/CustomSelect";
+import type { DeliveryArea } from "@/service/types";
 
 export interface ShippingInfoSectionProps {
     totalAmount: number;
     isSubmitting?: boolean;
+    deliveryAreas?: DeliveryArea[];
+    onDeliveryAreaChange?: (areaId: string) => void;
 }
 
 const COUNTRY_OPTIONS = [
@@ -36,12 +39,33 @@ const NIGERIA_STATES = [
 export const ShippingInfoSection: React.FC<ShippingInfoSectionProps> = ({
     totalAmount,
     isSubmitting = false,
+    deliveryAreas = [],
+    onDeliveryAreaChange,
 }) => {
+    const areaOptions = deliveryAreas.map((area) => ({
+        label: `${area.name} — ₦${Number(area.fee).toLocaleString()}${
+            area.estimatedDeliveryTime ? ` (${area.estimatedDeliveryTime})` : ""
+        }`,
+        value: area.deliveryAreaId,
+    }));
+
     return (
-        <div className="bg-black-700 rounded-sm px-4 py-6 sm:p-8 flex flex-col gap-5 ">
+        <div className="bg-black-700 rounded-sm px-4 py-6 sm:p-8 flex flex-col gap-5">
             <h2 className="text-xl sm:text-[1.25rem] font-playfair font-bold text-white mb-1">
                 Shipping Information
             </h2>
+
+            {areaOptions.length > 0 && (
+                <CustomSelect
+                    name="deliveryAreaId"
+                    label="DELIVERY REGION / AREA"
+                    options={areaOptions}
+                    placeholder="Select Delivery Region"
+                    onChange={(val) => {
+                        onDeliveryAreaChange?.(val);
+                    }}
+                />
+            )}
 
             <CustomSelect
                 name="country"

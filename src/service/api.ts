@@ -9,6 +9,8 @@ import type {
     ResendOtpResponseData,
     LoginPayload,
     LoginResponseData,
+    ForgotPasswordPayload,
+    ResetPasswordPayload,
     CustomerUser,
     CategoriesResponseData,
     BrandsResponseData,
@@ -21,6 +23,8 @@ import type {
     CheckoutAddressPayload,
     CheckoutResponseData,
     VerifyCheckoutResponseData,
+    DeliveryAreasResponseData,
+    AccountPaymentsResponseData,
     UpdateProfilePayload,
     ChangePasswordPayload,
     AddressResponseItem,
@@ -32,6 +36,10 @@ import type {
     OrderSummaryItem,
     OrderDetailsData,
     ReorderResponseData,
+    SubmitReviewPayload,
+    SubmitReviewResponseData,
+    LatestReviewsResponseData,
+    PublishedReviewsResponseData,
 } from "./types";
 
 // ==========================================
@@ -89,6 +97,34 @@ export const loginFunc = async (
 ): Promise<ApiResponse<LoginResponseData>> => {
     const response = await apiClient.post<ApiResponse<LoginResponseData>>(
         "/auth/login",
+        payload,
+    );
+    return response.data;
+};
+
+/**
+ * 5. Forgot Password
+ * POST /auth/forgot-password
+ */
+export const forgotPasswordFunc = async (
+    payload: ForgotPasswordPayload,
+): Promise<ApiResponse<unknown>> => {
+    const response = await apiClient.post<ApiResponse<unknown>>(
+        "/auth/forgot-password",
+        payload,
+    );
+    return response.data;
+};
+
+/**
+ * 6. Reset Password
+ * POST /auth/reset-password
+ */
+export const resetPasswordFunc = async (
+    payload: ResetPasswordPayload,
+): Promise<ApiResponse<unknown>> => {
+    const response = await apiClient.post<ApiResponse<unknown>>(
+        "/auth/reset-password",
         payload,
     );
     return response.data;
@@ -220,7 +256,21 @@ export const clearCartFunc = async (): Promise<ApiResponse<null>> => {
 // ==========================================
 
 /**
- * 14. Initialize Checkout
+ * 14. Get Public Delivery Areas
+ * GET /delivery-areas
+ */
+export const getDeliveryAreasFunc = async (): Promise<
+    ApiResponse<DeliveryAreasResponseData>
+> => {
+    const response =
+        await apiClient.get<ApiResponse<DeliveryAreasResponseData>>(
+            "/delivery-areas",
+        );
+    return response.data;
+};
+
+/**
+ * 15. Initialize Checkout
  * POST /checkout
  */
 export const initializeCheckoutFunc = async (
@@ -234,7 +284,7 @@ export const initializeCheckoutFunc = async (
 };
 
 /**
- * 15. Verify Checkout Payment & Trigger Order Creation
+ * 16. Verify Checkout Payment & Trigger Order Creation
  * GET /checkout/verify/:reference
  */
 export const verifyCheckoutFunc = async (
@@ -349,6 +399,20 @@ export const deleteAddressFunc = async (
     return response.data;
 };
 
+/**
+ * 23. Get Customer Payments History
+ * GET /account/payments
+ */
+export const getAccountPaymentsFunc = async (): Promise<
+    ApiResponse<AccountPaymentsResponseData>
+> => {
+    const response =
+        await apiClient.get<ApiResponse<AccountPaymentsResponseData>>(
+            "/account/payments",
+        );
+    return response.data;
+};
+
 // ==========================================
 // 6. ORDERS, TRACKING & REORDER API
 // ==========================================
@@ -402,5 +466,51 @@ export const reorderFunc = async (
     const response = await apiClient.post<ApiResponse<ReorderResponseData>>(
         `/account/orders/${orderNumber}/reorder`,
     );
+    return response.data;
+};
+
+// ==========================================
+// 7. REVIEWS & RATINGS API
+// ==========================================
+
+/**
+ * 27. Get Latest Six Published Reviews (for Homepage Testimonials)
+ * GET /reviews/latest
+ */
+export const getLatestReviewsFunc = async (): Promise<
+    ApiResponse<LatestReviewsResponseData>
+> => {
+    const response =
+        await apiClient.get<ApiResponse<LatestReviewsResponseData>>(
+            "/reviews/latest",
+        );
+    return response.data;
+};
+
+/**
+ * 28. Get Published Reviews List (with pagination and optional productId)
+ * GET /reviews
+ */
+export const getReviewsFunc = async (params?: {
+    page?: number;
+    limit?: number;
+    productId?: string;
+}): Promise<ApiResponse<PublishedReviewsResponseData>> => {
+    const response = await apiClient.get<
+        ApiResponse<PublishedReviewsResponseData>
+    >("/reviews", { params });
+    return response.data;
+};
+
+/**
+ * 29. Submit Order Review (Authenticated or Guest)
+ * POST /reviews
+ */
+export const submitReviewFunc = async (
+    payload: SubmitReviewPayload,
+): Promise<ApiResponse<SubmitReviewResponseData>> => {
+    const response = await apiClient.post<
+        ApiResponse<SubmitReviewResponseData>
+    >("/reviews", payload);
     return response.data;
 };

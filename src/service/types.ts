@@ -52,6 +52,17 @@ export interface LoginPayload {
     password: string;
 }
 
+export interface ForgotPasswordPayload {
+    email: string;
+}
+
+export interface ResetPasswordPayload {
+    email: string;
+    otp: string;
+    password: string;
+    confirmPassword: string;
+}
+
 export interface CustomerUser {
     customerId: string;
     firstName: string;
@@ -66,6 +77,7 @@ export interface CustomerUser {
 export interface LoginResponseData {
     customer: CustomerUser;
     token: string;
+    cartMerged?: boolean;
 }
 
 // ==========================================
@@ -215,10 +227,29 @@ export interface UpdateCartItemPayload {
 }
 
 // ==========================================
-// 4. CHECKOUT & PAYMENT TYPES
+// 4. CHECKOUT, DELIVERY AREAS & PAYMENT TYPES
 // ==========================================
 
+export interface DeliveryArea {
+    deliveryAreaId: string;
+    name: string;
+    fee: string | number;
+    state?: string;
+    city?: string;
+    description?: string;
+    estimatedDeliveryTime?: string;
+    status?: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export type DeliveryAreasResponseData =
+    | DeliveryArea[]
+    | { deliveryAreas: DeliveryArea[] }
+    | { areas: DeliveryArea[] };
+
 export interface CheckoutAddressPayload {
+    deliveryAreaId?: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -245,9 +276,28 @@ export interface CheckoutResponseData {
 
 export interface VerifyCheckoutResponseData {
     paid: boolean;
-    alreadyProcessed: boolean;
+    alreadyProcessed?: boolean;
+    paymentStatus?: string;
+    reference?: string;
     order?: OrderDetailsData;
 }
+
+export interface AccountPaymentItem {
+    paymentId: string;
+    orderId?: string;
+    orderNumber?: string;
+    reference: string;
+    amount: string | number;
+    currency: string;
+    channel?: string;
+    status: string;
+    paidAt?: string | null;
+    createdAt: string;
+}
+
+export type AccountPaymentsResponseData =
+    | AccountPaymentItem[]
+    | { payments: AccountPaymentItem[] };
 
 // ==========================================
 // 5. CUSTOMER ACCOUNT & SAVED ADDRESSES
@@ -422,4 +472,61 @@ export interface TrackOrderResponseData {
 
 export interface ReorderResponseData {
     cart: CartResponseData;
+}
+
+// ==========================================
+// 7. REVIEWS & RATINGS TYPES
+// ==========================================
+
+export interface ReviewProductInfo {
+    productId: string;
+    name: string;
+    slug: string;
+    images?: Array<{ imageUrl: string; altText?: string }>;
+}
+
+export interface ReviewItem {
+    reviewId: string;
+    orderId?: string;
+    customerId?: string;
+    productId: string;
+    displayName: string;
+    rating: number;
+    title?: string;
+    comment: string;
+    status: "published" | string;
+    createdAt: string;
+    product?: ReviewProductInfo;
+}
+
+export interface LatestReviewsResponseData {
+    reviews: ReviewItem[];
+}
+
+export interface ReviewsPagination {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+}
+
+export interface PublishedReviewsResponseData {
+    reviews: ReviewItem[];
+    pagination: ReviewsPagination;
+}
+
+export interface SubmitReviewPayload {
+    orderNumber: string;
+    productId: string;
+    rating: number;
+    comment: string;
+    title?: string;
+    email?: string;
+}
+
+export interface SubmitReviewResponseData {
+    review: {
+        reviewId: string;
+        status: string;
+    };
 }

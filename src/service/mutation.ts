@@ -7,6 +7,8 @@ import {
     verifyEmailFunc,
     resendOtpFunc,
     loginFunc,
+    forgotPasswordFunc,
+    resetPasswordFunc,
     addToCartFunc,
     updateCartItemQuantityFunc,
     removeCartItemFunc,
@@ -19,6 +21,7 @@ import {
     deleteAddressFunc,
     trackOrderFunc,
     reorderFunc,
+    submitReviewFunc,
 } from "./api";
 import { queryKeys } from "./queries";
 import type {
@@ -26,6 +29,8 @@ import type {
     VerifyEmailPayload,
     ResendOtpPayload,
     LoginPayload,
+    ForgotPasswordPayload,
+    ResetPasswordPayload,
     AddToCartPayload,
     UpdateCartItemPayload,
     CheckoutAddressPayload,
@@ -34,6 +39,7 @@ import type {
     CreateAddressPayload,
     UpdateAddressPayload,
     TrackOrderPayload,
+    SubmitReviewPayload,
     ApiErrorResponse,
 } from "./types";
 
@@ -109,7 +115,7 @@ export const useResendOtp = () => {
 };
 
 /**
- * Customer Login Mutation
+ * Customer Login Mutation (with guest cart merge support)
  */
 export const useLogin = () => {
     const queryClient = useQueryClient();
@@ -130,6 +136,13 @@ export const useLogin = () => {
                     JSON.stringify(data.data.customer),
                 );
             }
+
+            // Clear guest cart token if guest cart was merged
+            if (data?.data?.cartMerged) {
+                Cookies.remove("guestCartToken", { path: "/" });
+                localStorage.removeItem("guestCartToken");
+            }
+
             queryClient.invalidateQueries({
                 queryKey: queryKeys.auth.accountProfile,
             });
@@ -139,6 +152,55 @@ export const useLogin = () => {
         onError: (err: AxiosError<ApiErrorResponse>) => {
             toast.error(
                 getErrorMessage(err, "Invalid email or password."),
+            );
+        },
+    });
+};
+
+/**
+ * Forgot Password Mutation
+ * POST /auth/forgot-password
+ */
+export const useForgotPassword = () => {
+    return useMutation({
+        mutationFn: (payload: ForgotPasswordPayload) =>
+            forgotPasswordFunc(payload),
+        onSuccess: (data) => {
+            toast.success(
+                data?.message ||
+                    "If an account exists for this email, a password reset OTP has been sent",
+            );
+        },
+        onError: (err: AxiosError<ApiErrorResponse>) => {
+            toast.error(
+                getErrorMessage(
+                    err,
+                    "Unable to process password reset request. Please try again.",
+                ),
+            );
+        },
+    });
+};
+
+/**
+ * Reset Password Mutation
+ * POST /auth/reset-password
+ */
+export const useResetPassword = () => {
+    return useMutation({
+        mutationFn: (payload: ResetPasswordPayload) =>
+            resetPasswordFunc(payload),
+        onSuccess: (data) => {
+            toast.success(
+                data?.message || "Password reset successfully! Please log in.",
+            );
+        },
+        onError: (err: AxiosError<ApiErrorResponse>) => {
+            toast.error(
+                getErrorMessage(
+                    err,
+                    "Invalid or expired password reset code.",
+                ),
             );
         },
     });
@@ -411,6 +473,36 @@ export const useReorder = () => {
                 getErrorMessage(
                     err,
                     "Unable to reorder items. Some products may be out of stock.",
+                ),
+            );
+        },
+    });
+};
+
+// ==========================================
+// 6. REVIEWS & RATINGS MUTATIONS
+// ==========================================
+
+/**
+ * Submit Customer / Guest Order Review Mutation
+ */
+export const useSubmitReview = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (payload: SubmitReviewPayload) => submitReviewFunc(payload),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
+            toast.success(
+                data?.message ||
+                    "Thank you! Your review has been submitted successfully.",
+            );
+        },
+        onError: (err: AxiosError<ApiErrorResponse>) => {
+            toast.error(
+                getErrorMessage(
+                    err,
+                    "Failed to submit review. Please check your order details.",
                 ),
             );
         },

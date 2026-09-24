@@ -5,11 +5,14 @@ import {
     getProductsFunc,
     getProductBySlugFunc,
     getCartFunc,
+    getDeliveryAreasFunc,
     getAccountProfileFunc,
     getAddressesFunc,
+    getAccountPaymentsFunc,
     getCustomerOrdersFunc,
     getSingleOrderFunc,
     verifyCheckoutFunc,
+    getLatestReviewsFunc,
 } from "./api";
 import type { GetProductsParams } from "./types";
 
@@ -33,15 +36,25 @@ export const queryKeys = {
     cart: {
         all: ["cart"] as const,
     },
+    deliveryAreas: {
+        all: ["deliveryAreas"] as const,
+    },
     checkout: {
         verify: (reference: string) => ["checkout", "verify", reference] as const,
     },
     addresses: {
         all: ["addresses"] as const,
     },
+    account: {
+        payments: ["accountPayments"] as const,
+    },
     orders: {
         all: ["orders"] as const,
         single: (orderNumber: string) => ["orders", orderNumber] as const,
+    },
+    reviews: {
+        all: ["reviews"] as const,
+        latest: ["reviews", "latest"] as const,
     },
 };
 
@@ -120,6 +133,17 @@ export const useGetCart = () => {
 // ==========================================
 
 /**
+ * Fetch all active delivery areas and delivery rates
+ */
+export const useGetDeliveryAreas = () => {
+    return useQuery({
+        queryKey: queryKeys.deliveryAreas.all,
+        queryFn: () => getDeliveryAreasFunc(),
+        staleTime: 1000 * 60 * 10, // 10 minutes
+    });
+};
+
+/**
  * Verify checkout payment reference status
  */
 export const useVerifyCheckout = (
@@ -168,6 +192,17 @@ export const useGetAddresses = () => {
     });
 };
 
+/**
+ * Fetch customer payment history
+ */
+export const useGetAccountPayments = () => {
+    return useQuery({
+        queryKey: queryKeys.account.payments,
+        queryFn: () => getAccountPaymentsFunc(),
+        staleTime: 1000 * 60 * 2, // 2 minutes
+    });
+};
+
 // ==========================================
 // 5. ORDERS & ORDER DETAILS QUERIES
 // ==========================================
@@ -197,5 +232,20 @@ export const useGetSingleOrder = (
             options?.enabled !== undefined
                 ? options.enabled
                 : Boolean(orderNumber),
+    });
+};
+
+// ==========================================
+// 6. REVIEWS & RATINGS QUERIES
+// ==========================================
+
+/**
+ * Fetch latest 6 published customer reviews
+ */
+export const useGetLatestReviews = () => {
+    return useQuery({
+        queryKey: queryKeys.reviews.latest,
+        queryFn: () => getLatestReviewsFunc(),
+        staleTime: 1000 * 60 * 5, // 5 minutes
     });
 };

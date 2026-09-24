@@ -27,11 +27,19 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
     const activeRating = hoverRating || rating;
 
     const handleSubmit = async () => {
+        if (rating === 0) {
+            toast.error("Please select a star rating (1-5) before submitting.");
+            return;
+        }
+        if (review.trim().length < 2) {
+            toast.error("Please enter a short review of at least 2 characters.");
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             if (onSubmitReview) {
-                await onSubmitReview(rating, review);
-                // console.log(rating, review);
+                await onSubmitReview(rating, review.trim());
             } else {
                 await new Promise((resolve) => setTimeout(resolve, 600));
                 toast.success("Thank you for your feedback!");
@@ -41,7 +49,7 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
             setRating(0);
             setReview("");
         } catch {
-            toast.error("Failed to submit review. Please try again.");
+            // Handled by mutation onError toast
         } finally {
             setIsSubmitting(false);
         }
