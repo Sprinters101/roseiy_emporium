@@ -48,17 +48,23 @@ export const Login: React.FC = () => {
         values: LoginPayload,
         { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
     ) => {
-        loginMutation(values, {
-            onSuccess: (response) => {
-                if (response.data) {
-                    login(response.data.token, response.data.customer);
-                }
-                navigate(targetDestination, { replace: true });
+        loginMutation(
+            {
+                email: values.email.trim(),
+                password: values.password,
             },
-            onSettled: () => {
-                setSubmitting(false);
+            {
+                onSuccess: (response) => {
+                    if (response.data) {
+                        login(response.data.token, response.data.customer);
+                    }
+                    navigate(targetDestination, { replace: true });
+                },
+                onSettled: () => {
+                    setSubmitting(false);
+                },
             },
-        });
+        );
     };
 
     return (

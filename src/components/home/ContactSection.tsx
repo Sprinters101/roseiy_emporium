@@ -64,15 +64,25 @@ export const ContactSection = () => {
                                 <div className="size-12 rounded-full bg-black-900 flex items-center justify-center shrink-0">
                                     <PhoneCall className="size-5 text-white" />
                                 </div>
-                                <div className="flex flex-col">
-                                    <span className="text-body-c1 md:text-base text-white">
+                                <div className="">
+                                    <span className="text-xs md:text-base text-white font-medium uppercase tracking-wider block">
                                         Call Us On
                                     </span>
                                     <a
                                         href="tel:+2348156664737"
-                                        className="gradient-text font-hanken text-base md:text-body-b1 font-bold hover:underline"
+                                        className="text-sm sm:text-base md:text-[1.25rem] font-bold gradient-text hover:underline mt-0.5 inline-block leading-relaxed"
                                     >
-                                        +2348156664737 & +447946301028
+                                        +2348156664737
+                                    </a>
+                                    <span className="gradient-text text-sm sm:text-base md:text-[1.25rem]">
+                                        {" "}
+                                        &amp;{" "}
+                                    </span>
+                                    <a
+                                        href="tel:+447946301028"
+                                        className="text-sm sm:text-base md:text-[1.25rem] font-bold gradient-text hover:underline mt-0.5 inline-block leading-relaxed"
+                                    >
+                                        +447946301028
                                     </a>
                                 </div>
                             </div>

@@ -28,15 +28,18 @@ import {
     useUpdateAddress,
     useDeleteAddress,
     useUpdateAccountProfile,
+    useSubmitReview,
 } from "@/service/mutation";
 import {
     useVerifyCheckout,
     useGetAddresses,
     useGetAccountProfile,
+    useGetDeliveryAreas,
 } from "@/service/queries";
 import type {
     CheckoutAddressPayload,
     AddressResponseItem,
+    DeliveryArea,
 } from "@/service/types";
 
 const CheckoutValidationSchema = Yup.object().shape({
@@ -74,6 +77,7 @@ export const Checkout: React.FC = () => {
     const [verifiedOrderNumber, setVerifiedOrderNumber] = useState<string>("");
     const [verifiedCustomerEmail, setVerifiedCustomerEmail] =
         useState<string>("");
+    const [verifiedProductId, setVerifiedProductId] = useState<string>("");
     const [hasProcessedRef, setHasProcessedRef] = useState<boolean>(false);
 
     // API Mutations & Queries
@@ -82,12 +86,63 @@ export const Checkout: React.FC = () => {
     const updateAddressMutation = useUpdateAddress();
     const deleteAddressMutation = useDeleteAddress();
     const updateProfileMutation = useUpdateAccountProfile();
+    const submitReviewMutation = useSubmitReview();
 
     const { data: serverAddressesData, isLoading: isAddressesLoading } =
         useGetAddresses();
 
     const { data: profileData, isLoading: isProfileLoading } =
         useGetAccountProfile();
+
+    const { data: serverDeliveryAreasData } = useGetDeliveryAreas();
+
+    // Delivery Areas normalization
+    const deliveryAreas: DeliveryArea[] = useMemo(() => {
+        if (!serverDeliveryAreasData?.data) return [];
+        if (Array.isArray(serverDeliveryAreasData.data)) {
+            return serverDeliveryAreasData.data;
+        }
+        if (
+            Array.isArray(
+                (
+                    serverDeliveryAreasData.data as {
+                        deliveryAreas?: DeliveryArea[];
+                    }
+                ).deliveryAreas,
+            )
+        ) {
+            return (
+                serverDeliveryAreasData.data as {
+                    deliveryAreas: DeliveryArea[];
+                }
+            ).deliveryAreas;
+        }
+        if (
+            Array.isArray(
+                (
+                    serverDeliveryAreasData.data as {
+                        areas?: DeliveryArea[];
+                    }
+                ).areas,
+            )
+        ) {
+            return (
+                serverDeliveryAreasData.data as {
+                    areas: DeliveryArea[];
+                }
+            ).areas;
+        }
+        return [];
+    }, [serverDeliveryAreasData]);
+
+    const [selectedDeliveryAreaId, setSelectedDeliveryAreaId] =
+        useState<string>("");
+
+    useEffect(() => {
+        if (deliveryAreas.length > 0 && !selectedDeliveryAreaId) {
+            setSelectedDeliveryAreaId(deliveryAreas[0].deliveryAreaId);
+        }
+    }, [deliveryAreas, selectedDeliveryAreaId]);
 
     // Payment Return Reference Verification
     const reference =
@@ -126,9 +181,17 @@ export const Checkout: React.FC = () => {
                 setVerifiedCustomerEmail(
                     user?.email ||
                         profileData?.data?.email ||
+                        verifyData.data?.order?.email ||
                         verifyData.data?.order?.shippingAddress?.phoneNumber ||
                         "",
                 );
+
+                const items = verifyData.data?.order?.items || [];
+                const firstProductId =
+                    items.find((i) => i.productId)?.productId || "";
+                if (firstProductId) {
+                    setVerifiedProductId(firstProductId);
+                }
 
                 toast.success(
                     "Payment verified successfully! Your order has been placed.",
@@ -161,12 +224,10 @@ export const Checkout: React.FC = () => {
         if (customPersonalInfo) return customPersonalInfo;
         const profile = profileData?.data || user;
         return {
-            firstName: profile?.firstName || user?.firstName || "Customer",
-            lastName: profile?.lastName || user?.lastName || "User",
-            phoneNumber:
-                profile?.phoneNumber || user?.phoneNumber || "090 123 456 7890",
-            emailAddress:
-                profile?.email || user?.email || "customer@roseiyemporium.com",
+            firstName: profile?.firstName || user?.firstName || "",
+            lastName: profile?.lastName || user?.lastName || "",
+            phoneNumber: profile?.phoneNumber || user?.phoneNumber || "",
+            emailAddress: profile?.email || user?.email || "",
         };
     }, [profileData, user, customPersonalInfo]);
 
@@ -300,10 +361,22 @@ export const Checkout: React.FC = () => {
         );
     }, [displayItems]);
 
+    const selectedDeliveryArea = useMemo(() => {
+        return (
+            deliveryAreas.find(
+                (a) => a.deliveryAreaId === selectedDeliveryAreaId,
+            ) || null
+        );
+    }, [deliveryAreas, selectedDeliveryAreaId]);
+
     const deliveryFee = useMemo(() => {
         if (subtotal === 0) return 0;
-        return subtotal >= 1000000 ? 0 : 4000;
-    }, [subtotal]);
+        if (subtotal >= 1000000) return 0; // Free delivery for orders >= 1,000,000 NGN
+        if (selectedDeliveryArea?.fee !== undefined) {
+            return Number(selectedDeliveryArea.fee);
+        }
+        return 4000;
+    }, [subtotal, selectedDeliveryArea]);
 
     const total = subtotal + deliveryFee;
 
@@ -482,6 +555,7 @@ export const Checkout: React.FC = () => {
             addresses.find((a) => a.id === selectedAddressId) || addresses[0];
 
         const payload: CheckoutAddressPayload = {
+            deliveryAreaId: selectedDeliveryAreaId || undefined,
             firstName: personalInfo.firstName || user?.firstName || "",
             lastName: personalInfo.lastName || user?.lastName || "",
             email: personalInfo.emailAddress || user?.email || "",
@@ -492,15 +566,23 @@ export const Checkout: React.FC = () => {
                 "",
             addressLine1: selectedAddr?.address || "",
             addressLine2: null,
-            city: selectedAddr?.city || "",
-            state: selectedAddr?.state || "",
-            country: selectedAddr?.country || "",
+            city: selectedAddr?.city || selectedDeliveryArea?.city || "",
+            state: selectedAddr?.state || selectedDeliveryArea?.state || "",
+            country: selectedAddr?.country || "Nigeria",
         };
 
         setIsProcessing(true);
         try {
             const res = await initializeCheckoutMutation.mutateAsync(payload);
-            const authorizationUrl = res?.data?.checkout?.authorizationUrl;
+
+            // const authorizationUrl = res?.data?.checkout?.authorizationUrl;
+            const rawUrl = res?.data?.checkout?.authorizationUrl;
+            const authorizationUrl = rawUrl
+                ? rawUrl.replace(
+                      "https://roseiy-emporium.vercel.app",
+                      "http://localhost:5173",
+                  )
+                : undefined;
 
             if (authorizationUrl) {
                 toast.info("Redirecting to secure payment portal...");
@@ -526,6 +608,7 @@ export const Checkout: React.FC = () => {
         state: string;
         city: string;
         address: string;
+        deliveryAreaId?: string;
     }) => {
         if (displayItems.length === 0) {
             toast.error(
@@ -538,7 +621,10 @@ export const Checkout: React.FC = () => {
         const firstName = nameParts[0] || "Guest";
         const lastName = nameParts.slice(1).join(" ") || "Customer";
 
+        const activeAreaId = values.deliveryAreaId || selectedDeliveryAreaId;
+
         const payload: CheckoutAddressPayload = {
+            deliveryAreaId: activeAreaId || undefined,
             firstName,
             lastName,
             email: values.emailAddress.trim(),
@@ -568,6 +654,30 @@ export const Checkout: React.FC = () => {
         } finally {
             setIsProcessing(false);
         }
+    };
+
+    // Handle review submission from Order Success Modal
+    const handleReviewSubmit = async (rating: number, reviewText: string) => {
+        const targetProductId =
+            verifiedProductId ||
+            displayItems[0]?.productId ||
+            displayItems[0]?.id ||
+            "";
+
+        if (!verifiedOrderNumber || !targetProductId) {
+            toast.info("Thank you for your feedback!");
+            return;
+        }
+
+        await submitReviewMutation.mutateAsync({
+            orderNumber: verifiedOrderNumber,
+            productId: targetProductId,
+            rating,
+            comment: reviewText,
+            email: !isAuthenticated
+                ? verifiedCustomerEmail || undefined
+                : undefined,
+        });
     };
 
     // Show initial page skeleton if cart is loading and we have no items
@@ -637,6 +747,9 @@ export const Checkout: React.FC = () => {
                                 onAddNewAddress={handleAddNewAddress}
                                 onEditAddress={handleEditAddress}
                                 onDeleteAddress={handleDeleteAddress}
+                                deliveryAreas={deliveryAreas}
+                                selectedDeliveryAreaId={selectedDeliveryAreaId}
+                                onSelectDeliveryArea={setSelectedDeliveryAreaId}
                                 isLoading={isAddressesLoading}
                             />
 
@@ -701,7 +814,9 @@ export const Checkout: React.FC = () => {
                                 state: "",
                                 city: "",
                                 address: "",
+                                deliveryAreaId: selectedDeliveryAreaId || "",
                             }}
+                            enableReinitialize
                             validationSchema={CheckoutValidationSchema}
                             onSubmit={handleSubmitGuestOrder}
                         >
@@ -713,6 +828,10 @@ export const Checkout: React.FC = () => {
                                             <PersonalInfoSection />
                                             <ShippingInfoSection
                                                 totalAmount={total}
+                                                deliveryAreas={deliveryAreas}
+                                                onDeliveryAreaChange={
+                                                    setSelectedDeliveryAreaId
+                                                }
                                                 isSubmitting={
                                                     isSubmitting || isProcessing
                                                 }
@@ -742,6 +861,7 @@ export const Checkout: React.FC = () => {
                     open={showSuccessModal}
                     onOpenChange={setShowSuccessModal}
                     orderNumber={verifiedOrderNumber}
+                    onSubmitReview={handleReviewSubmit}
                     onTrackOrder={() => {
                         setShowSuccessModal(false);
                         navigate("/track-order", {
