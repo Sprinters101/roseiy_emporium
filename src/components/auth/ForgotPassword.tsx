@@ -69,7 +69,7 @@ export const ForgotPassword: React.FC = () => {
                                     >
                                         {isLoading
                                             ? "Sending OTP..."
-                                            : "Send Reset Code"}
+                                            : "Send OTP"}
                                     </button>
 
                                     <div className="text-xs sm:text-sm text-center text-white mt-4 font-hanken">
