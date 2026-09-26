@@ -9,7 +9,11 @@ import { useShopFilters } from "./data/useShopFilters";
 import { ShopHeader } from "./ShopHeader";
 import { ShopSidebar } from "./ShopSidebar";
 import { ShopEmptyState } from "./ShopEmptyState";
-import { useGetProducts, useGetCategories, useGetBrands } from "@/service/queries";
+import {
+    useGetProducts,
+    useGetCategories,
+    useGetBrands,
+} from "@/service/queries";
 import type { FilterOption } from "./data/shopData";
 import type { ProductItem } from "@/service/types";
 
@@ -48,18 +52,22 @@ export const Shop = () => {
                     productId: p.productId,
                     slug: p.slug,
                     name: p.name,
-                    brand: p.brand?.name || "Glenfiddich",
+                    brand: p.brand?.name || "",
                     brandId: p.brandId,
-                    category: p.category?.name || "Whiskey",
+                    category: p.category?.name || "",
                     categoryId: p.categoryId,
-                    volume: (p as any).volume || "70cl",
-                    piecesLeft: pieceUnit ? pieceUnit.stock : primaryUnit ? primaryUnit.stock : 22,
-                    casesLeft: cartonUnit ? cartonUnit.stock : 10,
-                    price: primaryUnit ? Number(primaryUnit.price) : 0,
+                    volume: (p as any).volume || "",
+                    piecesLeft: pieceUnit
+                        ? pieceUnit.stock
+                        : primaryUnit
+                          ? primaryUnit.stock
+                          : "",
+                    casesLeft: cartonUnit ? cartonUnit.stock : "",
+                    price: primaryUnit ? Number(primaryUnit.price) : "",
                     image:
                         p.images?.find((i) => i.isPrimary)?.imageUrl ||
                         p.images?.[0]?.imageUrl ||
-                        "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png",
+                        "",
                     gallery: p.images?.map((i) => i.imageUrl) || [],
                     description: p.description || "",
                     sellingUnits: p.sellingUnits,

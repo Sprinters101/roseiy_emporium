@@ -238,7 +238,7 @@ export const ProductCard = ({
                         isLandingPage && "md:text-[0.625rem] mt-1.25",
                     )}
                 >
-                    {product.volume || ""}
+                    {product.volume || product.description || ""}
                     {piecesLeft !== undefined && ` • ${piecesLeft} Pieces Left`}
                     {casesLeft !== undefined && ` • ${casesLeft} Cases Left`}
                 </p>
