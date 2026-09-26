@@ -18,9 +18,8 @@ export const ProductDetails: React.FC = () => {
     const { cartItems, setCartItemQuantities, isAddingProduct } = useCart();
 
     // 1. Fetch live product by slug or id from the backend
-    const { data: productApi, isLoading: isLoadingProduct } = useGetProductBySlug(
-        id ?? "",
-    );
+    const { data: productApi, isLoading: isLoadingProduct } =
+        useGetProductBySlug(id ?? "");
 
     const liveProduct = useMemo(() => {
         const raw = (productApi?.data as any)?.product || productApi?.data;
@@ -44,49 +43,47 @@ export const ProductDetails: React.FC = () => {
                 liveProduct.images?.find((img: any) => img.isPrimary)
                     ?.imageUrl ||
                 liveProduct.images?.[0]?.imageUrl ||
-                "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png";
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHcoC1Vf-DNLzYsBkbGaBdVEHTk1AhxeEfgaJguZgz-XqWAuwnmJ4gkxPA&s=10";
 
-            const galleryList =
-                liveProduct.images?.map((img: any) => img.imageUrl) || [
-                    primaryImg,
-                ];
+            const galleryList = liveProduct.images?.map(
+                (img: any) => img.imageUrl,
+            ) || [primaryImg];
 
             const piecesStock =
                 pieceUnit?.stock !== undefined
                     ? Number(pieceUnit.stock)
                     : primaryUnit?.stock !== undefined
-                    ? Number(primaryUnit.stock)
-                    : liveProduct.piecesLeft !== undefined
-                    ? Number(liveProduct.piecesLeft)
-                    : 22;
+                      ? Number(primaryUnit.stock)
+                      : liveProduct.piecesLeft !== undefined
+                        ? Number(liveProduct.piecesLeft)
+                        : 22;
 
             const casesStock =
                 cartonUnit?.stock !== undefined
                     ? Number(cartonUnit.stock)
                     : liveProduct.casesLeft !== undefined
-                    ? Number(liveProduct.casesLeft)
-                    : liveProduct.sellingUnits && liveProduct.sellingUnits.length > 0
-                    ? 0
-                    : 10;
+                      ? Number(liveProduct.casesLeft)
+                      : liveProduct.sellingUnits &&
+                          liveProduct.sellingUnits.length > 0
+                        ? 0
+                        : 10;
 
             return {
-                id: liveProduct.productId || liveProduct.slug || id || "10",
+                id: liveProduct.productId || liveProduct.slug || id || "",
                 productId: liveProduct.productId,
                 slug: liveProduct.slug,
                 name: liveProduct.name,
-                brand: liveProduct.brand?.name || "Glenfiddich",
+                brand: liveProduct.brand?.name || "",
                 brandId: liveProduct.brandId,
-                category: liveProduct.category?.name || "Whiskey",
+                category: liveProduct.category?.name || "",
                 categoryId: liveProduct.categoryId,
-                volume: (liveProduct as any).volume || "70cl",
+                volume: (liveProduct as any).volume || "",
                 piecesLeft: piecesStock,
                 casesLeft: casesStock,
-                price: primaryUnit ? Number(primaryUnit.price) : 110000,
+                price: primaryUnit ? Number(primaryUnit.price) : "",
                 image: primaryImg,
                 gallery: galleryList.length > 0 ? galleryList : [primaryImg],
-                description:
-                    liveProduct.description ||
-                    "A remarkably rich and luxurious expression with exceptional elegance and depth.",
+                description: liveProduct.description || "",
                 sellingUnits: liveProduct.sellingUnits,
             };
         }
@@ -208,9 +205,7 @@ export const ProductDetails: React.FC = () => {
     const piecePrice = pieceUnit
         ? Number(pieceUnit.price)
         : product.price || 110000;
-    const casePrice = cartonUnit
-        ? Number(cartonUnit.price)
-        : piecePrice * 6;
+    const casePrice = cartonUnit ? Number(cartonUnit.price) : piecePrice * 6;
 
     // Format NGN Currency
     const formattedPrice = useMemo(() => {
@@ -226,7 +221,14 @@ export const ProductDetails: React.FC = () => {
         })
             .format(displayAmount)
             .replace("NGN", "₦");
-    }, [includePieces, includeCases, piecesQty, casesQty, piecePrice, casePrice]);
+    }, [
+        includePieces,
+        includeCases,
+        piecesQty,
+        casesQty,
+        piecePrice,
+        casePrice,
+    ]);
 
     // Local Quantity Increment / Decrement Handlers (Does NOT affect cart until Add to Cart is clicked)
     const handleDecrementPieces = () => {
@@ -517,8 +519,9 @@ export const ProductDetails: React.FC = () => {
 
                                 {/* Stock & Volume Information Bar */}
                                 <div className="text-black-200 font-hanken text-[0.625rem] sm:text-base md:text-[1.25rem] font-normal tracking-wide mt-1.5">
-                                    {product.volume} • {piecesLeft} Pieces Left
-                                    • {casesLeft} Cases Left
+                                    {product.volume || product.description} •{" "}
+                                    {piecesLeft} Pieces Left • {casesLeft} Cases
+                                    Left
                                 </div>
 
                                 {/* Large Metallic Gold Price */}
@@ -546,24 +549,32 @@ export const ProductDetails: React.FC = () => {
                                             <div
                                                 className={cn(
                                                     "size-4 md:size-5 rounded flex items-center justify-center border transition-all",
-                                                    includePieces && piecesLeft > 0
+                                                    includePieces &&
+                                                        piecesLeft > 0
                                                         ? "bg-gold-400 border-gold-400 text-black font-bold"
                                                         : "border-gold-500 bg-transparent group-hover:border-neutral-400",
                                                 )}
                                             >
-                                                {includePieces && piecesLeft > 0 && (
-                                                    <Check className="size-2 md:size-3.5 stroke-3 text-black" />
-                                                )}
+                                                {includePieces &&
+                                                    piecesLeft > 0 && (
+                                                        <Check className="size-2 md:size-3.5 stroke-3 text-black" />
+                                                    )}
                                             </div>
                                             <span
                                                 className={cn(
                                                     "text-sm font-medium font-hanken transition-colors",
-                                                    includePieces && piecesLeft > 0
+                                                    includePieces &&
+                                                        piecesLeft > 0
                                                         ? "gradient-text"
                                                         : "text-white",
                                                 )}
                                             >
-                                                Pieces {piecesLeft <= 0 && <span className="text-red-400 text-xs ml-1">(Out of Stock)</span>}
+                                                Pieces{" "}
+                                                {piecesLeft <= 0 && (
+                                                    <span className="text-red-400 text-xs ml-1">
+                                                        (Out of Stock)
+                                                    </span>
+                                                )}
                                             </span>
                                         </button>
 
@@ -579,24 +590,32 @@ export const ProductDetails: React.FC = () => {
                                             <div
                                                 className={cn(
                                                     "size-4 md:size-5 rounded flex items-center justify-center border transition-all",
-                                                    includeCases && casesLeft > 0
+                                                    includeCases &&
+                                                        casesLeft > 0
                                                         ? "bg-gold-400 border-gold-400 text-black font-bold"
                                                         : "border-gold-500 bg-transparent group-hover:border-neutral-400",
                                                 )}
                                             >
-                                                {includeCases && casesLeft > 0 && (
-                                                    <Check className="size-2 md:size-3.5 stroke-3 text-black" />
-                                                )}
+                                                {includeCases &&
+                                                    casesLeft > 0 && (
+                                                        <Check className="size-2 md:size-3.5 stroke-3 text-black" />
+                                                    )}
                                             </div>
                                             <span
                                                 className={cn(
                                                     "text-sm font-medium font-hanken transition-colors",
-                                                    includeCases && casesLeft > 0
+                                                    includeCases &&
+                                                        casesLeft > 0
                                                         ? "gradient-text"
                                                         : "text-white",
                                                 )}
                                             >
-                                                Cases {casesLeft <= 0 && <span className="text-red-400 text-xs ml-1">(Out of Stock)</span>}
+                                                Cases{" "}
+                                                {casesLeft <= 0 && (
+                                                    <span className="text-red-400 text-xs ml-1">
+                                                        (Out of Stock)
+                                                    </span>
+                                                )}
                                             </span>
                                         </button>
                                     </div>
@@ -629,7 +648,8 @@ export const ProductDetails: React.FC = () => {
                                                 onClick={handleDecrementPieces}
                                                 className={cn(
                                                     "size-5 sm:size-11 rounded-md border flex items-center justify-center transition-all",
-                                                    piecesQty <= 1 || piecesLeft <= 0
+                                                    piecesQty <= 1 ||
+                                                        piecesLeft <= 0
                                                         ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
                                                         : "border-gold-500 bg-neutral-900/60 hover:bg-neutral-800 hover:border-gold-400/80 text-gold-500 cursor-pointer",
                                                 )}
@@ -639,7 +659,9 @@ export const ProductDetails: React.FC = () => {
                                             </button>
 
                                             <span className="w-24 text-center font-bold text-white text-body-c1 md:text-xl font-hanken">
-                                                {piecesLeft <= 0 ? 0 : piecesQty}
+                                                {piecesLeft <= 0
+                                                    ? 0
+                                                    : piecesQty}
                                             </span>
 
                                             <button
@@ -647,7 +669,8 @@ export const ProductDetails: React.FC = () => {
                                                 onClick={handleIncrementPieces}
                                                 className={cn(
                                                     "size-5 sm:size-11 rounded-md border flex items-center justify-center transition-all",
-                                                    piecesQty >= piecesLeft || piecesLeft <= 0
+                                                    piecesQty >= piecesLeft ||
+                                                        piecesLeft <= 0
                                                         ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
                                                         : "border-gold-500 bg-neutral-900/60 hover:bg-neutral-800 hover:border-gold-400/80 text-gold-500 cursor-pointer",
                                                 )}
@@ -686,7 +709,8 @@ export const ProductDetails: React.FC = () => {
                                                 onClick={handleDecrementCases}
                                                 className={cn(
                                                     "size-5 sm:size-11 rounded-md border flex items-center justify-center transition-all",
-                                                    casesQty <= 1 || casesLeft <= 0
+                                                    casesQty <= 1 ||
+                                                        casesLeft <= 0
                                                         ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
                                                         : "border-gold-500 bg-neutral-900/60 hover:bg-neutral-800 hover:border-gold-400/80 text-white cursor-pointer",
                                                 )}
@@ -704,7 +728,8 @@ export const ProductDetails: React.FC = () => {
                                                 onClick={handleIncrementCases}
                                                 className={cn(
                                                     "size-5 md:size-11 rounded-md border flex items-center justify-center transition-all",
-                                                    casesQty >= casesLeft || casesLeft <= 0
+                                                    casesQty >= casesLeft ||
+                                                        casesLeft <= 0
                                                         ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
                                                         : "border-gold-500 bg-neutral-900/60 hover:bg-neutral-800 hover:border-gold-400/80 text-gold-500 cursor-pointer",
                                                 )}
@@ -732,7 +757,8 @@ export const ProductDetails: React.FC = () => {
                                         const isAdding =
                                             isAddingProduct(product.id) ||
                                             isAddingProduct(
-                                                (product as any).productId || "",
+                                                (product as any).productId ||
+                                                    "",
                                             ) ||
                                             isAddingProduct(
                                                 (product as any).slug || "",
@@ -773,7 +799,9 @@ export const ProductDetails: React.FC = () => {
                                                     {isAdding ? (
                                                         <>
                                                             <Loader2 className="size-4.5 animate-spin text-black-900" />
-                                                            <span>Processing...</span>
+                                                            <span>
+                                                                Processing...
+                                                            </span>
                                                         </>
                                                     ) : isProductOutOfStock ? (
                                                         "Out of Stock"
@@ -796,7 +824,10 @@ export const ProductDetails: React.FC = () => {
                                                     {isAdding ? (
                                                         <>
                                                             <Loader2 className="size-4.5 animate-spin text-gold-500" />
-                                                            <span>Adding to Cart...</span>
+                                                            <span>
+                                                                Adding to
+                                                                Cart...
+                                                            </span>
                                                         </>
                                                     ) : isProductOutOfStock ? (
                                                         "Out of Stock"
@@ -824,7 +855,10 @@ export const ProductDetails: React.FC = () => {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-10 md:p-10">
                                 {relatedProducts.map((relProduct: any) => (
                                     <ProductCard
-                                        key={relProduct.productId || relProduct.id}
+                                        key={
+                                            relProduct.productId ||
+                                            relProduct.id
+                                        }
                                         product={relProduct}
                                     />
                                 ))}
