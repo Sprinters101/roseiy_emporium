@@ -12,6 +12,7 @@ import type { ProductItem } from "@/service/types";
 export interface BestSellerProduct {
     id: string;
     productId?: string;
+    description?: string;
     slug?: string;
     name: string;
     category: string;
@@ -112,7 +113,7 @@ const HorizontalProductCard = ({ product }: { product: BestSellerProduct }) => {
 
                 {/* Stock Meta Information */}
                 <p className="text-body-c1 text-black-200 font-hanken">
-                    {product.volume}
+                    {product.volume || product?.description || ""}
                     {product.piecesLeft !== undefined &&
                         ` • ${product.piecesLeft} Pieces Left`}
                     {product.casesLeft !== undefined &&
@@ -199,13 +200,13 @@ export const BestSellers = () => {
                     name: p.name,
                     title: p.name,
                     category: p.category?.name || "",
-                    volume: (p as any).volume || "",
+                    volume: (p as any).volume || p?.description || "",
                     piecesLeft: pieceUnit
                         ? pieceUnit.stock
                         : primaryUnit
                           ? primaryUnit.stock
                           : 22,
-                    casesLeft: cartonUnit ? cartonUnit.stock : 5,
+                    casesLeft: cartonUnit ? cartonUnit.stock : "",
                     price: pieceUnit
                         ? Number(
                               pieceUnit.price || (pieceUnit as any).unitPrice,
