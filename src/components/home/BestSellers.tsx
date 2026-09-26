@@ -246,7 +246,11 @@ export const BestSellers = () => {
                           ? primaryUnit.stock
                           : 22,
                     casesLeft: cartonUnit ? cartonUnit.stock : 5,
-                    price: primaryUnit ? Number(primaryUnit.price) : 650000,
+                    price: pieceUnit
+                        ? Number(pieceUnit.price || (pieceUnit as any).unitPrice)
+                        : primaryUnit
+                          ? Number(primaryUnit.price || (primaryUnit as any).unitPrice)
+                          : 650000,
                     image:
                         p.images?.find((i) => i.isPrimary)?.imageUrl ||
                         p.images?.[0]?.imageUrl ||

@@ -221,6 +221,18 @@ export interface AddToCartPayload {
     quantity: number;
 }
 
+export interface SetProductQuantitiesItem {
+    sellingUnitId: string;
+    quantity: number;
+}
+
+export interface SetProductQuantitiesPayload {
+    productId?: string;
+    items?: SetProductQuantitiesItem[];
+    quantities?: Record<string, number>;
+    [key: string]: unknown;
+}
+
 export interface UpdateCartItemPayload {
     cartItemId: string;
     quantity: number;
@@ -260,18 +272,30 @@ export interface CheckoutAddressPayload {
     state: string;
     postalCode?: string;
     country: string;
+    callbackUrl?: string;
 }
 
 export interface CheckoutResponseData {
-    checkout: {
+    checkout?: {
         reference: string;
         authorizationUrl: string;
-        accessCode: string;
-        subtotal: string;
-        deliveryFee: string;
-        total: string;
-        currency: string;
+        authorization_url?: string;
+        accessCode?: string;
+        access_code?: string;
+        subtotal?: string | number;
+        deliveryFee?: string | number;
+        total?: string | number;
+        currency?: string;
     };
+    reference?: string;
+    authorizationUrl?: string;
+    authorization_url?: string;
+    accessCode?: string;
+    access_code?: string;
+    subtotal?: string | number;
+    deliveryFee?: string | number;
+    total?: string | number;
+    currency?: string;
 }
 
 export interface VerifyCheckoutResponseData {
@@ -428,7 +452,13 @@ export interface OrderDetailsData {
     subtotal: string | number;
     deliveryFee: string | number;
     total: string | number;
-    status: "cancelled" | "processing" | "shipped" | "delivered" | "pending" | string;
+    status:
+        | "cancelled"
+        | "processing"
+        | "shipped"
+        | "delivered"
+        | "pending"
+        | string;
     paidAt?: string | null;
     createdAt?: string;
     updatedAt?: string;
@@ -458,9 +488,36 @@ export type SingleOrderResponseData =
     | { order: OrderDetailsData }
     | OrderDetailsData;
 
-export interface TrackOrderResponseData {
+export interface TrackOrderStep {
+    status: string;
+    label: string;
+    completed: boolean;
+    occurredAt?: string | null;
+}
+
+export interface TrackOrderTimelineItem {
+    orderStatusHistoryId: string;
+    status: string;
+    previousStatus?: string | null;
+    occurredAt: string;
+    derived?: boolean;
+    label: string;
+}
+
+export interface TrackOrderProgress {
+    orderId: string;
     orderNumber: string;
-    status: "processing" | "shipped" | "delivered" | "cancelled" | string;
+    currentStatus: string;
+    cancelled: boolean;
+    steps: TrackOrderStep[];
+    timeline: TrackOrderTimelineItem[];
+}
+
+export interface TrackOrderResponseData {
+    order?: OrderDetailsData;
+    progress?: TrackOrderProgress;
+    orderNumber?: string;
+    status?: "processing" | "shipped" | "delivered" | "cancelled" | string;
     subtotal?: string | number;
     deliveryFee?: string | number;
     total?: string | number;

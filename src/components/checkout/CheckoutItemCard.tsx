@@ -1,6 +1,6 @@
 import React from "react";
 import { Trash2, Package } from "lucide-react";
-import type { CartItem } from "@/context/CartContext";
+import { calculateCartItemTotal, type CartItem } from "@/context/CartContext";
 
 export interface CheckoutItemCardProps {
     item: CartItem;
@@ -29,9 +29,7 @@ export const CheckoutItemCard: React.FC<CheckoutItemCardProps> = ({
             ? quantityParts.join(" and ")
             : `${item.quantity || 1}`;
 
-    const formattedPrice = (
-        (item.price || 0) * (item.quantity || 1)
-    ).toLocaleString();
+    const formattedPrice = calculateCartItemTotal(item).toLocaleString();
 
     const displayImage =
         item.image && item.image.trim() !== ""

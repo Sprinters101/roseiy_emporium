@@ -1,15 +1,13 @@
 import React, { useState } from "react";
-import { PenLine, Trash2, MapPin } from "lucide-react";
+import { PenLine, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CustomSelect } from "@/components/common/CustomSelect";
 import { AddressModal } from "@/components/dashboard/addresses/AddressModal";
 import { DeleteAddressModal } from "@/components/dashboard/addresses/DeleteAddressModal";
 import type {
     AddressItem,
     AddressFormData,
 } from "@/components/dashboard/addresses/types";
-import type { DeliveryArea } from "@/service/types";
 
 export interface LoggedInShippingInfoProps {
     addresses: AddressItem[];
@@ -28,9 +26,6 @@ export interface LoggedInShippingInfoProps {
         id: string,
         successCallback?: () => void,
     ) => Promise<void> | void;
-    deliveryAreas?: DeliveryArea[];
-    selectedDeliveryAreaId?: string;
-    onSelectDeliveryArea?: (areaId: string) => void;
     isLoading?: boolean;
 }
 
@@ -41,9 +36,6 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
     onAddNewAddress,
     onEditAddress,
     onDeleteAddress,
-    deliveryAreas = [],
-    selectedDeliveryAreaId = "",
-    onSelectDeliveryArea,
     isLoading = false,
 }) => {
     const [isMultiView, setIsMultiView] = useState<boolean>(false);
@@ -148,30 +140,6 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                     </button>
                 )}
             </div>
-
-            {/* Delivery Area / Region Dropdown */}
-            {deliveryAreas.length > 0 && (
-                <div className="bg-black-900/60 border border-neutral-800/80 rounded-xl p-4 flex flex-col gap-2.5">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-gold-400 font-hanken tracking-wider uppercase">
-                        <MapPin className="size-3.5" />
-                        <span>Delivery Destination & Shipping Rate</span>
-                    </div>
-                    <CustomSelect
-                        name="deliveryArea"
-                        options={deliveryAreas.map((area) => ({
-                            label: `${area.name} — ₦${Number(area.fee).toLocaleString()}${
-                                area.estimatedDeliveryTime
-                                    ? ` (${area.estimatedDeliveryTime})`
-                                    : ""
-                            }`,
-                            value: area.deliveryAreaId,
-                        }))}
-                        value={selectedDeliveryAreaId}
-                        onChange={(val) => onSelectDeliveryArea?.(val)}
-                        placeholder="Select Delivery Region"
-                    />
-                </div>
-            )}
 
             {/* Address View: Loading Skeleton vs Single Default vs All Addresses */}
             {isLoading ? (

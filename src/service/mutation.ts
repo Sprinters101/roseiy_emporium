@@ -10,6 +10,7 @@ import {
     forgotPasswordFunc,
     resetPasswordFunc,
     addToCartFunc,
+    setProductQuantitiesFunc,
     updateCartItemQuantityFunc,
     removeCartItemFunc,
     clearCartFunc,
@@ -32,6 +33,7 @@ import type {
     ForgotPasswordPayload,
     ResetPasswordPayload,
     AddToCartPayload,
+    SetProductQuantitiesPayload,
     UpdateCartItemPayload,
     CheckoutAddressPayload,
     UpdateProfilePayload,
@@ -211,7 +213,31 @@ export const useResetPassword = () => {
 // ==========================================
 
 /**
- * Add Item to Cart Mutation (with sellingUnitId)
+ * Set Product Quantities (Unified Pieces & Cases) Mutation
+ * POST /cart/product-quantities
+ */
+export const useSetProductQuantities = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (payload: SetProductQuantitiesPayload) =>
+            setProductQuantitiesFunc(payload),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
+            if (data?.message) {
+                toast.success(data.message);
+            }
+        },
+        onError: (err: AxiosError<ApiErrorResponse>) => {
+            toast.error(
+                getErrorMessage(err, "Failed to update cart quantities."),
+            );
+        },
+    });
+};
+
+/**
+ * Add Single Item to Cart Mutation (with sellingUnitId)
  */
 export const useAddToCart = () => {
     const queryClient = useQueryClient();

@@ -9,7 +9,7 @@ import {
     SheetClose,
 } from "@/components/ui/sheet";
 import { Link, useNavigate } from "react-router";
-import { useCart } from "@/context/CartContext";
+import { useCart, calculateCartItemTotal } from "@/context/CartContext";
 import { ShopEmptyState } from "@/components/shop/ShopEmptyState";
 import { toast } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
@@ -177,17 +177,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                             const categoryName = item.category || "";
                             const volumeText = item.volume || "";
 
-                            const cartonUnit = item.sellingUnits?.find(
-                                (u: any) =>
-                                    u.name?.toLowerCase().includes("carton") ||
-                                    u.name?.toLowerCase().includes("case"),
-                            );
-                            const piecePrice = item.price;
-                            const casePrice =
-                                item.casePrice ||
-                                (cartonUnit ? Number(cartonUnit.price) : piecePrice);
-                            const itemTotal =
-                                pQty * piecePrice + cQty * casePrice;
+                            const itemTotal = calculateCartItemTotal(item);
 
                             const displayImage =
                                 item.image && item.image.trim() !== ""

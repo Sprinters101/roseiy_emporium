@@ -4,7 +4,8 @@ import { ChevronRight } from "lucide-react";
 import Container from "@/components/common/Container";
 import { toast } from "@/components/ui/sonner";
 import { TrackOrderForm, type TrackOrderFormValues } from "./TrackOrderForm";
-import { DeliveryProgress } from "./DeliveryProgress";
+import { DeliveryProgress, DeliveryProgressSkeleton } from "./DeliveryProgress";
+import { TrackOrderEmptyState } from "./TrackOrderEmptyState";
 import { useTrackOrder } from "@/service/mutation";
 import { useAuth } from "@/context/AuthContext";
 
@@ -40,14 +41,11 @@ export const TrackOrder: React.FC = () => {
         searchParams.get("id") ||
         "";
     const paramEmail =
-        location.state?.email ||
-        searchParams.get("email") ||
-        user?.email ||
-        "";
+        location.state?.email || searchParams.get("email") || user?.email || "";
 
     const [formValues, setFormValues] = useState<TrackOrderFormValues>({
-        orderId: paramOrderId || "RE-2026-7890",
-        emailAddress: paramEmail || "customer@roseiyemporium.com",
+        orderId: paramOrderId || "",
+        emailAddress: paramEmail || "",
     });
 
     const [trackedOrder, setTrackedOrder] = useState<{
@@ -55,65 +53,98 @@ export const TrackOrder: React.FC = () => {
         emailAddress: string;
         placedDate: string;
         stepIndex: number;
-    }>({
-        orderId: paramOrderId || "RE-2026-7890",
-        emailAddress: paramEmail || "customer@roseiyemporium.com",
-        placedDate: "January 15 2026",
-        stepIndex: 1, // Order Confirmed
-    });
+    } | null>(null);
+
+    const [trackingStatus, setTrackingStatus] = useState<
+        "idle" | "success" | "error"
+    >("idle");
+    const [searchedOrderId, setSearchedOrderId] = useState<string>(
+        paramOrderId || "",
+    );
 
     // Auto-track if navigated with real orderNumber & email
     useEffect(() => {
         if (paramOrderId && paramEmail) {
+            setSearchedOrderId(paramOrderId.trim());
             trackOrderMutation
                 .mutateAsync({
-                    orderNumber: paramOrderId,
-                    email: paramEmail,
+                    orderNumber: paramOrderId.trim(),
+                    email: paramEmail.trim(),
                 })
                 .then((res) => {
-                    if (res?.data) {
-                        const data = res.data;
-                        const dateStr = data.placedAt
-                            ? new Date(data.placedAt).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                      year: "numeric",
-                                      month: "long",
-                                      day: "numeric",
-                                  },
-                              )
+                    if (
+                        res?.data &&
+                        (res.data.order || res.data.orderNumber)
+                    ) {
+                        const orderData = res.data.order;
+                        const progressData = res.data.progress;
+                        const status =
+                            progressData?.currentStatus ||
+                            orderData?.status ||
+                            res.data.status;
+                        const rawDate =
+                            orderData?.paidAt ||
+                            orderData?.createdAt ||
+                            orderData?.placedAt;
+                        const dateStr = rawDate
+                            ? new Date(rawDate).toLocaleDateString("en-US", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                              })
                             : "Recent";
 
                         setTrackedOrder({
-                            orderId: data.orderNumber || paramOrderId,
+                            orderId:
+                                orderData?.orderNumber ||
+                                res.data.orderNumber ||
+                                paramOrderId,
                             emailAddress: paramEmail,
                             placedDate: dateStr,
-                            stepIndex: getStepIndexFromStatus(data.status),
+                            stepIndex: getStepIndexFromStatus(status),
                         });
                         setFormValues({
-                            orderId: data.orderNumber || paramOrderId,
+                            orderId:
+                                orderData?.orderNumber ||
+                                res.data.orderNumber ||
+                                paramOrderId,
                             emailAddress: paramEmail,
                         });
+                        setTrackingStatus("success");
+                    } else {
+                        setTrackedOrder(null);
+                        setTrackingStatus("error");
                     }
                 })
                 .catch(() => {
-                    // Fallback to local params
+                    setTrackedOrder(null);
+                    setTrackingStatus("error");
                 });
         }
     }, [paramOrderId, paramEmail]);
 
     const handleTrackOrder = async (values: TrackOrderFormValues) => {
         setFormValues(values);
+        setSearchedOrderId(values.orderId.trim());
         try {
             const res = await trackOrderMutation.mutateAsync({
                 orderNumber: values.orderId.trim(),
                 email: values.emailAddress.trim(),
             });
 
-            if (res?.data) {
-                const data = res.data;
-                const dateStr = data.placedAt
-                    ? new Date(data.placedAt).toLocaleDateString("en-US", {
+            if (res?.data && (res.data.order || res.data.orderNumber)) {
+                const orderData = res.data.order;
+                const progressData = res.data.progress;
+                const status =
+                    progressData?.currentStatus ||
+                    orderData?.status ||
+                    res.data.status;
+                const rawDate =
+                    orderData?.paidAt ||
+                    orderData?.createdAt ||
+                    orderData?.placedAt;
+                const dateStr = rawDate
+                    ? new Date(rawDate).toLocaleDateString("en-US", {
                           year: "numeric",
                           month: "long",
                           day: "numeric",
@@ -121,29 +152,27 @@ export const TrackOrder: React.FC = () => {
                     : "Recent";
 
                 setTrackedOrder({
-                    orderId: data.orderNumber || values.orderId,
+                    orderId:
+                        orderData?.orderNumber ||
+                        res.data.orderNumber ||
+                        values.orderId,
                     emailAddress: values.emailAddress,
                     placedDate: dateStr,
-                    stepIndex: getStepIndexFromStatus(data.status),
+                    stepIndex: getStepIndexFromStatus(status),
                 });
-                toast.success(`Tracking order status for ${values.orderId}`);
+                setTrackingStatus("success");
+                toast.success(
+                    res.message || `Tracking order status for ${values.orderId}`,
+                );
             } else {
-                setTrackedOrder({
-                    orderId: values.orderId.toUpperCase().startsWith("RE-")
-                        ? values.orderId.toUpperCase()
-                        : `RE-${values.orderId.toUpperCase()}`,
-                    emailAddress: values.emailAddress,
-                    placedDate: new Date().toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                    }),
-                    stepIndex: 1,
-                });
-                toast.success(`Tracking order status for ${values.orderId}`);
+                // No valid order found: clear previous data
+                setTrackedOrder(null);
+                setTrackingStatus("error");
             }
         } catch {
-            // Error toast handled by useTrackOrder mutation hook
+            // Invalid data / error: clear any past data so user knows it's not valid
+            setTrackedOrder(null);
+            setTrackingStatus("error");
         }
     };
 
@@ -175,14 +204,24 @@ export const TrackOrder: React.FC = () => {
                 <TrackOrderForm
                     initialValues={formValues}
                     onTrack={handleTrackOrder}
+                    isLoading={trackOrderMutation.isPending}
                 />
 
-                {/* Delivery Progress Stepper Card Component */}
-                <DeliveryProgress
-                    orderId={trackedOrder.orderId}
-                    placedDate={trackedOrder.placedDate}
-                    currentStepIndex={trackedOrder.stepIndex}
-                />
+                {/* Delivery Progress, Skeleton, or Empty State Component */}
+                {trackOrderMutation.isPending ? (
+                    <DeliveryProgressSkeleton />
+                ) : trackedOrder ? (
+                    <DeliveryProgress
+                        orderId={trackedOrder.orderId}
+                        placedDate={trackedOrder.placedDate}
+                        currentStepIndex={trackedOrder.stepIndex}
+                    />
+                ) : (
+                    <TrackOrderEmptyState
+                        type={trackingStatus === "error" ? "error" : "idle"}
+                        searchedOrderId={searchedOrderId}
+                    />
+                )}
             </Container>
         </div>
     );

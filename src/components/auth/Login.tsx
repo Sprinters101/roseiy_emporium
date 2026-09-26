@@ -28,12 +28,17 @@ export const Login: React.FC = () => {
     // Determine target redirect destination
     const fromState = location.state?.from;
     const searchParams = new URLSearchParams(location.search);
-    const redirectParam = searchParams.get("redirect") || searchParams.get("from");
+    const redirectParam =
+        searchParams.get("redirect") || searchParams.get("from");
 
     let fromPath = "";
     if (typeof fromState === "string") {
         fromPath = fromState;
-    } else if (fromState && typeof fromState === "object" && "pathname" in fromState) {
+    } else if (
+        fromState &&
+        typeof fromState === "object" &&
+        "pathname" in fromState
+    ) {
         fromPath = fromState.pathname;
     } else if (redirectParam) {
         fromPath = redirectParam;
@@ -42,7 +47,7 @@ export const Login: React.FC = () => {
     // Default to Profile, unless redirected from Checkout
     const targetDestination = fromPath.includes("/checkout")
         ? "/checkout"
-        : "/dashboard/profile";
+        : "/dashboard";
 
     const handleSubmit = (
         values: LoginPayload,
@@ -119,9 +124,7 @@ export const Login: React.FC = () => {
                                         disabled={isLoading}
                                         className="w-full mt-2 h-10 md:h-12 bg-gold-g hover:opacity-95 text-black font-semibold text-sm sm:text-base py-3.5 px-6 rounded-sm transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center font-hanken"
                                     >
-                                        {isLoading
-                                            ? "Logging In..."
-                                            : "Log In"}
+                                        {isLoading ? "Logging In..." : "Log In"}
                                     </button>
 
                                     <div className="text-xs sm:text-sm text-center text-white mt-4 font-hanken">

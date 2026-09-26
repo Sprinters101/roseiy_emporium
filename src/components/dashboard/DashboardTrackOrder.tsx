@@ -10,7 +10,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DeliveryProgress } from "@/components/track-order/DeliveryProgress";
+import {
+    DeliveryProgress,
+    DeliveryProgressSkeleton,
+} from "@/components/track-order/DeliveryProgress";
 import { useGetCustomerOrders, useGetSingleOrder } from "@/service/queries";
 import type { OrderDetailsData, OrderSummaryItem } from "@/service/types";
 
@@ -63,7 +66,9 @@ const getStatusBadge = (status?: string) => {
     return (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gold-400/10 text-gold-400 border border-gold-400/30">
             <Clock className="size-3.5" />
-            {status ? status.charAt(0).toUpperCase() + status.slice(1) : "Processing"}
+            {status
+                ? status.charAt(0).toUpperCase() + status.slice(1)
+                : "Processing"}
         </span>
     );
 };
@@ -78,14 +83,17 @@ export const DashboardTrackOrder: React.FC = () => {
 
     const ordersList: OrderSummaryItem[] = useMemo(() => {
         if (!customerOrdersData?.data) return [];
-        if (Array.isArray(customerOrdersData.data)) return customerOrdersData.data;
+        if (Array.isArray(customerOrdersData.data))
+            return customerOrdersData.data;
         if (
             Array.isArray(
-                (customerOrdersData.data as { orders?: OrderSummaryItem[] }).orders,
+                (customerOrdersData.data as { orders?: OrderSummaryItem[] })
+                    .orders,
             )
         ) {
             return (
-                (customerOrdersData.data as { orders: OrderSummaryItem[] }).orders || []
+                (customerOrdersData.data as { orders: OrderSummaryItem[] })
+                    .orders || []
             );
         }
         return [];
@@ -111,7 +119,10 @@ export const DashboardTrackOrder: React.FC = () => {
 
     const rawData = orderDetailsData?.data;
     const order: OrderDetailsData | undefined =
-        rawData && typeof rawData === "object" && "order" in rawData && rawData.order
+        rawData &&
+        typeof rawData === "object" &&
+        "order" in rawData &&
+        rawData.order
             ? (rawData as { order: OrderDetailsData }).order
             : (rawData as OrderDetailsData | undefined);
 
@@ -158,7 +169,9 @@ export const DashboardTrackOrder: React.FC = () => {
                         No Active Orders to Track
                     </h3>
                     <p className="text-neutral-400 text-sm max-w-sm font-hanken">
-                        You have not placed any orders yet. Once you make a purchase, you can follow its live shipping progress here.
+                        You have not placed any orders yet. Once you make a
+                        purchase, you can follow its live shipping progress
+                        here.
                     </p>
                     <Link
                         to="/shop"
@@ -213,7 +226,10 @@ export const DashboardTrackOrder: React.FC = () => {
                             className="bg-black-700 text-white text-xs font-hanken border border-neutral-800 rounded-md px-3 py-1.5 focus:outline-none focus:border-gold-400 cursor-pointer"
                         >
                             {ordersList.map((o) => (
-                                <option key={o.orderNumber} value={o.orderNumber}>
+                                <option
+                                    key={o.orderNumber}
+                                    value={o.orderNumber}
+                                >
                                     {o.orderNumber} ({o.status})
                                 </option>
                             ))}
@@ -224,7 +240,7 @@ export const DashboardTrackOrder: React.FC = () => {
 
             {/* Live Delivery Progress Card */}
             {isOrderLoading ? (
-                <Skeleton className="h-56 w-full bg-neutral-800 rounded-xl" />
+                <DeliveryProgressSkeleton />
             ) : (
                 <div className="relative">
                     <DeliveryProgress

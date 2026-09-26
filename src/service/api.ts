@@ -19,6 +19,7 @@ import type {
     ProductItem,
     CartResponseData,
     AddToCartPayload,
+    SetProductQuantitiesPayload,
     UpdateCartItemPayload,
     CheckoutAddressPayload,
     CheckoutResponseData,
@@ -202,7 +203,20 @@ export const getCartFunc = async (): Promise<
 };
 
 /**
- * 10. Add Item to Cart
+ * 10. Set Product Quantities (Unified Pieces & Cases)
+ * POST /cart/product-quantities
+ */
+export const setProductQuantitiesFunc = async (
+    payload: SetProductQuantitiesPayload,
+): Promise<ApiResponse<{ cart: CartResponseData }>> => {
+    const response = await apiClient.post<
+        ApiResponse<{ cart: CartResponseData }>
+    >("/cart/product-quantities", payload);
+    return response.data;
+};
+
+/**
+ * 11. Add Single Item to Cart
  * POST /cart/items
  */
 export const addToCartFunc = async (

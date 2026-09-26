@@ -12,19 +12,19 @@ export interface DeliveryProgressProps {
 
 const STEPS = [
     { label: "Order Placed", key: "placed" },
-    { label: "Order Confirmed", key: "confirmed" },
-    { label: "In Transit", key: "transit" },
+    { label: "Order Confirmed", key: "processing" },
+    { label: "In Transit", key: "shipped" },
     { label: "Order Delivered", key: "delivered" },
 ];
 
 export const DeliveryProgress: React.FC<DeliveryProgressProps> = ({
-    orderId = "RE-2026-7890",
-    placedDate = "January 15 2026",
+    orderId = "",
+    placedDate = "",
     currentStepIndex = 1, // Order Confirmed
     className,
 }) => {
     // Progress bar width (0 -> 15%, 1 -> 48%, 2 -> 75%, 3 -> 100%)
-    const progressWidths = ["15%", "48%", "75%", "100%"];
+    const progressWidths = ["15%", "35%", "67%", "100%"];
     const activeProgressWidth = progressWidths[currentStepIndex] || "48%";
 
     return (
@@ -66,7 +66,7 @@ export const DeliveryProgress: React.FC<DeliveryProgressProps> = ({
             <div className="w-full pt-1">
                 {/* Icons & Connecting Lines Row */}
                 <div className="flex items-center justify-between w-full">
-                    {STEPS.map((step, idx) => {
+                    {STEPS?.map((step, idx) => {
                         const isCompleted = idx <= currentStepIndex;
                         const isLast = idx === STEPS.length - 1;
 
@@ -95,7 +95,7 @@ export const DeliveryProgress: React.FC<DeliveryProgressProps> = ({
 
                 {/* Labels Row */}
                 <div className="flex items-start justify-between w-full mt-2">
-                    {STEPS.map((step, idx) => {
+                    {STEPS?.map((step, idx) => {
                         const isCompleted = idx <= currentStepIndex;
 
                         return (
@@ -121,3 +121,4 @@ export const DeliveryProgress: React.FC<DeliveryProgressProps> = ({
 };
 
 export default DeliveryProgress;
+export { DeliveryProgressSkeleton } from "./DeliveryProgressSkeleton";

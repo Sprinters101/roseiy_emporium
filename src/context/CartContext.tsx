@@ -11,6 +11,7 @@ import { toast } from "@/components/ui/sonner";
 import { useGetCart } from "@/service/queries";
 import {
     useAddToCart,
+    useSetProductQuantities,
     useUpdateCartItem,
     useRemoveCartItem,
     useClearCart,
@@ -46,6 +47,53 @@ export const getProductMaxStock = (product: {
     if (product.piecesLeft !== undefined) return product.piecesLeft;
     if (product.casesLeft !== undefined) return product.casesLeft;
     return Infinity;
+};
+
+/**
+ * Calculates the exact line total for a given cart item accounting for Pieces and Cases
+ */
+export const calculateCartItemTotal = (item: CartItem): number => {
+    if (!item) return 0;
+
+    const pQty =
+        item.piecesQty !== undefined
+            ? item.piecesQty
+            : item.casesQty !== undefined && item.casesQty > 0
+              ? 0
+              : item.quantity || 0;
+    const cQty = item.casesQty !== undefined ? item.casesQty : 0;
+
+    const cartonUnit = item.sellingUnits?.find(
+        (u: any) =>
+            u.name?.toLowerCase().includes("carton") ||
+            u.name?.toLowerCase().includes("case"),
+    );
+    const pieceUnit = item.sellingUnits?.find((u: any) =>
+        u.name?.toLowerCase().includes("piece"),
+    );
+
+    const piecePrice =
+        item.price > 0
+            ? Number(item.price)
+            : pieceUnit
+              ? Number(pieceUnit.price || pieceUnit.unitPrice || 0)
+              : 0;
+
+    const casePrice =
+        item.casePrice && item.casePrice > 0
+            ? Number(item.casePrice)
+            : cartonUnit
+              ? Number(cartonUnit.price || cartonUnit.unitPrice || 0)
+              : piecePrice > 0
+                ? piecePrice
+                : 0;
+
+    if (item.piecesQty !== undefined || item.casesQty !== undefined) {
+        return pQty * piecePrice + cQty * casePrice;
+    }
+
+    const unitPrice = piecePrice > 0 ? piecePrice : casePrice;
+    return unitPrice * (item.quantity || 1);
 };
 
 export interface AddToCartOptions {
@@ -187,6 +235,112 @@ export const extractImageFromObject = (obj: any): string => {
  */
 const parseServerCart = (cartData: any): CartItem[] => {
     if (!cartData) return [];
+
+    // 1. Check if backend returned pre-consolidated groupedItems
+    if (
+        Array.isArray(cartData.groupedItems) &&
+        cartData.groupedItems.length > 0
+    ) {
+        return cartData.groupedItems
+            .map((group: any) => {
+                const product = group.product || {};
+                const productId = String(
+                    group.productId || product.productId || product.id || "",
+                );
+                const pieceUnit = group.pieceUnit || {};
+                const caseUnit = group.caseUnit || {};
+
+                const piecesQty = Number(
+                    group.piecesQuantity ??
+                        pieceUnit.quantity ??
+                        pieceUnit.cartQuantity ??
+                        0,
+                );
+                const casesQty = Number(
+                    group.casesQuantity ??
+                        caseUnit.quantity ??
+                        caseUnit.cartQuantity ??
+                        0,
+                );
+
+                const name = product.name || group.name || "";
+                const image =
+                    extractImageFromObject(product) ||
+                    extractImageFromObject(group) ||
+                    "";
+                const category =
+                    typeof product.category === "object" &&
+                    product.category !== null
+                        ? product.category.name
+                        : product.category || "";
+                const volume = product.volume || "";
+
+                const piecePrice = Number(
+                    pieceUnit.unitPrice || pieceUnit.price || 0,
+                );
+                const casePrice = Number(
+                    caseUnit.unitPrice || caseUnit.price || 0,
+                );
+
+                const piecesLeft =
+                    pieceUnit.availableStock !== undefined
+                        ? Number(pieceUnit.availableStock)
+                        : undefined;
+                const casesLeft =
+                    caseUnit.availableStock !== undefined
+                        ? Number(caseUnit.availableStock)
+                        : undefined;
+
+                const pieceSellingUnitId = pieceUnit.sellingUnitId;
+                const caseSellingUnitId = caseUnit.sellingUnitId;
+                const pieceCartItemId = pieceUnit.cartItemId;
+                const caseCartItemId = caseUnit.cartItemId;
+
+                const sellingUnits: any[] = [];
+                if (pieceSellingUnitId) {
+                    sellingUnits.push({
+                        ...pieceUnit,
+                        name: pieceUnit.name || "Piece",
+                        price: piecePrice,
+                        stock: piecesLeft,
+                    });
+                }
+                if (caseSellingUnitId) {
+                    sellingUnits.push({
+                        ...caseUnit,
+                        name: caseUnit.name || "Case",
+                        price: casePrice,
+                        stock: casesLeft,
+                    });
+                }
+
+                return {
+                    id: productId,
+                    productId,
+                    slug: product.slug,
+                    name,
+                    category,
+                    volume,
+                    image,
+                    price: piecePrice > 0 ? piecePrice : (casePrice > 0 ? casePrice : 0),
+                    casePrice: casePrice > 0 ? casePrice : undefined,
+                    quantity: piecesQty + casesQty,
+                    piecesQty,
+                    casesQty,
+                    piecesLeft,
+                    casesLeft,
+                    sellingUnits,
+                    pieceSellingUnitId,
+                    caseSellingUnitId,
+                    pieceCartItemId,
+                    caseCartItemId,
+                    cartItemId: pieceCartItemId || caseCartItemId,
+                };
+            })
+            .filter((item: CartItem) => item.quantity > 0 || (item.piecesQty || 0) > 0 || (item.casesQty || 0) > 0);
+    }
+
+    // 2. Fallback: Parse flat items array
     const rawItems = Array.isArray(cartData.items)
         ? cartData.items
         : Array.isArray(cartData)
@@ -353,6 +507,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     } = useGetCart();
 
     // 3. Backend Mutations
+    const setProductQuantitiesMutation = useSetProductQuantities();
     const addToCartMutation = useAddToCart();
     const updateCartItemMutation = useUpdateCartItem();
     const removeCartItemMutation = useRemoveCartItem();
@@ -429,6 +584,46 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
             return { pieceUnit, cartonUnit };
         },
         [],
+    );
+
+    // Remove an item entirely from cart
+    const removeFromCart = useCallback(
+        (productId: string) => {
+            const itemToRemove = cartItems.find(
+                (item) =>
+                    item.id === productId ||
+                    item.productId === productId ||
+                    item.slug === productId ||
+                    item.cartItemId === productId ||
+                    item.pieceCartItemId === productId ||
+                    item.caseCartItemId === productId,
+            );
+
+            if (itemToRemove) {
+                const targetProductId = String(
+                    itemToRemove.productId || itemToRemove.id || productId,
+                );
+                setProductQuantitiesMutation.mutate({
+                    productId: targetProductId,
+                    piecesQuantity: 0,
+                    casesQuantity: 0,
+                });
+                toast.info(`${itemToRemove.name} removed from cart`);
+            }
+
+            setCartItems((prevItems) =>
+                prevItems.filter(
+                    (item) =>
+                        item.id !== productId &&
+                        item.productId !== productId &&
+                        item.slug !== productId &&
+                        item.cartItemId !== productId &&
+                        item.pieceCartItemId !== productId &&
+                        item.caseCartItemId !== productId,
+                ),
+            );
+        },
+        [cartItems, setProductQuantitiesMutation],
     );
 
     // Add or merge quantities into cart
@@ -540,49 +735,28 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
                 existingItem,
             );
 
-            const mutationPromises: Promise<any>[] = [];
+            const finalPQty = currentPieces + actualAddPieces;
+            const finalCQty = currentCases + actualAddCases;
 
-            if (actualAddPieces > 0 && pieceUnit?.sellingUnitId) {
-                mutationPromises.push(
-                    addToCartMutation
-                        .mutateAsync({
-                            sellingUnitId: pieceUnit.sellingUnitId,
-                            quantity: actualAddPieces,
-                        })
-                        .catch((err) => {
-                            console.error(
-                                "Error adding piece unit to cart",
-                                err,
-                            );
-                        }),
-                );
-            }
+            const targetProductId = String(
+                (product as any).productId || product.id || targetId,
+            );
 
-            if (actualAddCases > 0 && cartonUnit?.sellingUnitId) {
-                mutationPromises.push(
-                    addToCartMutation
-                        .mutateAsync({
-                            sellingUnitId: cartonUnit.sellingUnitId,
-                            quantity: actualAddCases,
-                        })
-                        .catch((err) => {
-                            console.error(
-                                "Error adding case unit to cart",
-                                err,
-                            );
-                        }),
-                );
-            }
+            const mutationPromise = targetProductId
+                ? setProductQuantitiesMutation
+                      .mutateAsync({
+                          productId: targetProductId,
+                          piecesQuantity: finalPQty,
+                          casesQuantity: finalCQty,
+                      })
+                      .catch((err) => {
+                          console.error("Error setting product quantities", err);
+                      })
+                : Promise.resolve();
 
-            if (mutationPromises.length > 0) {
-                Promise.all(mutationPromises).finally(() => {
-                    stopAddingProduct(product);
-                });
-            } else {
-                setTimeout(() => {
-                    stopAddingProduct(product);
-                }, 400);
-            }
+            mutationPromise.finally(() => {
+                stopAddingProduct(product);
+            });
 
             // Optimistic Local State Update
             setCartItems((prevItems) => {
@@ -624,6 +798,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
                 const resolvedImage =
                     extractImageFromObject(product) || "";
 
+                const piecePrice =
+                    pieceUnit?.price !== undefined
+                        ? Number(pieceUnit.price)
+                        : pieceUnit?.unitPrice !== undefined
+                          ? Number(pieceUnit.unitPrice)
+                          : Number(product.price || 0);
+
+                const casePrice =
+                    cartonUnit?.price !== undefined
+                        ? Number(cartonUnit.price)
+                        : cartonUnit?.unitPrice !== undefined
+                          ? Number(cartonUnit.unitPrice)
+                          : (product as any).casePrice !== undefined
+                            ? Number((product as any).casePrice)
+                            : undefined;
+
                 return [
                     ...prevItems,
                     {
@@ -631,7 +821,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
                         productId: (product as any).productId || targetId,
                         slug: (product as any).slug,
                         name: product.name,
-                        price: product.price,
+                        price: piecePrice,
+                        casePrice: casePrice && casePrice > 0 ? casePrice : undefined,
                         volume: product.volume,
                         category:
                             typeof product.category === "object" &&
@@ -656,7 +847,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         [
             cartItems,
             resolveSellingUnits,
-            addToCartMutation,
+            setProductQuantitiesMutation,
             startAddingProduct,
             stopAddingProduct,
         ],
@@ -722,75 +913,23 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
                 existingItem,
             );
 
-            const mutationPromises: Promise<any>[] = [];
+            const targetProductId = String(
+                (product as any).productId || product.id || targetId,
+            );
 
-            // Backend mutations for piece
-            if (cappedPieces > 0) {
-                if (existingItem?.pieceCartItemId) {
-                    mutationPromises.push(
-                        updateCartItemMutation
-                            .mutateAsync({
-                                cartItemId: existingItem.pieceCartItemId,
-                                quantity: cappedPieces,
-                            })
-                            .catch((err) => console.error(err)),
-                    );
-                } else if (pieceUnit?.sellingUnitId) {
-                    mutationPromises.push(
-                        addToCartMutation
-                            .mutateAsync({
-                                sellingUnitId: pieceUnit.sellingUnitId,
-                                quantity: cappedPieces,
-                            })
-                            .catch((err) => console.error(err)),
-                    );
-                }
-            } else if (existingItem?.pieceCartItemId) {
-                mutationPromises.push(
-                    removeCartItemMutation
-                        .mutateAsync(existingItem.pieceCartItemId)
-                        .catch((err) => console.error(err)),
-                );
-            }
-
-            // Backend mutations for case
-            if (cappedCases > 0) {
-                if (existingItem?.caseCartItemId) {
-                    mutationPromises.push(
-                        updateCartItemMutation
-                            .mutateAsync({
-                                cartItemId: existingItem.caseCartItemId,
-                                quantity: cappedCases,
-                            })
-                            .catch((err) => console.error(err)),
-                    );
-                } else if (cartonUnit?.sellingUnitId) {
-                    mutationPromises.push(
-                        addToCartMutation
-                            .mutateAsync({
-                                sellingUnitId: cartonUnit.sellingUnitId,
-                                quantity: cappedCases,
-                            })
-                            .catch((err) => console.error(err)),
-                    );
-                }
-            } else if (existingItem?.caseCartItemId) {
-                mutationPromises.push(
-                    removeCartItemMutation
-                        .mutateAsync(existingItem.caseCartItemId)
-                        .catch((err) => console.error(err)),
-                );
-            }
-
-            if (mutationPromises.length > 0) {
-                Promise.all(mutationPromises).finally(() => {
-                    stopAddingProduct(product);
+            const mutationPromise = setProductQuantitiesMutation
+                .mutateAsync({
+                    productId: targetProductId,
+                    piecesQuantity: cappedPieces,
+                    casesQuantity: cappedCases,
+                })
+                .catch((err) => {
+                    console.error("Error setting product quantities", err);
                 });
-            } else {
-                setTimeout(() => {
-                    stopAddingProduct(product);
-                }, 400);
-            }
+
+            mutationPromise.finally(() => {
+                stopAddingProduct(product);
+            });
 
             // Optimistic Local State Update
             setCartItems((prevItems) => {
@@ -822,6 +961,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
                     return updated;
                 }
 
+                const piecePrice =
+                    pieceUnit?.price !== undefined
+                        ? Number(pieceUnit.price)
+                        : pieceUnit?.unitPrice !== undefined
+                          ? Number(pieceUnit.unitPrice)
+                          : Number(product.price || 0);
+
+                const casePrice =
+                    cartonUnit?.price !== undefined
+                        ? Number(cartonUnit.price)
+                        : cartonUnit?.unitPrice !== undefined
+                          ? Number(cartonUnit.unitPrice)
+                          : (product as any).casePrice !== undefined
+                            ? Number((product as any).casePrice)
+                            : undefined;
+
                 return [
                     ...prevItems,
                     {
@@ -829,7 +984,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
                         productId: (product as any).productId || targetId,
                         slug: (product as any).slug,
                         name: product.name,
-                        price: product.price,
+                        price: piecePrice,
+                        casePrice: casePrice && casePrice > 0 ? casePrice : undefined,
                         volume: product.volume,
                         category:
                             typeof product.category === "object" &&
@@ -854,57 +1010,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         [
             cartItems,
             resolveSellingUnits,
-            updateCartItemMutation,
-            addToCartMutation,
-            removeCartItemMutation,
+            setProductQuantitiesMutation,
+            removeFromCart,
             startAddingProduct,
             stopAddingProduct,
         ],
-    );
-
-    // Remove an item entirely from cart
-    const removeFromCart = useCallback(
-        (productId: string) => {
-            const itemToRemove = cartItems.find(
-                (item) =>
-                    item.id === productId ||
-                    item.productId === productId ||
-                    item.slug === productId ||
-                    item.cartItemId === productId ||
-                    item.pieceCartItemId === productId ||
-                    item.caseCartItemId === productId,
-            );
-
-            if (itemToRemove) {
-                if (itemToRemove.pieceCartItemId) {
-                    removeCartItemMutation.mutate(itemToRemove.pieceCartItemId);
-                }
-                if (itemToRemove.caseCartItemId) {
-                    removeCartItemMutation.mutate(itemToRemove.caseCartItemId);
-                }
-                if (
-                    itemToRemove.cartItemId &&
-                    itemToRemove.cartItemId !== itemToRemove.pieceCartItemId &&
-                    itemToRemove.cartItemId !== itemToRemove.caseCartItemId
-                ) {
-                    removeCartItemMutation.mutate(itemToRemove.cartItemId);
-                }
-                toast.info(`${itemToRemove.name} removed from cart`);
-            }
-
-            setCartItems((prevItems) =>
-                prevItems.filter(
-                    (item) =>
-                        item.id !== productId &&
-                        item.productId !== productId &&
-                        item.slug !== productId &&
-                        item.cartItemId !== productId &&
-                        item.pieceCartItemId !== productId &&
-                        item.caseCartItemId !== productId,
-                ),
-            );
-        },
-        [cartItems, removeCartItemMutation],
     );
 
     // Update single unit quantity
@@ -930,14 +1040,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
             }
 
             if (item) {
-                const targetCartItemId =
-                    item.pieceCartItemId || item.cartItemId;
-                if (targetCartItemId) {
-                    updateCartItemMutation.mutate({
-                        cartItemId: targetCartItemId,
-                        quantity: validQty,
-                    });
-                }
+                const targetProductId = String(
+                    item.productId || item.id || productId,
+                );
+                setProductQuantitiesMutation.mutate({
+                    productId: targetProductId,
+                    piecesQuantity: validQty,
+                    casesQuantity: item.casesQty ?? 0,
+                });
             }
 
             setCartItems((prevItems) =>
@@ -953,7 +1063,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
                 }),
             );
         },
-        [cartItems, removeFromCart, updateCartItemMutation],
+        [cartItems, removeFromCart, setProductQuantitiesMutation],
     );
 
     // Update pieces & cases independently
@@ -1009,43 +1119,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
             const validC = Math.max(0, Math.min(newCasesQty, maxC));
 
             if (item) {
-                // Handle piece updates with validP
-                if (validP !== currentP) {
-                    if (validP <= 0 && item.pieceCartItemId) {
-                        removeCartItemMutation.mutate(item.pieceCartItemId);
-                    } else if (validP > 0) {
-                        if (item.pieceCartItemId) {
-                            updateCartItemMutation.mutate({
-                                cartItemId: item.pieceCartItemId,
-                                quantity: validP,
-                            });
-                        } else if (item.pieceSellingUnitId) {
-                            addToCartMutation.mutate({
-                                sellingUnitId: item.pieceSellingUnitId,
-                                quantity: validP,
-                            });
-                        }
-                    }
-                }
-
-                // Handle case updates with validC
-                if (validC !== currentC) {
-                    if (validC <= 0 && item.caseCartItemId) {
-                        removeCartItemMutation.mutate(item.caseCartItemId);
-                    } else if (validC > 0) {
-                        if (item.caseCartItemId) {
-                            updateCartItemMutation.mutate({
-                                cartItemId: item.caseCartItemId,
-                                quantity: validC,
-                            });
-                        } else if (item.caseSellingUnitId) {
-                            addToCartMutation.mutate({
-                                sellingUnitId: item.caseSellingUnitId,
-                                quantity: validC,
-                            });
-                        }
-                    }
-                }
+                const targetProductId = String(
+                    item.productId || item.id || productId,
+                );
+                setProductQuantitiesMutation.mutate({
+                    productId: targetProductId,
+                    piecesQuantity: validP,
+                    casesQuantity: validC,
+                });
             }
 
             // Optimistic Local State Update
@@ -1071,9 +1152,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         [
             cartItems,
             removeFromCart,
-            removeCartItemMutation,
-            updateCartItemMutation,
-            addToCartMutation,
+            setProductQuantitiesMutation,
         ],
     );
 
@@ -1106,22 +1185,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         return cartItems.reduce((total, item) => {
-            const pQty = item.piecesQty ?? item.quantity ?? 0;
-            const cQty = item.casesQty ?? 0;
-            const cartonUnit = item.sellingUnits?.find(
-                (u: any) =>
-                    u.name?.toLowerCase().includes("carton") ||
-                    u.name?.toLowerCase().includes("case"),
-            );
-            const casePrice = cartonUnit
-                ? Number(cartonUnit.price)
-                : item.price;
-            return total + pQty * item.price + cQty * casePrice;
+            return total + calculateCartItemTotal(item);
         }, 0);
     }, [cartItems, cartApiResponse]);
 
     const isLoading =
         isCartQueryLoading ||
+        setProductQuantitiesMutation.isPending ||
         addToCartMutation.isPending ||
         updateCartItemMutation.isPending ||
         removeCartItemMutation.isPending ||

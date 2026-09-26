@@ -1,5 +1,4 @@
 import React from "react";
-import { Info } from "lucide-react";
 import type { CartItem } from "@/context/CartContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckoutItemCard } from "./CheckoutItemCard";
@@ -8,7 +7,6 @@ export interface OrderSummarySectionProps {
     items: CartItem[];
     onRemoveItem: (id: string) => void;
     subtotal: number;
-    deliveryFee: number;
     total: number;
     isLoading?: boolean;
 }
@@ -17,7 +15,6 @@ export const OrderSummarySection: React.FC<OrderSummarySectionProps> = ({
     items,
     onRemoveItem,
     subtotal,
-    deliveryFee,
     total,
     isLoading = false,
 }) => {
@@ -75,23 +72,6 @@ export const OrderSummarySection: React.FC<OrderSummarySectionProps> = ({
                             ₦{subtotal.toLocaleString()}
                         </span>
                     </div>
-
-                    <div className="flex items-center justify-between text-xs sm:text-sm font-hanken">
-                        <span className="text-neutral-300">Delivery Fee</span>
-                        <span className="text-white font-bold font-hanken">
-                            {deliveryFee === 0
-                                ? "FREE"
-                                : `₦${deliveryFee.toLocaleString()}`}
-                        </span>
-                    </div>
-                </div>
-
-                {/* Free Delivery Notice Banner */}
-                <div className="flex items-center gap-2 text-xs text-gold-300 font-hanken mt-3.5 px-1">
-                    <Info className="size-4 text-gold-400 shrink-0" />
-                    <span>
-                        Delivery is free for purchases above 1 million naira
-                    </span>
                 </div>
             </div>
 

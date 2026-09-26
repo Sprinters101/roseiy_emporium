@@ -41,10 +41,12 @@ apiClient.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`;
         } else if (config.headers) {
             const guestCartToken =
+                Cookies.get("roseiy_cart_token") ||
+                localStorage.getItem("roseiy_cart_token") ||
                 Cookies.get("guestCartToken") ||
                 localStorage.getItem("guestCartToken");
             if (guestCartToken) {
-                config.headers["X-Cart-Token"] = guestCartToken;
+                config.headers["x-cart-token"] = guestCartToken;
             }
         }
         return config;
@@ -60,10 +62,15 @@ apiClient.interceptors.response.use(
             response.data?.data?.cart?.guestToken ||
             response.data?.data?.guestToken;
         if (guestToken) {
+            Cookies.set("roseiy_cart_token", guestToken, {
+                expires: 30,
+                path: "/",
+            });
             Cookies.set("guestCartToken", guestToken, {
                 expires: 30,
                 path: "/",
             });
+            localStorage.setItem("roseiy_cart_token", guestToken);
             localStorage.setItem("guestCartToken", guestToken);
         }
         return response;

@@ -44,15 +44,7 @@ export const ProductCard = ({
             ? product.category.name
             : product.category || "";
 
-    // Resolve price
-    const resolvedPrice =
-        product.price !== undefined && typeof product.price === "number"
-            ? product.price
-            : product.sellingUnits?.[0]?.price
-              ? Number(product.sellingUnits[0].price)
-              : 0;
-
-    // Resolve stock metrics
+    // Resolve stock metrics & selling units
     const pieceUnit = product.sellingUnits?.find((u: any) =>
         u.name?.toLowerCase().includes("piece"),
     );
@@ -61,7 +53,34 @@ export const ProductCard = ({
             u.name?.toLowerCase().includes("carton") ||
             u.name?.toLowerCase().includes("case"),
     );
-    const primaryUnit = product.sellingUnits?.[0];
+    const primaryUnit = pieceUnit || product.sellingUnits?.[0];
+
+    // Prioritize pieces price first
+    const piecePrice =
+        pieceUnit?.price !== undefined
+            ? Number(pieceUnit.price)
+            : pieceUnit?.unitPrice !== undefined
+              ? Number(pieceUnit.unitPrice)
+              : undefined;
+
+    const fallbackSellingUnitPrice =
+        product.sellingUnits?.[0]?.price !== undefined
+            ? Number(product.sellingUnits[0].price)
+            : product.sellingUnits?.[0]?.unitPrice !== undefined
+              ? Number(product.sellingUnits[0].unitPrice)
+              : undefined;
+
+    const resolvedPrice =
+        piecePrice !== undefined && piecePrice > 0
+            ? piecePrice
+            : product.price !== undefined &&
+                typeof product.price === "number" &&
+                product.price > 0
+              ? product.price
+              : fallbackSellingUnitPrice !== undefined &&
+                  fallbackSellingUnitPrice > 0
+                ? fallbackSellingUnitPrice
+                : 0;
 
     const piecesLeft =
         product.piecesLeft !== undefined
@@ -219,7 +238,7 @@ export const ProductCard = ({
                         isLandingPage && "md:text-[0.625rem] mt-1.25",
                     )}
                 >
-                    {product.volume || "75cl"}
+                    {product.volume || ""}
                     {piecesLeft !== undefined && ` • ${piecesLeft} Pieces Left`}
                     {casesLeft !== undefined && ` • ${casesLeft} Cases Left`}
                 </p>
