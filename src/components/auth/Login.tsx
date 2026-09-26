@@ -39,15 +39,16 @@ export const Login: React.FC = () => {
         typeof fromState === "object" &&
         "pathname" in fromState
     ) {
-        fromPath = fromState.pathname;
+        fromPath = fromState.pathname + (fromState.search || "");
     } else if (redirectParam) {
-        fromPath = redirectParam;
+        fromPath = decodeURIComponent(redirectParam);
     }
 
-    // Default to Profile, unless redirected from Checkout
-    const targetDestination = fromPath.includes("/checkout")
-        ? "/checkout"
-        : "/dashboard";
+    // Redirect to original route or default to dashboard
+    const targetDestination =
+        fromPath && fromPath.startsWith("/") && !fromPath.startsWith("/login")
+            ? fromPath
+            : "/dashboard";
 
     const handleSubmit = (
         values: LoginPayload,

@@ -39,6 +39,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (cookieToken && cookieToken !== token) {
             setToken(cookieToken);
         }
+
+        const handleAuthLogout = () => {
+            Cookies.remove(TOKEN_KEY, { path: "/" });
+            localStorage.removeItem("userData");
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            setToken(null);
+            setUser(null);
+        };
+
+        window.addEventListener("auth:logout", handleAuthLogout);
+        return () => {
+            window.removeEventListener("auth:logout", handleAuthLogout);
+        };
     }, [token]);
 
     const login = (newToken: string, userData?: UserProfile) => {

@@ -78,80 +78,101 @@ apiClient.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // Skip refresh logic for authentication endpoints
+        // Skip refresh / logout redirect for authentication endpoints
         const requestUrl = originalRequest?.url || "";
         const isAuthEndpoint =
             requestUrl.includes("/auth/login") ||
             requestUrl.includes("/auth/register") ||
             requestUrl.includes("/auth/verify-email") ||
             requestUrl.includes("/auth/resend-otp") ||
+            requestUrl.includes("/auth/forgot-password") ||
+            requestUrl.includes("/auth/reset-password") ||
             requestUrl.includes("/auth/refresh");
 
-        // Guard: Trigger refresh only on 401 errors on protected routes, ensuring we don't loop
-        if (
-            error.response?.status === 401 &&
-            !originalRequest._retry &&
-            !isAuthEndpoint
-        ) {
+        // Handle 401 Unauthorized for non-auth endpoints
+        if (error.response?.status === 401 && !isAuthEndpoint) {
             const refreshToken = localStorage.getItem("refreshToken");
 
-            // If user doesn't have a refresh token, reject immediately without reloading the page
-            if (!refreshToken) {
-                return Promise.reject(error);
-            }
-
-            // If a refresh is already in progress, queue this request until it's done
-            if (isRefreshing) {
-                return new Promise((resolve, reject) => {
-                    failedQueue.push({ resolve, reject });
-                })
-                    .then((token) => {
-                        originalRequest.headers.Authorization = `Bearer ${token}`;
-                        return apiClient(originalRequest);
+            // Attempt silent token refresh if refreshToken is available and haven't retried yet
+            if (refreshToken && !originalRequest._retry) {
+                if (isRefreshing) {
+                    return new Promise((resolve, reject) => {
+                        failedQueue.push({ resolve, reject });
                     })
-                    .catch((err) => Promise.reject(err));
-            }
-
-            originalRequest._retry = true;
-            isRefreshing = true;
-
-            try {
-                // Call the silent refresh endpoint (using basic axios to bypass main interceptors)
-                const response = await axios.post(
-                    `${apiClient.defaults.baseURL}/auth/refresh`,
-                    {
-                        refreshToken,
-                    },
-                );
-
-                const {
-                    accessToken: newAccessToken,
-                    refreshToken: newRefreshToken,
-                } = response.data;
-
-                localStorage.setItem("accessToken", newAccessToken);
-                localStorage.setItem("refreshToken", newRefreshToken);
-                Cookies.set("accessToken", newAccessToken, {
-                    expires: 7,
-                    path: "/",
-                });
-
-                // Clear queue and retry the initial failed request
-                processQueue(null, newAccessToken);
-                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-                return apiClient(originalRequest);
-            } catch (refreshError) {
-                // Refresh token failed/expired -> Log user out completely
-                processQueue(refreshError, null);
-                localStorage.clear();
-                Cookies.remove("accessToken", { path: "/" });
-                if (window.location.pathname !== "/login") {
-                    window.location.href = "/login";
+                        .then((token) => {
+                            originalRequest.headers.Authorization = `Bearer ${token}`;
+                            return apiClient(originalRequest);
+                        })
+                        .catch((err) => Promise.reject(err));
                 }
-                return Promise.reject(refreshError);
-            } finally {
-                isRefreshing = false;
+
+                originalRequest._retry = true;
+                isRefreshing = true;
+
+                try {
+                    const response = await axios.post(
+                        `${apiClient.defaults.baseURL}/auth/refresh`,
+                        { refreshToken },
+                    );
+
+                    const newAccessToken =
+                        response.data?.data?.accessToken ||
+                        response.data?.accessToken;
+                    const newRefreshToken =
+                        response.data?.data?.refreshToken ||
+                        response.data?.refreshToken;
+
+                    if (newAccessToken) {
+                        localStorage.setItem("accessToken", newAccessToken);
+                        Cookies.set("accessToken", newAccessToken, {
+                            expires: 7,
+                            path: "/",
+                        });
+                        if (newRefreshToken) {
+                            localStorage.setItem(
+                                "refreshToken",
+                                newRefreshToken,
+                            );
+                        }
+
+                        processQueue(null, newAccessToken);
+                        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                        return apiClient(originalRequest);
+                    }
+                } catch (refreshError) {
+                    processQueue(refreshError, null);
+                } finally {
+                    isRefreshing = false;
+                }
             }
+
+            // If refresh fails, or no refreshToken exists: Log user out completely & redirect to login
+            Cookies.remove("accessToken", { path: "/" });
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("userData");
+
+            // Dispatch global event for AuthContext & state sync
+            window.dispatchEvent(new Event("auth:logout"));
+
+            const currentPath = window.location.pathname;
+            const isAuthPage =
+                currentPath === "/login" ||
+                currentPath === "/register" ||
+                currentPath === "/signup" ||
+                currentPath === "/verify-otp" ||
+                currentPath === "/forgot-password" ||
+                currentPath === "/reset-password";
+
+            if (!isAuthPage) {
+                const currentSearch = window.location.search;
+                const fullRedirect = encodeURIComponent(
+                    currentPath + currentSearch,
+                );
+                window.location.href = `/login?redirect=${fullRedirect}`;
+            }
+
+            return Promise.reject(error);
         }
 
         return Promise.reject(error);
