@@ -40,7 +40,8 @@ export const queryKeys = {
         all: ["deliveryAreas"] as const,
     },
     checkout: {
-        verify: (reference: string) => ["checkout", "verify", reference] as const,
+        verify: (reference: string) =>
+            ["checkout", "verify", reference] as const,
     },
     addresses: {
         all: ["addresses"] as const,
@@ -72,7 +73,7 @@ export const useGetCategories = () => {
     return useQuery({
         queryKey: queryKeys.catalogue.categories,
         queryFn: () => getCategoriesFunc(),
-        staleTime: 1000 * 60 * 10, // 10 minutes
+        // staleTime: 1000 * 60 * 10, // 10 minutes
     });
 };
 
@@ -83,7 +84,7 @@ export const useGetBrands = () => {
     return useQuery({
         queryKey: queryKeys.catalogue.brands,
         queryFn: () => getBrandsFunc(),
-        staleTime: 1000 * 60 * 10, // 10 minutes
+        // staleTime: 1000 * 60 * 10, // 10 minutes
     });
 };
 
@@ -94,7 +95,7 @@ export const useGetProducts = (params?: GetProductsParams) => {
     return useQuery({
         queryKey: queryKeys.catalogue.products(params),
         queryFn: () => getProductsFunc(params),
-        staleTime: 1000 * 60 * 2, // 2 minutes
+        // staleTime: 1000 * 60 * 2, // 2 minutes
     });
 };
 
@@ -108,8 +109,9 @@ export const useGetProductBySlug = (
     return useQuery({
         queryKey: queryKeys.catalogue.productBySlug(slug),
         queryFn: () => getProductBySlugFunc(slug),
-        enabled: options?.enabled !== undefined ? options.enabled : Boolean(slug),
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        enabled:
+            options?.enabled !== undefined ? options.enabled : Boolean(slug),
+        // staleTime: 1000 * 60 * 5, // 5 minutes
     });
 };
 
@@ -124,7 +126,7 @@ export const useGetCart = () => {
     return useQuery({
         queryKey: queryKeys.cart.all,
         queryFn: () => getCartFunc(),
-        staleTime: 1000 * 30, // 30 seconds
+        // staleTime: 1000 * 30, // 30 seconds
     });
 };
 
@@ -139,7 +141,7 @@ export const useGetDeliveryAreas = () => {
     return useQuery({
         queryKey: queryKeys.deliveryAreas.all,
         queryFn: () => getDeliveryAreasFunc(),
-        staleTime: 1000 * 60 * 10, // 10 minutes
+        // staleTime: 1000 * 60 * 10, // 10 minutes
     });
 };
 
@@ -172,7 +174,7 @@ export const useGetAccountProfile = () => {
     return useQuery({
         queryKey: queryKeys.auth.accountProfile,
         queryFn: () => getAccountProfileFunc(),
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        // staleTime: 1000 * 60 * 5, // 5 minutes
         retry: false,
     });
 };
@@ -188,7 +190,7 @@ export const useGetAddresses = () => {
     return useQuery({
         queryKey: queryKeys.addresses.all,
         queryFn: () => getAddressesFunc(),
-        staleTime: 1000 * 60 * 2, // 2 minutes
+        // staleTime: 1000 * 60 * 2, // 2 minutes
     });
 };
 
@@ -199,7 +201,7 @@ export const useGetAccountPayments = () => {
     return useQuery({
         queryKey: queryKeys.account.payments,
         queryFn: () => getAccountPaymentsFunc(),
-        staleTime: 1000 * 60 * 2, // 2 minutes
+        // staleTime: 1000 * 60 * 2, // 2 minutes
     });
 };
 
@@ -214,7 +216,7 @@ export const useGetCustomerOrders = () => {
     return useQuery({
         queryKey: queryKeys.orders.all,
         queryFn: () => getCustomerOrdersFunc(),
-        staleTime: 1000 * 60 * 2, // 2 minutes
+        // staleTime: 1000 * 60 * 2, // 2 minutes
     });
 };
 
@@ -246,6 +248,6 @@ export const useGetLatestReviews = () => {
     return useQuery({
         queryKey: queryKeys.reviews.latest,
         queryFn: () => getLatestReviewsFunc(),
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        // staleTime: 1000 * 60 * 5, // 5 minutes
     });
 };
