@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { toast } from "@/components/ui/sonner";
 import { Plus } from "lucide-react";
 import { AddressCard } from "./addresses/AddressCard";
 import { AddressModal } from "./addresses/AddressModal";
@@ -35,6 +34,8 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
         null,
     );
     const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+
+    const [settingActiveId, setSettingActiveId] = useState<string>("");
 
     // Delete Confirmation Modal State
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
@@ -91,13 +92,15 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
 
     // Initialize default selected address
     React.useEffect(() => {
-        if (addresses.length > 0 && !selectedAddressId) {
+        if (addresses.length > 0) {
             const defaultAddr = addresses.find((a) => a.isDefault);
-            setSelectedAddressId(
-                defaultAddr ? defaultAddr.id : addresses[0].id,
-            );
+            if (defaultAddr) {
+                setSelectedAddressId(defaultAddr.id);
+            } else if (!selectedAddressId) {
+                setSelectedAddressId(addresses[0].id);
+            }
         }
-    }, [addresses, selectedAddressId]);
+    }, [addresses]);
 
     const loading = propIsLoading !== undefined ? propIsLoading : queryLoading;
 
@@ -106,10 +109,28 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
     }
 
     const handleSelectAddress = async (id: string) => {
-        setSelectedAddressId(id);
         const selected = addresses.find((a) => a.id === id);
-        if (selected) {
-            toast.success(`Active address set to ${selected.title}`);
+        if (!selected) return;
+
+        setSelectedAddressId(id);
+
+        if (selected.isDefault) {
+            return;
+        }
+
+        // Call PATCH /account/addresses/:addressId with isDefault: true
+        setSettingActiveId(id);
+        try {
+            await updateAddressMutation.mutateAsync({
+                addressId: selected.addressId || id,
+                data: {
+                    isDefault: true,
+                },
+            });
+        } catch {
+            // Handled in mutation onError toast
+        } finally {
+            setSettingActiveId("");
         }
     };
 
@@ -170,6 +191,7 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
                         state: formData.state,
                         postalCode: formData.postalCode || "",
                         country: formData.country,
+                        isDefault: formData.isDefault,
                     },
                 });
                 successCallback?.();
@@ -191,11 +213,17 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
                     state: formData.state,
                     postalCode: formData.postalCode || "",
                     country: formData.country,
-                    isDefault: addresses.length === 0,
+                    isDefault:
+                        formData.isDefault !== undefined
+                            ? formData.isDefault
+                            : addresses.length === 0,
                 };
 
                 const res = await createAddressMutation.mutateAsync(payload);
-                if (addresses.length === 0 && res?.data?.addressId) {
+                if (
+                    (addresses.length === 0 || formData.isDefault) &&
+                    res?.data?.addressId
+                ) {
                     setSelectedAddressId(res.data.addressId);
                 }
                 successCallback?.();
@@ -233,6 +261,7 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
                             key={address.id}
                             address={address}
                             isSelected={selectedAddressId === address.id}
+                            isSettingActive={settingActiveId === address.id}
                             onSelect={handleSelectAddress}
                             onEdit={handleOpenEditModal}
                             onDelete={handleOpenDeleteModal}

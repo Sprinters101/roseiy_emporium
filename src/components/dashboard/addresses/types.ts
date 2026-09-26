@@ -26,6 +26,7 @@ export interface AddressFormData {
     firstName?: string;
     lastName?: string;
     postalCode?: string;
+    isDefault?: boolean;
 }
 
 export const COUNTRY_OPTIONS = [

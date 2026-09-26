@@ -13,13 +13,19 @@ export const OrderDetailsItemRow: React.FC<OrderDetailsItemRowProps> = ({
             {/* Left: Thumbnail & Details */}
             <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
                 {/* Thumbnail */}
-                <div className="size-12 sm:size-16 rounded-lg bg-black-900 flex items-center justify-center p-1 border border-neutral-800/50 shrink-0 overflow-hidden shadow-md">
-                    <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-contain"
-                    />
-                </div>
+                {item.image ? (
+                    <div className="size-12 sm:size-16 rounded-lg bg-black-900 flex items-center justify-center p-1 border border-neutral-800/50 shrink-0 overflow-hidden shadow-md">
+                        <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-full h-full object-contain"
+                        />
+                    </div>
+                ) : (
+                    <div className="size-10 md:size-16 rounded-lg bg-black-900 flex items-center justify-center overflow-hidden p-1 shadow-md border border-neutral-800/40 text-[10px] text-neutral-500 font-mono">
+                        Order
+                    </div>
+                )}
 
                 {/* Details */}
                 <div className="flex flex-col min-w-0">

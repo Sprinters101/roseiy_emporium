@@ -20,7 +20,10 @@ export const CustomerOrderDetails: React.FC = () => {
 
     const rawData = orderData?.data;
     const order: OrderDetailsData | undefined =
-        rawData && typeof rawData === "object" && "order" in rawData && rawData.order
+        rawData &&
+        typeof rawData === "object" &&
+        "order" in rawData &&
+        rawData.order
             ? (rawData as { order: OrderDetailsData }).order
             : (rawData as OrderDetailsData | undefined);
 
@@ -95,7 +98,10 @@ export const CustomerOrderDetails: React.FC = () => {
         : "Recent";
 
     const itemsCount =
-        order?.items?.reduce((sum: number, item: OrderItemDetail) => sum + (item.quantity || 1), 0) ||
+        order?.items?.reduce(
+            (sum: number, item: OrderItemDetail) => sum + (item.quantity || 1),
+            0,
+        ) ||
         order?.items?.length ||
         0;
 
@@ -106,20 +112,27 @@ export const CustomerOrderDetails: React.FC = () => {
               ? order.total
               : `₦${Number(order?.total || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-    const items = (order?.items || []).map((item: OrderItemDetail, idx: number) => ({
-        id: item.orderItemId || `item-${idx}`,
-        category: item.sellingUnitName ? item.sellingUnitName.toUpperCase() : "PIECE",
-        name: item.productName || item.name || "Selected Item",
-        volume: item.volume || (item.sellingUnitName ? item.sellingUnitName : "75cl"),
-        quantityText: `Quantity: ${item.quantity} ${item.sellingUnitName || (item.quantity === 1 ? "Piece" : "Pieces")}`,
-        price:
-            typeof item.lineTotal === "number"
-                ? `₦${item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                : typeof item.lineTotal === "string" && item.lineTotal.startsWith("₦")
-                  ? item.lineTotal
-                  : `₦${Number(item.lineTotal || (Number(item.unitPrice || item.price || 0) * (item.quantity || 1))).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-        image: extractImageFromObject(item) || "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png",
-    }));
+    const items = (order?.items || []).map(
+        (item: OrderItemDetail, idx: number) => ({
+            id: item.orderItemId || `item-${idx}`,
+            category: item.sellingUnitName
+                ? item.sellingUnitName.toUpperCase()
+                : "",
+            name: item.productName || item.name || "",
+            volume:
+                item.volume ||
+                (item.sellingUnitName ? item.sellingUnitName : ""),
+            quantityText: `Quantity: ${item.quantity} ${item.sellingUnitName || (item.quantity === 1 ? "Piece" : "Pieces")}`,
+            price:
+                typeof item.lineTotal === "number"
+                    ? `₦${item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    : typeof item.lineTotal === "string" &&
+                        item.lineTotal.startsWith("₦")
+                      ? item.lineTotal
+                      : `₦${Number(item.lineTotal || Number(item.unitPrice || item.price || 0) * (item.quantity || 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+            image: extractImageFromObject(item) || "",
+        }),
+    );
 
     const fullStreetAddress =
         [

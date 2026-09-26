@@ -73,7 +73,7 @@ export const RecentOrdersList: React.FC<RecentOrdersListProps> = ({
             ) : (
                 /* Recent Orders Items List */
                 <div className="flex flex-col gap-3 w-full">
-                    {recentOrders.map((order, idx) => {
+                    {recentOrders?.map((order, idx) => {
                         const itemsCount =
                             order.items?.reduce(
                                 (sum, i) => sum + (i.quantity || 1),

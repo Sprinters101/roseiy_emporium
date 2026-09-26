@@ -1,5 +1,5 @@
 import React from "react";
-import { PenLine, Trash2 } from "lucide-react";
+import { PenLine, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AddressItem } from "./types";
 
@@ -9,6 +9,7 @@ export interface AddressCardProps {
     onSelect: (id: string) => void;
     onEdit: (address: AddressItem) => void;
     onDelete: (id: string) => void;
+    isSettingActive?: boolean;
 }
 
 export const AddressCard: React.FC<AddressCardProps> = ({
@@ -17,45 +18,53 @@ export const AddressCard: React.FC<AddressCardProps> = ({
     onSelect,
     onEdit,
     onDelete,
+    isSettingActive = false,
 }) => {
+    const isDefaultOrSelected = Boolean(address.isDefault || isSelected);
+
     return (
         <div
             onClick={() => onSelect(address.id)}
             className={cn(
-                "bg-black-700 rounded-lg p-5 sm:p-6 transition-all duration-200 cursor-pointer flex items-start justify-between gap-4 relative",
-                isSelected
+                "bg-black-700 rounded-lg p-5 sm:p-6 transition-all duration-200 cursor-pointer flex items-start justify-between gap-4 relative group",
+                isDefaultOrSelected
                     ? "border border-gold-400 shadow-[0_0_16px_rgba(228,196,91,0.08)]"
                     : "border border-neutral-800/60 hover:border-neutral-700/80",
             )}
         >
             {/* Left: Radio Selector & Address Details */}
-            <div className="flex items-start gap-3.5 sm:gap-4 min-w-0">
+            <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
                 {/* Radio Button */}
                 <button
                     type="button"
+                    disabled={isSettingActive}
                     onClick={(e) => {
                         e.stopPropagation();
                         onSelect(address.id);
                     }}
-                    className="size-5 rounded-full border-2 border-gold-400 flex items-center justify-center shrink-0 mt-0.5 cursor-pointer focus:outline-none"
+                    className="size-5 rounded-full border-2 border-gold-400 flex items-center justify-center shrink-0 mt-0.5 cursor-pointer focus:outline-none disabled:opacity-60"
                     aria-label={`Select ${address.title}`}
-                    aria-checked={isSelected}
+                    aria-checked={isDefaultOrSelected}
                     role="radio"
                 >
-                    {isSelected && (
+                    {isSettingActive ? (
+                        <Loader2 className="size-3 text-gold-400 animate-spin" />
+                    ) : isDefaultOrSelected ? (
                         <div className="size-2.5 rounded-full bg-gold-400 animate-in fade-in zoom-in duration-150" />
-                    )}
+                    ) : null}
                 </button>
 
                 {/* Address Information Stack */}
                 <div className="flex flex-col min-w-0">
-                    <h3 className="font-hanken font-bold text-base sm:text-xl text-white">
-                        {address.title}
-                    </h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-hanken font-bold text-base sm:text-xl text-white">
+                            {address.title}
+                        </h3>
+                    </div>
                     <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1 leading-relaxed max-w-58.5 line-clamp-2">
                         {address.address}
                     </p>
-                    <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1.5 pb-[17px]">
+                    <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1.5 pb-2">
                         {address.phone}
                     </p>
                 </div>

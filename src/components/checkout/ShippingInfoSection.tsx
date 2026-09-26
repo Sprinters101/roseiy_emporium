@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { useFormikContext } from "formik";
+import { Country, State } from "country-state-city";
 import { CustomInput } from "@/components/common/CustomInput";
 import { CustomSelect } from "@/components/common/CustomSelect";
 
@@ -7,36 +9,47 @@ export interface ShippingInfoSectionProps {
     isSubmitting?: boolean;
 }
 
-const COUNTRY_OPTIONS = [
-    "Nigeria",
-    "United Kingdom",
-    "United States",
-    "Ghana",
-    "Canada",
-];
-
-const NIGERIA_STATES = [
-    "Lagos",
-    "Abuja (FCT)",
-    "Rivers",
-    "Oyo",
-    "Ogun",
-    "Enugu",
-    "Delta",
-    "Edo",
-    "Kano",
-    "Anambra",
-    "Akwa Ibom",
-    "Cross River",
-    "Kaduna",
-    "Ondo",
-    "Imo",
-];
-
 export const ShippingInfoSection: React.FC<ShippingInfoSectionProps> = ({
     totalAmount,
     isSubmitting = false,
 }) => {
+    const { values, setFieldValue } = useFormikContext<{
+        country?: string;
+        state?: string;
+    }>();
+
+    const allCountries = useMemo(() => Country.getAllCountries(), []);
+
+    const selectedCountryObj = useMemo(() => {
+        if (!values?.country) return null;
+        return (
+            allCountries.find(
+                (c) =>
+                    c.name.toLowerCase() === values.country?.toLowerCase() ||
+                    c.isoCode.toLowerCase() === values.country?.toLowerCase(),
+            ) || null
+        );
+    }, [allCountries, values?.country]);
+
+    const availableStates = useMemo(() => {
+        if (!selectedCountryObj?.isoCode) return [];
+        return State.getStatesOfCountry(selectedCountryObj.isoCode);
+    }, [selectedCountryObj]);
+
+    const countryOptions = useMemo(
+        () => allCountries.map((c) => ({ label: c.name, value: c.name })),
+        [allCountries],
+    );
+
+    const stateOptions = useMemo(
+        () =>
+            availableStates.map((st) => ({
+                label: st.name,
+                value: st.name,
+            })),
+        [availableStates],
+    );
+
     return (
         <div className="bg-black-700 rounded-sm px-4 py-6 sm:p-8 flex flex-col gap-5">
             <h2 className="text-xl sm:text-[1.25rem] font-playfair font-bold text-white mb-1">
@@ -46,16 +59,28 @@ export const ShippingInfoSection: React.FC<ShippingInfoSectionProps> = ({
             <CustomSelect
                 name="country"
                 label="COUNTRY"
-                options={COUNTRY_OPTIONS}
+                options={countryOptions}
                 placeholder="Select Country"
+                onChange={(val) => {
+                    setFieldValue("country", val);
+                    setFieldValue("state", "");
+                }}
             />
 
-            <CustomSelect
-                name="state"
-                label="STATE"
-                options={NIGERIA_STATES}
-                placeholder="Select State"
-            />
+            {availableStates.length > 0 ? (
+                <CustomSelect
+                    name="state"
+                    label="STATE / PROVINCE"
+                    options={stateOptions}
+                    placeholder="Select State"
+                />
+            ) : (
+                <CustomInput
+                    name="state"
+                    label="STATE / PROVINCE"
+                    placeholder="Enter State / Province / Region"
+                />
+            )}
 
             <CustomInput name="city" label="CITY" placeholder="Enter City" />
 

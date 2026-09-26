@@ -1,12 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
 import { ChevronDown, Loader2, X } from "lucide-react";
-import {
-    COUNTRY_OPTIONS,
-    NIGERIA_STATES,
-    type AddressItem,
-    type AddressFormData,
-} from "./types";
+import { Country, State } from "country-state-city";
+import type { AddressItem, AddressFormData } from "./types";
 
 interface AddressFormProps {
     addressToEdit?: AddressItem | null;
@@ -23,9 +19,28 @@ const AddressForm: React.FC<AddressFormProps> = ({
     onSave,
     onClose,
 }) => {
+    const allCountries = useMemo(() => Country.getAllCountries(), []);
+
     const [country, setCountry] = useState<string>(
         addressToEdit?.country || "Nigeria",
     );
+
+    const selectedCountryObj = useMemo(() => {
+        if (!country) return null;
+        return (
+            allCountries.find(
+                (c) =>
+                    c.name.toLowerCase() === country.toLowerCase() ||
+                    c.isoCode.toLowerCase() === country.toLowerCase(),
+            ) || null
+        );
+    }, [allCountries, country]);
+
+    const availableStates = useMemo(() => {
+        if (!selectedCountryObj?.isoCode) return [];
+        return State.getStatesOfCountry(selectedCountryObj.isoCode);
+    }, [selectedCountryObj]);
+
     const [state, setState] = useState<string>(addressToEdit?.state || "");
     const [city, setCity] = useState<string>(addressToEdit?.city || "");
     const [address, setAddress] = useState<string>(
@@ -34,18 +49,27 @@ const AddressForm: React.FC<AddressFormProps> = ({
     const [phone, setPhone] = useState<string>(
         addressToEdit?.phone || addressToEdit?.phoneNumber || "",
     );
+    const [isDefault, setIsDefault] = useState<boolean>(
+        Boolean(addressToEdit?.isDefault),
+    );
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     const validate = () => {
         const newErrors: { [key: string]: string } = {};
         if (!country) newErrors.country = "Country is required";
-        if (!state) newErrors.state = "State is required";
+        if (availableStates.length > 0 && !state)
+            newErrors.state = "State is required";
         if (!city.trim()) newErrors.city = "City is required";
         if (!address.trim()) newErrors.address = "Address is required";
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
+    };
+
+    const handleCountryChange = (newCountryName: string) => {
+        setCountry(newCountryName);
+        setState(""); // Reset state when country changes
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -56,8 +80,8 @@ const AddressForm: React.FC<AddressFormProps> = ({
         try {
             await onSave(
                 {
-                    country,
-                    state,
+                    country: selectedCountryObj?.name || country,
+                    state: state.trim(),
                     city: city.trim(),
                     address: address.trim(),
                     phone: phone.trim() || "",
@@ -65,6 +89,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
                     firstName: addressToEdit?.firstName,
                     lastName: addressToEdit?.lastName,
                     postalCode: addressToEdit?.postalCode,
+                    isDefault,
                 },
                 addressToEdit?.id || addressToEdit?.addressId,
                 () => {
@@ -93,16 +118,23 @@ const AddressForm: React.FC<AddressFormProps> = ({
                         id="address-country"
                         disabled={isSubmitting}
                         value={country}
-                        onChange={(e) => setCountry(e.target.value)}
+                        onChange={(e) => handleCountryChange(e.target.value)}
                         className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-white text-sm appearance-none outline-none focus:border-gold-400 transition-colors cursor-pointer pr-10 font-hanken disabled:opacity-60"
                     >
-                        {COUNTRY_OPTIONS.map((c) => (
+                        <option
+                            value=""
+                            disabled
+                            className="bg-black-900 text-neutral-400"
+                        >
+                            Select Country
+                        </option>
+                        {allCountries.map((c) => (
                             <option
-                                key={c}
-                                value={c}
+                                key={c.isoCode}
+                                value={c.name}
                                 className="bg-black-900 text-white py-2"
                             >
-                                {c}
+                                {c.name}
                             </option>
                         ))}
                     </select>
@@ -121,36 +153,50 @@ const AddressForm: React.FC<AddressFormProps> = ({
                     htmlFor="address-state"
                     className="text-xs font-semibold text-gold-400 tracking-wider uppercase font-hanken"
                 >
-                    STATE
+                    STATE / PROVINCE
                 </label>
                 <div className="relative w-full">
-                    <select
-                        id="address-state"
-                        disabled={isSubmitting}
-                        value={state}
-                        onChange={(e) => setState(e.target.value)}
-                        className={`w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-sm appearance-none outline-none focus:border-gold-400 transition-colors cursor-pointer pr-10 font-hanken disabled:opacity-60 ${
-                            state ? "text-white" : "text-neutral-400"
-                        }`}
-                    >
-                        <option
-                            value=""
-                            disabled
-                            className="bg-black-900 text-neutral-400"
-                        >
-                            Select State
-                        </option>
-                        {NIGERIA_STATES.map((st) => (
-                            <option
-                                key={st}
-                                value={st}
-                                className="bg-black-900 text-white py-2"
+                    {availableStates.length > 0 ? (
+                        <>
+                            <select
+                                id="address-state"
+                                disabled={isSubmitting}
+                                value={state}
+                                onChange={(e) => setState(e.target.value)}
+                                className={`w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-sm appearance-none outline-none focus:border-gold-400 transition-colors cursor-pointer pr-10 font-hanken disabled:opacity-60 ${
+                                    state ? "text-white" : "text-neutral-400"
+                                }`}
                             >
-                                {st}
-                            </option>
-                        ))}
-                    </select>
-                    <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400 pointer-events-none" />
+                                <option
+                                    value=""
+                                    disabled
+                                    className="bg-black-900 text-neutral-400"
+                                >
+                                    Select State
+                                </option>
+                                {availableStates.map((st) => (
+                                    <option
+                                        key={st.isoCode || st.name}
+                                        value={st.name}
+                                        className="bg-black-900 text-white py-2"
+                                    >
+                                        {st.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400 pointer-events-none" />
+                        </>
+                    ) : (
+                        <input
+                            id="address-state"
+                            type="text"
+                            disabled={isSubmitting}
+                            value={state}
+                            onChange={(e) => setState(e.target.value)}
+                            placeholder="Enter State / Province / Region"
+                            className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken disabled:opacity-60"
+                        />
+                    )}
                 </div>
                 {errors.state && (
                     <span className="text-xs text-red-400 font-medium">
@@ -230,6 +276,20 @@ const AddressForm: React.FC<AddressFormProps> = ({
                     </span>
                 )}
             </div>
+
+            {/* Set As Default Checkbox */}
+            <label className="flex items-center gap-3 cursor-pointer select-none py-1">
+                <input
+                    type="checkbox"
+                    disabled={isSubmitting}
+                    checked={isDefault}
+                    onChange={(e) => setIsDefault(e.target.checked)}
+                    className="size-4 rounded bg-black-900 border border-neutral-700 text-gold-400 focus:ring-gold-400/20 focus:ring-2 cursor-pointer accent-[#e4c45b]"
+                />
+                <span className="text-xs sm:text-sm font-hanken text-neutral-300">
+                    Set as default / active delivery address
+                </span>
+            </label>
 
             {/* Confirm Button */}
             <button
