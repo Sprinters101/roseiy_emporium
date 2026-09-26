@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { PenLine, Trash2 } from "lucide-react";
+import { PenLine, Trash2, X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddressModal } from "@/components/dashboard/addresses/AddressModal";
@@ -118,25 +118,34 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                         <button
                             type="button"
                             onClick={() => setIsMultiView(false)}
-                            className="bg-transparent border border-neutral-700/80 text-neutral-300 rounded-md text-xs font-hanken px-3 py-1.5 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
+                            aria-label="Cancel"
+                            title="Cancel"
+                            className="bg-transparent border border-neutral-700/80 text-neutral-300 rounded-md text-xs font-hanken px-2.5 sm:px-3 py-1.5 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                         >
-                            Cancel
+                            <X className="size-3.5 sm:size-3 text-neutral-400" />
+                            <span className="hidden sm:inline">Cancel</span>
                         </button>
                         <button
                             type="button"
                             onClick={handleOpenAddModal}
-                            className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer"
+                            aria-label="Add New Address"
+                            title="Add New Address"
+                            className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-2.5 sm:px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                         >
-                            Add New Address
+                            <Plus className="size-3.5 sm:size-3 text-gold-400" />
+                            <span className="hidden sm:inline">Add New Address</span>
                         </button>
                     </div>
                 ) : (
                     <button
                         type="button"
                         onClick={() => setIsMultiView(true)}
-                        className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer"
+                        aria-label="Change Address"
+                        title="Change Address"
+                        className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-2.5 sm:px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                        Change Address
+                        <PenLine className="size-3.5 sm:size-3 text-gold-400" />
+                        <span className="hidden sm:inline">Change Address</span>
                     </button>
                 )}
             </div>

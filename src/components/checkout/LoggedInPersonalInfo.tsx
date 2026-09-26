@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2 } from "lucide-react";
+import { Loader2, PenLine, Check, X } from "lucide-react";
 
 export interface PersonalInfoData {
     firstName: string;
@@ -48,11 +48,6 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
             newErrors.lastName = "Last name is required";
         if (!formData.phoneNumber.trim())
             newErrors.phoneNumber = "Phone number is required";
-        if (!formData.emailAddress.trim()) {
-            newErrors.emailAddress = "Email address is required";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailAddress)) {
-            newErrors.emailAddress = "Enter a valid email address";
-        }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -89,29 +84,41 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                             type="button"
                             onClick={handleCancel}
                             disabled={isSubmitting}
-                            className="bg-transparent border border-neutral-700/80 text-neutral-300 rounded-md text-xs font-hanken px-3 py-1.5 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            aria-label="Cancel"
+                            title="Cancel"
+                            className="bg-transparent border border-neutral-700/80 text-neutral-300 rounded-md text-xs font-hanken px-2.5 sm:px-3 py-1.5 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
                         >
-                            Cancel
+                            <X className="size-3.5 sm:size-3 text-neutral-400" />
+                            <span className="hidden sm:inline">Cancel</span>
                         </button>
                         <button
                             type="button"
                             onClick={handleSave}
                             disabled={isSubmitting}
-                            className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                            aria-label="Save Changes"
+                            title="Save Changes"
+                            className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-2.5 sm:px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
                         >
-                            {isSubmitting && (
-                                <Loader2 className="size-3 animate-spin" />
+                            {isSubmitting ? (
+                                <Loader2 className="size-3.5 sm:size-3 animate-spin text-gold-400" />
+                            ) : (
+                                <Check className="size-3.5 sm:size-3 text-gold-400" />
                             )}
-                            {isSubmitting ? "Saving..." : "Save Changes"}
+                            <span className="hidden sm:inline">
+                                {isSubmitting ? "Saving..." : "Save Changes"}
+                            </span>
                         </button>
                     </div>
                 ) : (
                     <button
                         type="button"
                         onClick={handleStartEditing}
-                        className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer"
+                        aria-label="Edit Information"
+                        title="Edit Information"
+                        className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-2.5 sm:px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                        Edit Information
+                        <PenLine className="size-3.5 sm:size-3 text-gold-400" />
+                        <span className="hidden sm:inline">Edit Information</span>
                     </button>
                 )}
             </div>
@@ -159,8 +166,8 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                         <span className="text-xs text-neutral-400 font-hanken">
                             Email Address
                         </span>
-                        <span className="text-sm sm:text-base font-bold text-white font-hanken mt-0.5">
-                            {personalInfo.emailAddress || "Rosebola@gmail.com"}
+                        <span className="text-sm sm:text-base font-bold text-white font-hanken mt-0.5 no-underline hover:no-underline select-text">
+                            {personalInfo.emailAddress || ""}
                         </span>
                     </div>
                 </div>
@@ -256,7 +263,7 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                         )}
                     </div>
 
-                    {/* Email Address */}
+                    {/* Email Address (Non-editable / Locked for logged-in user) */}
                     <div className="flex flex-col gap-1.5">
                         <label
                             htmlFor="checkout-email-address"
@@ -267,22 +274,15 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                         <input
                             id="checkout-email-address"
                             type="email"
-                            disabled={isSubmitting}
-                            value={formData.emailAddress}
-                            onChange={(e) =>
-                                setFormData((prev) => ({
-                                    ...prev,
-                                    emailAddress: e.target.value,
-                                }))
+                            disabled={true}
+                            readOnly
+                            value={
+                                formData.emailAddress ||
+                                personalInfo.emailAddress
                             }
-                            placeholder="Enter Email Address"
-                            className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken disabled:opacity-60"
+                            placeholder="Email Address"
+                            className="w-full bg-black-900/60 border border-neutral-800/80 rounded-lg px-4 py-3 text-neutral-400 text-sm font-hanken cursor-not-allowed opacity-75 select-none no-underline focus:outline-none"
                         />
-                        {errors.emailAddress && (
-                            <span className="text-xs text-red-400 font-medium">
-                                {errors.emailAddress}
-                            </span>
-                        )}
                     </div>
                 </div>
             )}

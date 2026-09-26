@@ -692,14 +692,14 @@ export const Checkout: React.FC = () => {
                                 isLoading={isAddressesLoading}
                             />
 
-                            {/* Bottom Full-Width Pay Button */}
+                            {/* Desktop Pay Button (Hidden on Mobile) */}
                             <button
                                 type="button"
                                 onClick={handlePayOrder}
                                 disabled={
                                     isProcessing || displayItems.length === 0
                                 }
-                                className="w-full mt-2 bg-gold-gradient text-black-900 font-bold font-hanken text-sm sm:text-base py-3.5 sm:py-4 px-6 rounded-sm sm:rounded-md shadow-xl hover:opacity-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-center gap-2"
+                                className="hidden lg:flex w-full mt-2 bg-gold-gradient text-black-900 font-bold font-hanken text-sm sm:text-base py-3.5 sm:py-4 px-6 rounded-sm sm:rounded-md shadow-xl hover:opacity-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center text-center gap-2"
                             >
                                 {isProcessing && (
                                     <Loader2 className="size-4 animate-spin" />
@@ -713,7 +713,7 @@ export const Checkout: React.FC = () => {
                         </div>
 
                         {/* Right Column: Sticky Order Summary Section */}
-                        <div className="lg:col-span-5 w-full sticky top-28">
+                        <div className="lg:col-span-5 w-full sticky top-28 flex flex-col gap-4">
                             <OrderSummarySection
                                 items={displayItems}
                                 onRemoveItem={handleRemoveItem}
@@ -721,6 +721,25 @@ export const Checkout: React.FC = () => {
                                 total={total}
                                 isLoading={isCartLoading}
                             />
+
+                            {/* Mobile Pay Button (At the bottom of Order Summary on Mobile) */}
+                            <button
+                                type="button"
+                                onClick={handlePayOrder}
+                                disabled={
+                                    isProcessing || displayItems.length === 0
+                                }
+                                className="lg:hidden w-full bg-gold-gradient text-black-900 font-bold font-hanken text-sm sm:text-base py-3.5 sm:py-4 px-6 rounded-sm sm:rounded-md shadow-xl hover:opacity-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-center gap-2"
+                            >
+                                {isProcessing && (
+                                    <Loader2 className="size-4 animate-spin" />
+                                )}
+                                <span>
+                                    {isProcessing
+                                        ? "Initializing Payment..."
+                                        : `Pay ₦${total.toLocaleString()}`}
+                                </span>
+                            </button>
                         </div>
                     </div>
                 ) : (
@@ -772,7 +791,7 @@ export const Checkout: React.FC = () => {
                                         </div>
 
                                         {/* Right Column: Order Summary */}
-                                        <div className="lg:col-span-5 w-full sticky top-28">
+                                        <div className="lg:col-span-5 w-full sticky top-28 flex flex-col gap-4">
                                             <OrderSummarySection
                                                 items={displayItems}
                                                 onRemoveItem={handleRemoveItem}
@@ -780,6 +799,26 @@ export const Checkout: React.FC = () => {
                                                 total={total}
                                                 isLoading={isCartLoading}
                                             />
+
+                                            {/* Mobile Submit Button (At the bottom of Order Summary on Mobile) */}
+                                            <button
+                                                type="submit"
+                                                disabled={
+                                                    isSubmitting ||
+                                                    isProcessing ||
+                                                    displayItems.length === 0
+                                                }
+                                                className="lg:hidden w-full bg-gold-g hover:opacity-95 text-black font-semibold text-body-c1 md:text-base py-3.5 px-6 rounded-sm transition-all shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-hanken"
+                                            >
+                                                {isSubmitting || isProcessing ? (
+                                                    <Loader2 className="size-4 animate-spin mr-2" />
+                                                ) : null}
+                                                <span>
+                                                    {isSubmitting || isProcessing
+                                                        ? "Processing Payment..."
+                                                        : `Pay ₦${total.toLocaleString()}`}
+                                                </span>
+                                            </button>
                                         </div>
                                     </div>
                                 </Form>
