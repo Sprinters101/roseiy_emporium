@@ -40,7 +40,9 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
 }) => {
     const [isMultiView, setIsMultiView] = useState<boolean>(false);
     const [modalOpen, setModalOpen] = useState<boolean>(false);
-    const [addressToEdit, setAddressToEdit] = useState<AddressItem | null>(null);
+    const [addressToEdit, setAddressToEdit] = useState<AddressItem | null>(
+        null,
+    );
 
     // Delete modal states
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
@@ -120,7 +122,7 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                             onClick={() => setIsMultiView(false)}
                             aria-label="Cancel"
                             title="Cancel"
-                            className="bg-transparent border border-neutral-700/80 text-neutral-300 rounded-md text-xs font-hanken px-2.5 sm:px-3 py-1.5 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                            className=" bg-transparent border border-neutral-700/80 text-neutral-300 rounded-md text-xs font-hanken px-2.5 sm:px-3 py-1.5 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                         >
                             <X className="size-3.5 sm:size-3 text-neutral-400" />
                             <span className="hidden sm:inline">Cancel</span>
@@ -133,7 +135,9 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                             className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-2.5 sm:px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                         >
                             <Plus className="size-3.5 sm:size-3 text-gold-400" />
-                            <span className="hidden sm:inline">Add New Address</span>
+                            <span className="hidden sm:inline">
+                                Add New Address
+                            </span>
                         </button>
                     </div>
                 ) : (
@@ -197,18 +201,6 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                             >
                                 <PenLine className="size-3.5 sm:size-4" />
                             </button>
-                            {onDeleteAddress && addresses.length > 1 && (
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        handleOpenDeleteModal(selectedAddress)
-                                    }
-                                    className="size-8 sm:size-9 rounded-full bg-black-900 border border-neutral-800/80 flex items-center justify-center text-red-500 hover:bg-red-500/10 hover:border-red-500/30 transition-all cursor-pointer shrink-0"
-                                    aria-label="Delete address"
-                                >
-                                    <Trash2 className="size-3.5 sm:size-4" />
-                                </button>
-                            )}
                         </div>
                     </div>
                 ) : (
@@ -285,22 +277,6 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                                     >
                                         <PenLine className="size-3.5 sm:size-4" />
                                     </button>
-                                    {onDeleteAddress &&
-                                        addresses.length > 1 && (
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleOpenDeleteModal(
-                                                        address,
-                                                    );
-                                                }}
-                                                className="size-8 sm:size-9 rounded-full bg-black-900 border border-neutral-800/80 flex items-center justify-center text-red-500 hover:bg-red-500/10 hover:border-red-500/30 transition-all cursor-pointer shrink-0"
-                                                aria-label={`Delete ${address.title}`}
-                                            >
-                                                <Trash2 className="size-3.5 sm:size-4" />
-                                            </button>
-                                        )}
                                 </div>
                             </div>
                         );
