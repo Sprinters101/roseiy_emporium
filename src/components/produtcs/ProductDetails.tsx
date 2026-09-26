@@ -80,7 +80,7 @@ export const ProductDetails: React.FC = () => {
                 volume: (liveProduct as any).volume || "",
                 piecesLeft: piecesStock,
                 casesLeft: casesStock,
-                price: primaryUnit ? Number(primaryUnit.price) : "",
+                price: primaryUnit ? Number(primaryUnit.price || primaryUnit.unitPrice || 0) : 0,
                 image: primaryImg,
                 gallery: galleryList.length > 0 ? galleryList : [primaryImg],
                 description: liveProduct.description || "",

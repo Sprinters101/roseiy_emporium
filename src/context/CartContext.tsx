@@ -422,6 +422,13 @@ const parseServerCart = (cartData: any): CartItem[] => {
                   ? Number(product.casesLeft)
                   : undefined;
 
+        const piecePriceFromUnits = foundPieceUnit
+            ? Number(foundPieceUnit.price || foundPieceUnit.unitPrice || 0)
+            : 0;
+        const casePriceFromUnits = foundCartonUnit
+            ? Number(foundCartonUnit.price || foundCartonUnit.unitPrice || 0)
+            : 0;
+
         if (!productMap.has(productId)) {
             productMap.set(productId, {
                 id: productId,
@@ -431,8 +438,20 @@ const parseServerCart = (cartData: any): CartItem[] => {
                 category,
                 volume,
                 image,
-                price: isCase ? 0 : unitPrice,
-                casePrice: isCase ? unitPrice : undefined,
+                price: isCase
+                    ? piecePriceFromUnits > 0
+                        ? piecePriceFromUnits
+                        : 0
+                    : unitPrice > 0
+                      ? unitPrice
+                      : piecePriceFromUnits,
+                casePrice: isCase
+                    ? unitPrice > 0
+                        ? unitPrice
+                        : casePriceFromUnits
+                    : casePriceFromUnits > 0
+                      ? casePriceFromUnits
+                      : undefined,
                 quantity: 0,
                 piecesQty: 0,
                 casesQty: 0,
@@ -452,7 +471,13 @@ const parseServerCart = (cartData: any): CartItem[] => {
             entry.caseCartItemId = cartItemId;
             entry.caseSellingUnitId =
                 item.sellingUnitId || sellingUnit.sellingUnitId;
-            entry.casePrice = unitPrice > 0 ? unitPrice : entry.casePrice;
+            entry.casePrice =
+                unitPrice > 0
+                    ? unitPrice
+                    : entry.casePrice || casePriceFromUnits;
+            if ((!entry.price || entry.price <= 0) && piecePriceFromUnits > 0) {
+                entry.price = piecePriceFromUnits;
+            }
             if (availableStock !== undefined) {
                 entry.casesLeft = availableStock;
             } else if (caseStock !== undefined) {
@@ -463,7 +488,13 @@ const parseServerCart = (cartData: any): CartItem[] => {
             entry.pieceCartItemId = cartItemId;
             entry.pieceSellingUnitId =
                 item.sellingUnitId || sellingUnit.sellingUnitId;
-            entry.price = unitPrice > 0 ? unitPrice : entry.price;
+            entry.price =
+                unitPrice > 0
+                    ? unitPrice
+                    : entry.price || piecePriceFromUnits;
+            if ((!entry.casePrice || entry.casePrice <= 0) && casePriceFromUnits > 0) {
+                entry.casePrice = casePriceFromUnits;
+            }
             if (availableStock !== undefined) {
                 entry.piecesLeft = availableStock;
             } else if (pieceStock !== undefined) {
@@ -1176,18 +1207,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     );
 
     const subtotal = useMemo(() => {
-        const serverSubtotal = Number(
-            (cartApiResponse?.data as any)?.cart?.subtotal ??
-                (cartApiResponse?.data as any)?.subtotal,
-        );
-        if (!isNaN(serverSubtotal) && serverSubtotal > 0) {
-            return serverSubtotal;
-        }
-
         return cartItems.reduce((total, item) => {
             return total + calculateCartItemTotal(item);
         }, 0);
-    }, [cartItems, cartApiResponse]);
+    }, [cartItems]);
 
     const isLoading =
         isCartQueryLoading ||
