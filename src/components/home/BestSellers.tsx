@@ -2,11 +2,6 @@ import { useMemo } from "react";
 import { Link } from "react-router";
 import { Loader2 } from "lucide-react";
 import TitleDecoration from "@/components/common/TitleDecoration";
-import {
-    donJulioReposadoImg,
-    hennessyXoImg,
-    claseAzulImg,
-} from "@/lib/site_data";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -180,42 +175,7 @@ export const BestSellers = () => {
         featured: true,
     });
 
-    const fallbackBestSellers: BestSellerProduct[] = useMemo(
-        () => [
-            {
-                id: "don-julio-reposado",
-                name: "Don Julio Reposado",
-                category: "Tequila",
-                volume: "75cl",
-                piecesLeft: 22,
-                price: 650000,
-                image: donJulioReposadoImg,
-                title: "Don Julio Reposado",
-            },
-            {
-                id: "hennessy-xo",
-                name: "Hennessy XO",
-                category: "Cognac",
-                volume: "75cl",
-                piecesLeft: 22,
-                casesLeft: 5,
-                price: 650000,
-                image: hennessyXoImg,
-                title: "Hennessy \n X.O",
-            },
-            {
-                id: "clase-azul",
-                name: "Clase Azul Reposado",
-                category: "Tequila",
-                volume: "75cl",
-                casesLeft: 5,
-                price: 650000,
-                image: claseAzulImg,
-                title: "Clase Azul \n Reposado ",
-            },
-        ],
-        [],
-    );
+    const fallbackBestSellers: BestSellerProduct[] = useMemo(() => [], []);
 
     const bestSellers: BestSellerProduct[] = useMemo(() => {
         const liveItems =
@@ -247,14 +207,19 @@ export const BestSellers = () => {
                           : 22,
                     casesLeft: cartonUnit ? cartonUnit.stock : 5,
                     price: pieceUnit
-                        ? Number(pieceUnit.price || (pieceUnit as any).unitPrice)
+                        ? Number(
+                              pieceUnit.price || (pieceUnit as any).unitPrice,
+                          )
                         : primaryUnit
-                          ? Number(primaryUnit.price || (primaryUnit as any).unitPrice)
+                          ? Number(
+                                primaryUnit.price ||
+                                    (primaryUnit as any).unitPrice,
+                            )
                           : 650000,
                     image:
                         p.images?.find((i) => i.isPrimary)?.imageUrl ||
                         p.images?.[0]?.imageUrl ||
-                        donJulioReposadoImg,
+                        "",
                     sellingUnits: p.sellingUnits,
                 };
             });
