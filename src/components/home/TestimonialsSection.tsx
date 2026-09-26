@@ -1,8 +1,10 @@
+import { useMemo } from "react";
 import Container from "@/components/common/Container";
 import TitleDecoration from "@/components/common/TitleDecoration";
 import { cn } from "@/lib/utils";
 import { Star } from "lucide-react";
 import { motion } from "framer-motion";
+import { useGetLatestReviews } from "@/service/queries";
 
 interface Testimonial {
     id: string;
@@ -13,6 +15,70 @@ interface Testimonial {
     bgFade: boolean;
 }
 
+const getInitials = (name?: string): string => {
+    if (!name) return "RE";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
+const DEFAULT_TESTIMONIALS: Testimonial[] = [
+    {
+        id: "1",
+        name: "Peter Odejobi",
+        initials: "PO",
+        rating: 5,
+        bgFade: true,
+        comment:
+            "The bottle arrived beautifully packaged and exactly as described. You can tell Roseiy takes presentation seriously. I'll definitely be ordering again.",
+    },
+    {
+        id: "2",
+        name: "Omobolaji Abubakar",
+        initials: "OA",
+        rating: 5,
+        bgFade: false,
+        comment:
+            "Everything about the experience felt premium, from the packaging to the product itself. My only suggestion would be to offer more payment options at checkout.",
+    },
+    {
+        id: "3",
+        name: "Toheeb Kasali",
+        initials: "TK",
+        rating: 3,
+        bgFade: true,
+        comment:
+            "The quality of the bottle was excellent, but one item I wanted was already sold out. Hopefully they restock faster because I'd love to purchase again.",
+    },
+    {
+        id: "4",
+        name: "Rasheed Bello",
+        initials: "RB",
+        rating: 5,
+        bgFade: false,
+        comment:
+            "Finding authentic premium champagne locally isn't always easy, so I was impressed by the selection. Delivery was smooth and everything arrived in perfect condition.",
+    },
+    {
+        id: "5",
+        name: "Busayo Daramola",
+        initials: "BD",
+        rating: 4,
+        bgFade: true,
+        comment:
+            "Great shopping experience overall. The website was easy to navigate and checkout was seamless. I just wish there were more whisky options available.",
+    },
+    {
+        id: "6",
+        name: "Ghali Abdullahi",
+        initials: "GA",
+        rating: 3,
+        bgFade: false,
+        comment:
+            "Customer support responded quickly when I had questions about my order. Delivery took a little longer than expected, but the bottle arrived safely and was worth the wait.",
+    },
+];
+
 const StarRating = ({ rating }: { rating: number }) => {
     return (
         <div className="flex items-center gap-1">
@@ -22,7 +88,7 @@ const StarRating = ({ rating }: { rating: number }) => {
                     className={`size-4 ${
                         star <= rating
                             ? "fill-amber-400 text-amber-400"
-                            : "fill-white "
+                            : "fill-white text-white/30"
                     }`}
                 />
             ))}
@@ -65,62 +131,31 @@ const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
 };
 
 export const TestimonialsSection = () => {
-    const testimonials: Testimonial[] = [
-        {
-            id: "1",
-            name: "Peter Odejobi",
-            initials: "PO",
-            rating: 5,
-            bgFade: true,
-            comment:
-                "The bottle arrived beautifully packaged and exactly as described. You can tell Roseiy takes presentation seriously. I'll definitely be ordering again.",
-        },
-        {
-            id: "2",
-            name: "Omobolaji Abubakar",
-            initials: "OA",
-            rating: 5,
-            bgFade: false,
-            comment:
-                "Everything about the experience felt premium, from the packaging to the product itself. My only suggestion would be to offer more payment options at checkout.",
-        },
-        {
-            id: "3",
-            name: "Toheeb Kasali",
-            initials: "TK",
-            rating: 3,
-            bgFade: true,
-            comment:
-                "The quality of the bottle was excellent, but one item I wanted was already sold out. Hopefully they restock faster because I'd love to purchase again.",
-        },
-        {
-            id: "4",
-            name: "Rasheed Bello",
-            initials: "RB",
-            rating: 5,
-            bgFade: false,
-            comment:
-                "Finding authentic premium champagne locally isn't always easy, so I was impressed by the selection. Delivery was smooth and everything arrived in perfect condition.",
-        },
-        {
-            id: "5",
-            name: "Busayo Daramola",
-            initials: "RB",
-            rating: 4,
-            bgFade: true,
-            comment:
-                "Great shopping experience overall. The website was easy to navigate and checkout was seamless. I just wish there were more whisky options available.",
-        },
-        {
-            id: "6",
-            name: "Ghali Abdullahi",
-            initials: "GA",
-            rating: 3,
-            bgFade: false,
-            comment:
-                "Customer support responded quickly when I had questions about my order. Delivery took a little longer than expected, but the bottle arrived safely and was worth the wait.",
-        },
-    ];
+    const { data: reviewsData } = useGetLatestReviews();
+
+    const testimonials: Testimonial[] = useMemo(() => {
+        const apiReviews = reviewsData?.data?.reviews;
+        if (apiReviews && apiReviews.length > 0) {
+            const mapped = apiReviews.slice(0, 6).map((rev, idx) => ({
+                id: rev.reviewId || `rev-${idx}`,
+                name: rev.displayName || "Verified Customer",
+                initials: getInitials(rev.displayName),
+                rating: rev.rating || 5,
+                comment: rev.comment,
+                bgFade: idx % 2 === 0,
+            }));
+
+            // If less than 6 API reviews exist yet, backfill with default items to maintain the 3-column layout
+            if (mapped.length < 6) {
+                const backfill = DEFAULT_TESTIMONIALS.slice(mapped.length);
+                return [...mapped, ...backfill];
+            }
+
+            return mapped;
+        }
+
+        return DEFAULT_TESTIMONIALS;
+    }, [reviewsData]);
 
     return (
         <section className="w-full bg-black-900 py-16 md:py-24 border-t border-white/5">

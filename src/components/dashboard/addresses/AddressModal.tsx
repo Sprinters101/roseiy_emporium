@@ -1,7 +1,11 @@
 import React, { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
-import { ChevronDown, Loader2, X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { Country, State } from "country-state-city";
+import {
+    CustomDropdown,
+    type DropdownOption,
+} from "@/components/common/CustomDropdown";
 import type { AddressItem, AddressFormData } from "./types";
 
 interface AddressFormProps {
@@ -20,6 +24,11 @@ const AddressForm: React.FC<AddressFormProps> = ({
     onClose,
 }) => {
     const allCountries = useMemo(() => Country.getAllCountries(), []);
+
+    const countryOptions: DropdownOption[] = useMemo(
+        () => allCountries.map((c) => ({ label: c.name, value: c.name })),
+        [allCountries],
+    );
 
     const [country, setCountry] = useState<string>(
         addressToEdit?.country || "Nigeria",
@@ -40,6 +49,15 @@ const AddressForm: React.FC<AddressFormProps> = ({
         if (!selectedCountryObj?.isoCode) return [];
         return State.getStatesOfCountry(selectedCountryObj.isoCode);
     }, [selectedCountryObj]);
+
+    const stateOptions: DropdownOption[] = useMemo(
+        () =>
+            availableStates.map((st) => ({
+                label: st.name,
+                value: st.name,
+            })),
+        [availableStates],
+    );
 
     const [state, setState] = useState<string>(addressToEdit?.state || "");
     const [city, setCity] = useState<string>(addressToEdit?.city || "");
@@ -113,33 +131,18 @@ const AddressForm: React.FC<AddressFormProps> = ({
                 >
                     COUNTRY
                 </label>
-                <div className="relative w-full">
-                    <select
-                        id="address-country"
-                        disabled={isSubmitting}
-                        value={country}
-                        onChange={(e) => handleCountryChange(e.target.value)}
-                        className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-white text-sm appearance-none outline-none focus:border-gold-400 transition-colors cursor-pointer pr-10 font-hanken disabled:opacity-60"
-                    >
-                        <option
-                            value=""
-                            disabled
-                            className="bg-black-900 text-neutral-400"
-                        >
-                            Select Country
-                        </option>
-                        {allCountries.map((c) => (
-                            <option
-                                key={c.isoCode}
-                                value={c.name}
-                                className="bg-black-900 text-white py-2"
-                            >
-                                {c.name}
-                            </option>
-                        ))}
-                    </select>
-                    <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400 pointer-events-none" />
-                </div>
+                <CustomDropdown
+                    options={countryOptions}
+                    value={country}
+                    onChange={handleCountryChange}
+                    placeholder="Select Country"
+                    searchable
+                    searchPlaceholder="Search country..."
+                    disabled={isSubmitting}
+                    hasError={Boolean(errors.country)}
+                    triggerClassName="py-3.5 bg-black-900 border-neutral-800 rounded-lg text-sm focus:border-gold-400"
+                    className="w-full"
+                />
                 {errors.country && (
                     <span className="text-xs text-red-400 font-medium">
                         {errors.country}
@@ -157,35 +160,18 @@ const AddressForm: React.FC<AddressFormProps> = ({
                 </label>
                 <div className="relative w-full">
                     {availableStates.length > 0 ? (
-                        <>
-                            <select
-                                id="address-state"
-                                disabled={isSubmitting}
-                                value={state}
-                                onChange={(e) => setState(e.target.value)}
-                                className={`w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-sm appearance-none outline-none focus:border-gold-400 transition-colors cursor-pointer pr-10 font-hanken disabled:opacity-60 ${
-                                    state ? "text-white" : "text-neutral-400"
-                                }`}
-                            >
-                                <option
-                                    value=""
-                                    disabled
-                                    className="bg-black-900 text-neutral-400"
-                                >
-                                    Select State
-                                </option>
-                                {availableStates.map((st) => (
-                                    <option
-                                        key={st.isoCode || st.name}
-                                        value={st.name}
-                                        className="bg-black-900 text-white py-2"
-                                    >
-                                        {st.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400 pointer-events-none" />
-                        </>
+                        <CustomDropdown
+                            options={stateOptions}
+                            value={state}
+                            onChange={(val) => setState(val)}
+                            placeholder="Select State"
+                            searchable
+                            searchPlaceholder="Search state..."
+                            disabled={isSubmitting}
+                            hasError={Boolean(errors.state)}
+                            triggerClassName="py-3.5 bg-black-900 border-neutral-800 rounded-lg text-sm focus:border-gold-400"
+                            className="w-full"
+                        />
                     ) : (
                         <input
                             id="address-state"
@@ -263,11 +249,11 @@ const AddressForm: React.FC<AddressFormProps> = ({
                 </label>
                 <input
                     id="address-phone"
-                    type="tel"
+                    type="number"
                     disabled={isSubmitting}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Enter Phone Number (e.g. 08012345678)"
+                    placeholder="Enter Phone Number (e.g. 080**********)"
                     className="w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-white text-sm placeholder:text-neutral-500 focus:border-gold-400 focus:outline-none transition-colors font-hanken disabled:opacity-60"
                 />
                 {errors.phone && (

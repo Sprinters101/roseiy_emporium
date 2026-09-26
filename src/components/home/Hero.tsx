@@ -95,16 +95,9 @@ export const Hero = () => {
                             <div className="flex items-center gap-4">
                                 <Link
                                     to="/shop"
-                                    className="md:px-8 px-4 py-3.5 bg-gold-gradient text-black-900 font-hanken font-bold text-body-c1 rounded-md tracking-wider w-full text-center shadow-lg hover:opacity-95 transition-opacity active:scale-[0.99]"
+                                    className="md:px-8 px-4 py-3.5 bg-gold-gradient text-black-900 font-hanken font-bold text-body-c1 rounded-md tracking-wider w-full text-center shadow-lg hover:opacity-95 transition-opacity active:scale-[0.99] max-w-[11.6875rem]"
                                 >
                                     Shop Collection
-                                </Link>
-
-                                <Link
-                                    to="/categories"
-                                    className="md:px-8 px-4 py-3.5 bg-transparent border border-white text-white font-hanken font-medium text-body-c1 rounded-md w-full text-center tracking-wider hover:bg-white/10 transition-colors active:scale-[0.99]"
-                                >
-                                    Explore Categories
                                 </Link>
                             </div>
                         </div>
