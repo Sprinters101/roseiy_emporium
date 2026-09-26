@@ -206,7 +206,7 @@ export const BestSellers = () => {
                         : primaryUnit
                           ? primaryUnit.stock
                           : 22,
-                    casesLeft: cartonUnit ? cartonUnit.stock : "",
+                    casesLeft: cartonUnit ? cartonUnit.stock : undefined,
                     price: pieceUnit
                         ? Number(
                               pieceUnit.price || (pieceUnit as any).unitPrice,
