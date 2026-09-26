@@ -178,9 +178,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                             const pQty = item.piecesQty ?? item.quantity ?? 1;
                             const cQty = item.casesQty ?? 0;
                             const piecesLeft =
-                                item.piecesLeft !== undefined ? item.piecesLeft : 0;
+                                item.piecesLeft !== undefined
+                                    ? item.piecesLeft
+                                    : 0;
                             const casesLeft =
-                                item.casesLeft !== undefined ? item.casesLeft : 0;
+                                item.casesLeft !== undefined
+                                    ? item.casesLeft
+                                    : 0;
 
                             const isPieceOutOfStock = piecesLeft <= 0;
                             const isCaseOutOfStock = casesLeft <= 0;
@@ -233,7 +237,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                             </h4>
 
                                             <p className="text-[0.5rem] md:text-[0.625rem]  text-black-200 font-hanken mt-0.5">
-                                                {volumeText ? `${volumeText} • ` : ""}Quantity:{" "}
+                                                {volumeText
+                                                    ? `${volumeText} • `
+                                                    : ""}
+                                                Quantity:{" "}
                                                 {getQuantitySummary(item)}
                                             </p>
 
@@ -258,11 +265,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                             </span>
                                                         ) : isPieceMaxInStock ? (
                                                             <span className="text-amber-400 font-medium">
-                                                                Max in Stock ({piecesLeft})
+                                                                Max in Stock (
+                                                                {piecesLeft})
                                                             </span>
                                                         ) : (
                                                             <span className="text-neutral-400">
-                                                                {piecesLeft} available
+                                                                {piecesLeft}{" "}
+                                                                available
                                                             </span>
                                                         )}
                                                     </span>
@@ -272,8 +281,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                 <button
                                                     type="button"
                                                     onClick={() => {
-                                                        if (isPieceOutOfStock && pQty <= 0) {
-                                                            toast.error("Pieces are out of stock");
+                                                        if (
+                                                            isPieceOutOfStock &&
+                                                            pQty <= 0
+                                                        ) {
+                                                            toast.error(
+                                                                "Pieces are out of stock",
+                                                            );
                                                             return;
                                                         }
                                                         if (pQty > 0) {
@@ -308,10 +322,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                     }
                                                     onClick={() => {
                                                         if (isPieceOutOfStock) {
-                                                            toast.error("Pieces are out of stock");
+                                                            toast.error(
+                                                                "Pieces are out of stock",
+                                                            );
                                                             return;
                                                         }
-                                                        if (isPieceMaxInStock || pQty >= piecesLeft) {
+                                                        if (
+                                                            isPieceMaxInStock ||
+                                                            pQty >= piecesLeft
+                                                        ) {
                                                             toast.warning(
                                                                 `Maximum available pieces in stock is ${piecesLeft}`,
                                                             );
@@ -325,7 +344,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                     }}
                                                     className={cn(
                                                         "size-4 md:size-6 rounded border flex items-center justify-center transition-all",
-                                                        isPieceMaxInStock || isPieceOutOfStock || pQty >= piecesLeft
+                                                        isPieceMaxInStock ||
+                                                            isPieceOutOfStock ||
+                                                            pQty >= piecesLeft
                                                             ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
                                                             : "border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 cursor-pointer",
                                                     )}
@@ -349,11 +370,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                         </span>
                                                     ) : isCaseMaxInStock ? (
                                                         <span className="text-amber-400 font-medium">
-                                                            Max in Stock ({casesLeft})
+                                                            Max in Stock (
+                                                            {casesLeft})
                                                         </span>
                                                     ) : (
                                                         <span className="text-neutral-400">
-                                                            {casesLeft} available
+                                                            {casesLeft}{" "}
+                                                            available
                                                         </span>
                                                     )}
                                                 </span>
@@ -363,8 +386,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                     type="button"
                                                     disabled={cQty <= 0}
                                                     onClick={() => {
-                                                        if (isCaseOutOfStock && cQty <= 0) {
-                                                            toast.error("Cases are out of stock");
+                                                        if (
+                                                            isCaseOutOfStock &&
+                                                            cQty <= 0
+                                                        ) {
+                                                            toast.error(
+                                                                "Cases are out of stock",
+                                                            );
                                                             return;
                                                         }
                                                         if (cQty > 0) {
@@ -399,10 +427,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                     }
                                                     onClick={() => {
                                                         if (isCaseOutOfStock) {
-                                                            toast.error("Cases are out of stock");
+                                                            toast.error(
+                                                                "Cases are out of stock",
+                                                            );
                                                             return;
                                                         }
-                                                        if (isCaseMaxInStock || cQty >= casesLeft) {
+                                                        if (
+                                                            isCaseMaxInStock ||
+                                                            cQty >= casesLeft
+                                                        ) {
                                                             toast.warning(
                                                                 `Maximum available cases in stock is ${casesLeft}`,
                                                             );
@@ -416,7 +449,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                     }}
                                                     className={cn(
                                                         "size-4 md:size-6 rounded border flex items-center justify-center transition-all",
-                                                        isCaseMaxInStock || isCaseOutOfStock || cQty >= casesLeft
+                                                        isCaseMaxInStock ||
+                                                            isCaseOutOfStock ||
+                                                            cQty >= casesLeft
                                                             ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
                                                             : "border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 cursor-pointer",
                                                     )}
