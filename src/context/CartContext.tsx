@@ -1035,8 +1035,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
                     },
                 ];
             });
-
-            toast.success(`Cart updated for ${product.name}`);
         },
         [
             cartItems,

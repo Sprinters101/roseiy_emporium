@@ -222,11 +222,8 @@ export const useSetProductQuantities = () => {
     return useMutation({
         mutationFn: (payload: SetProductQuantitiesPayload) =>
             setProductQuantitiesFunc(payload),
-        onSuccess: (data) => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
-            if (data?.message) {
-                toast.success(data.message);
-            }
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
             toast.error(
@@ -265,9 +262,8 @@ export const useUpdateCartItem = () => {
     return useMutation({
         mutationFn: (payload: UpdateCartItemPayload) =>
             updateCartItemQuantityFunc(payload),
-        onSuccess: (data) => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
-            toast.success(data?.message || "Cart updated");
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
             toast.error(

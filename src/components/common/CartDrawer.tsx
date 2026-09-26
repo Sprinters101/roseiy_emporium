@@ -72,7 +72,22 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
         isCartFetching,
         updateUnitQuantities,
         removeFromCart,
+        refetchCart,
     } = useCart();
+
+    // Refetch cart data from server whenever the cart drawer opens
+    useEffect(() => {
+        if (isOpen) {
+            refetchCart();
+        }
+    }, [isOpen, refetchCart]);
+
+    const handleOpenChange = (open: boolean) => {
+        setIsOpen(open);
+        if (open) {
+            refetchCart();
+        }
+    };
 
     // Monitor screen width to switch sheet side between bottom (mobile) and right (desktop)
     useEffect(() => {
@@ -116,7 +131,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
     };
 
     return (
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <Sheet open={isOpen} onOpenChange={handleOpenChange}>
             <SheetTrigger>{children}</SheetTrigger>
 
             {/* Slide out drawer panel (bottom on mobile, right on desktop) */}
