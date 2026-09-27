@@ -82,7 +82,7 @@ export const ProfilePersonalInfoCard: React.FC<
                             type="button"
                             disabled={isSaving || isLoading}
                             onClick={handleSave}
-                            className="bg-gold-gradient text-black-900 font-semibold rounded-md text-xs font-hanken px-4 py-1.5 hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
+                            className="bg-gold-gradient  text-black-900 font-semibold rounded-md text-xs font-hanken px-4 py-1.5 hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
                         >
                             {isSaving ? "Saving..." : "Save Changes"}
                         </button>
@@ -182,10 +182,14 @@ export const ProfilePersonalInfoCard: React.FC<
                     <input
                         id="profile-phone-number"
                         type="tel"
-                        disabled={true}
+                        disabled={!isEditing}
                         value={formData.phoneNumber}
                         placeholder="Phone Number"
-                        className="w-full bg-black-900/60 border border-neutral-800/80 rounded-lg px-4 py-3.5 text-neutral-400 text-sm font-hanken cursor-not-allowed opacity-75 select-none"
+                        className={`w-full bg-black-900 border border-neutral-800 rounded-lg px-4 py-3.5 text-white text-sm placeholder:text-neutral-500 font-hanken transition-colors ${
+                            isEditing
+                                ? "focus:border-gold-400 focus:outline-none"
+                                : "cursor-default text-white"
+                        }`}
                     />
                 </div>
 
