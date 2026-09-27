@@ -84,7 +84,7 @@ export const ProfilePersonalInfoCard: React.FC<
                             onClick={handleSave}
                             className="bg-gold-gradient  text-black-900 font-semibold rounded-md text-xs font-hanken px-4 py-1.5 hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
                         >
-                            {isSaving ? "Saving..." : "Save Changes"}
+                            {isSaving ? "Saving..." : "Save"}
                         </button>
                     </div>
                 ) : (
