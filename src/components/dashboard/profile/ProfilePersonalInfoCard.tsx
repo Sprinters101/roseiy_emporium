@@ -82,9 +82,20 @@ export const ProfilePersonalInfoCard: React.FC<
                             type="button"
                             disabled={isSaving || isLoading}
                             onClick={handleSave}
-                            className="bg-gold-gradient  text-black-900 font-semibold rounded-md text-xs font-hanken px-4 py-1.5 hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
+                            className="bg-gold-gradient text-black-900 font-semibold rounded-md text-xs font-hanken px-3 sm:px-4 py-1.5 hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
                         >
-                            {isSaving ? "Saving..." : "Save"}
+                            {isSaving ? (
+                                "Saving..."
+                            ) : (
+                                <>
+                                    <span className="inline sm:hidden">
+                                        Save
+                                    </span>
+                                    <span className="hidden sm:inline">
+                                        Save Changes
+                                    </span>
+                                </>
+                            )}
                         </button>
                     </div>
                 ) : (
