@@ -80,7 +80,9 @@ export const ProductDetails: React.FC = () => {
                 volume: (liveProduct as any).volume || "",
                 piecesLeft: piecesStock,
                 casesLeft: casesStock,
-                price: primaryUnit ? Number(primaryUnit.price || primaryUnit.unitPrice || 0) : 0,
+                price: primaryUnit
+                    ? Number(primaryUnit.price || primaryUnit.unitPrice || 0)
+                    : 0,
                 image: primaryImg,
                 gallery: galleryList.length > 0 ? galleryList : [primaryImg],
                 description: liveProduct.description || "",
@@ -361,7 +363,7 @@ export const ProductDetails: React.FC = () => {
     // Buy Now handler
     const handleBuyNow = () => {
         handleAddToCart();
-        navigate("/shop");
+        navigate("/checkout");
     };
 
     // 2. Fetch live related products
