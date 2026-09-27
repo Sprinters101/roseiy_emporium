@@ -170,10 +170,11 @@ export const useVerifyCheckout = (
 /**
  * Fetch Current Customer Profile
  */
-export const useGetAccountProfile = () => {
+export const useGetAccountProfile = (options?: { enabled?: boolean }) => {
     return useQuery({
         queryKey: queryKeys.auth.accountProfile,
         queryFn: () => getAccountProfileFunc(),
+        enabled: options?.enabled !== undefined ? options.enabled : true,
         // staleTime: 1000 * 60 * 5, // 5 minutes
         retry: false,
     });
@@ -186,10 +187,11 @@ export const useGetCustomerProfile = useGetAccountProfile;
 /**
  * Fetch saved delivery addresses
  */
-export const useGetAddresses = () => {
+export const useGetAddresses = (options?: { enabled?: boolean }) => {
     return useQuery({
         queryKey: queryKeys.addresses.all,
         queryFn: () => getAddressesFunc(),
+        enabled: options?.enabled !== undefined ? options.enabled : true,
         // staleTime: 1000 * 60 * 2, // 2 minutes
     });
 };
@@ -197,10 +199,11 @@ export const useGetAddresses = () => {
 /**
  * Fetch customer payment history
  */
-export const useGetAccountPayments = () => {
+export const useGetAccountPayments = (options?: { enabled?: boolean }) => {
     return useQuery({
         queryKey: queryKeys.account.payments,
         queryFn: () => getAccountPaymentsFunc(),
+        enabled: options?.enabled !== undefined ? options.enabled : true,
         // staleTime: 1000 * 60 * 2, // 2 minutes
     });
 };

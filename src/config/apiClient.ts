@@ -164,7 +164,13 @@ apiClient.interceptors.response.use(
                 currentPath === "/forgot-password" ||
                 currentPath === "/reset-password";
 
-            if (!isAuthPage) {
+            const isCheckoutPage =
+                currentPath === "/checkout" ||
+                currentPath.startsWith("/checkout") ||
+                currentPath.startsWith("/payment/callback");
+
+            // Do not redirect to login if user is on auth pages or checkout page
+            if (!isAuthPage && !isCheckoutPage) {
                 const currentSearch = window.location.search;
                 const fullRedirect = encodeURIComponent(
                     currentPath + currentSearch,

@@ -92,10 +92,10 @@ export const Checkout: React.FC = () => {
     const submitReviewMutation = useSubmitReview();
 
     const { data: serverAddressesData, isLoading: isAddressesLoading } =
-        useGetAddresses();
+        useGetAddresses({ enabled: isAuthenticated });
 
     const { data: profileData, isLoading: isProfileLoading } =
-        useGetAccountProfile();
+        useGetAccountProfile({ enabled: isAuthenticated });
 
     // Payment Return Reference Verification
     const reference =
@@ -699,7 +699,7 @@ export const Checkout: React.FC = () => {
                                 disabled={
                                     isProcessing || displayItems.length === 0
                                 }
-                                className="hidden lg:flex w-full mt-2 bg-gold-gradient text-black-900 font-bold font-hanken text-sm sm:text-base py-3.5 sm:py-4 px-6 rounded-sm sm:rounded-md shadow-xl hover:opacity-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center text-center gap-2"
+                                className="hidden lg:flex w-full h-12 bg-gold-gradient text-black-900 font-bold font-hanken text-sm sm:text-base px-6 rounded-sm sm:rounded-md shadow-xl hover:opacity-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center text-center gap-2"
                             >
                                 {isProcessing && (
                                     <Loader2 className="size-4 animate-spin" />
@@ -713,33 +713,16 @@ export const Checkout: React.FC = () => {
                         </div>
 
                         {/* Right Column: Sticky Order Summary Section */}
-                        <div className="lg:col-span-5 w-full sticky top-28 flex flex-col gap-4">
+                        <div className="lg:col-span-5 w-full sticky top-28">
                             <OrderSummarySection
                                 items={displayItems}
                                 onRemoveItem={handleRemoveItem}
                                 subtotal={subtotal}
                                 total={total}
                                 isLoading={isCartLoading}
+                                isProcessing={isProcessing}
+                                onPay={handlePayOrder}
                             />
-
-                            {/* Mobile Pay Button (At the bottom of Order Summary on Mobile) */}
-                            <button
-                                type="button"
-                                onClick={handlePayOrder}
-                                disabled={
-                                    isProcessing || displayItems.length === 0
-                                }
-                                className="lg:hidden w-full bg-gold-gradient text-black-900 font-bold font-hanken text-sm sm:text-base py-3.5 sm:py-4 px-6 rounded-sm sm:rounded-md shadow-xl hover:opacity-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-center gap-2"
-                            >
-                                {isProcessing && (
-                                    <Loader2 className="size-4 animate-spin" />
-                                )}
-                                <span>
-                                    {isProcessing
-                                        ? "Initializing Payment..."
-                                        : `Pay ₦${total.toLocaleString()}`}
-                                </span>
-                            </button>
                         </div>
                     </div>
                 ) : (
@@ -791,34 +774,17 @@ export const Checkout: React.FC = () => {
                                         </div>
 
                                         {/* Right Column: Order Summary */}
-                                        <div className="lg:col-span-5 w-full sticky top-28 flex flex-col gap-4">
+                                        <div className="lg:col-span-5 w-full sticky top-28">
                                             <OrderSummarySection
                                                 items={displayItems}
                                                 onRemoveItem={handleRemoveItem}
                                                 subtotal={subtotal}
                                                 total={total}
                                                 isLoading={isCartLoading}
+                                                isSubmitting={isSubmitting}
+                                                isProcessing={isProcessing}
+                                                isSubmitType={true}
                                             />
-
-                                            {/* Mobile Submit Button (At the bottom of Order Summary on Mobile) */}
-                                            <button
-                                                type="submit"
-                                                disabled={
-                                                    isSubmitting ||
-                                                    isProcessing ||
-                                                    displayItems.length === 0
-                                                }
-                                                className="lg:hidden w-full bg-gold-g hover:opacity-95 text-black font-semibold text-body-c1 md:text-base py-3.5 px-6 rounded-sm transition-all shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-hanken"
-                                            >
-                                                {isSubmitting || isProcessing ? (
-                                                    <Loader2 className="size-4 animate-spin mr-2" />
-                                                ) : null}
-                                                <span>
-                                                    {isSubmitting || isProcessing
-                                                        ? "Processing Payment..."
-                                                        : `Pay ₦${total.toLocaleString()}`}
-                                                </span>
-                                            </button>
                                         </div>
                                     </div>
                                 </Form>

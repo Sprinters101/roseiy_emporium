@@ -86,9 +86,9 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                             disabled={isSubmitting}
                             aria-label="Cancel"
                             title="Cancel"
-                            className="bg-transparent border border-neutral-700/80 text-neutral-300 rounded-md text-xs font-hanken px-2.5 sm:px-3 py-1.5 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                            className="bg-black-800  md:border md:border-neutral-700/80 md:rounded-md text-neutral-300 rounded-full size-8 md:size-fit text-xs font-hanken px-2.5 sm:px-3 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
                         >
-                            <X className="size-3.5 sm:size-3 text-neutral-400" />
+                            <X className="size-3.5 sm:size-3 text-neutral-400 md:hidden" />
                             <span className="hidden sm:inline">Cancel</span>
                         </button>
                         <button
@@ -97,12 +97,12 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                             disabled={isSubmitting}
                             aria-label="Save Changes"
                             title="Save Changes"
-                            className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-2.5 sm:px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                            className="bg-black-800  md:border md:border-neutral-700/80 md:rounded-md text-white rounded-full size-8 md:size-fit text-xs font-hanken px-2.5 sm:px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
                         >
                             {isSubmitting ? (
-                                <Loader2 className="size-3.5 sm:size-3 animate-spin text-gold-400" />
+                                <Loader2 className="size-4 sm:size-3 animate-spin text-gold-400" />
                             ) : (
-                                <Check className="size-3.5 sm:size-3 text-gold-400" />
+                                <Check className="size-4 sm:size-3 text-gold-400 md:hidden" />
                             )}
                             <span className="hidden sm:inline">
                                 {isSubmitting ? "Saving..." : "Save Changes"}
@@ -115,10 +115,12 @@ export const LoggedInPersonalInfo: React.FC<LoggedInPersonalInfoProps> = ({
                         onClick={handleStartEditing}
                         aria-label="Edit Information"
                         title="Edit Information"
-                        className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-2.5 sm:px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                        className="bg-black-800  md:border md:border-neutral-700/80 md:rounded-md text-white rounded-full hover:border-gold-400/40 size-8 md:size-fit text-xs font-hanken px-2.5 sm:px-3.5 py-1.5 hover:bg-neutral-800  transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                        <PenLine className="size-3.5 sm:size-3 text-gold-400" />
-                        <span className="hidden sm:inline">Edit Information</span>
+                        <PenLine className="size-3.5 sm:size-3 text-gold-400 md:hidden" />
+                        <span className="hidden sm:inline">
+                            Edit Information
+                        </span>
                     </button>
                 )}
             </div>

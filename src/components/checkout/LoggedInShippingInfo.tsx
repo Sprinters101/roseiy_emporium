@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { PenLine, Trash2, X, Plus } from "lucide-react";
+import { PenLine, X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddressModal } from "@/components/dashboard/addresses/AddressModal";
@@ -66,11 +66,6 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
         setModalOpen(true);
     };
 
-    const handleOpenDeleteModal = (addr: AddressItem) => {
-        setAddressToDelete(addr);
-        setIsDeleteModalOpen(true);
-    };
-
     const handleConfirmDelete = async () => {
         if (!addressToDelete || !onDeleteAddress) return;
         setIsDeleting(true);
@@ -122,11 +117,12 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                             onClick={() => setIsMultiView(false)}
                             aria-label="Cancel"
                             title="Cancel"
-                            className=" bg-transparent border border-neutral-700/80 text-neutral-300 rounded-md text-xs font-hanken px-2.5 sm:px-3 py-1.5 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                            className=" bg-transparent border border-neutral-700/80 text-neutral-300 rounded-md text-xs font-hanken px-2.5 sm:px-3 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 hover:text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                         >
-                            <X className="size-3.5 sm:size-3 text-neutral-400" />
+                            <X className="size-3.5 sm:size-3 text-neutral-400 md:hidden" />
                             <span className="hidden sm:inline">Cancel</span>
                         </button>
+
                         <button
                             type="button"
                             onClick={handleOpenAddModal}
@@ -134,7 +130,7 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                             title="Add New Address"
                             className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-2.5 sm:px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                         >
-                            <Plus className="size-3.5 sm:size-3 text-gold-400" />
+                            <Plus className="size-3.5 sm:size-3 text-gold-400 md:hidden" />
                             <span className="hidden sm:inline">
                                 Add New Address
                             </span>
@@ -146,9 +142,9 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                         onClick={() => setIsMultiView(true)}
                         aria-label="Change Address"
                         title="Change Address"
-                        className="bg-black-900 border border-neutral-700/80 text-white rounded-md text-xs font-hanken px-2.5 sm:px-3.5 py-1.5 hover:bg-neutral-800 hover:border-gold-400/40 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                        className="bg-black-900 md:border md:border-neutral-700/80 text-white rounded-full md:rounded-md text-xs font-hanken px-2.5 sm:px-3.5 py-1.5 hover:bg-neutral-800  size-8 md:size-auto hover:border-gold-400/40 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                        <PenLine className="size-3.5 sm:size-3 text-gold-400" />
+                        <PenLine className="size-3.5 sm:size-3 text-gold-400 md:hidden" />
                         <span className="hidden sm:inline">Change Address</span>
                     </button>
                 )}

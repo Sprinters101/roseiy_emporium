@@ -1,11 +1,12 @@
 import React, { useMemo } from "react";
 import { useFormikContext } from "formik";
 import { Country, State } from "country-state-city";
+import { Loader2 } from "lucide-react";
 import { CustomInput } from "@/components/common/CustomInput";
 import { CustomSelect } from "@/components/common/CustomSelect";
 
 export interface ShippingInfoSectionProps {
-    totalAmount: number;
+    totalAmount?: number;
     isSubmitting?: boolean;
 }
 
@@ -90,14 +91,20 @@ export const ShippingInfoSection: React.FC<ShippingInfoSectionProps> = ({
                 placeholder="Enter Address"
             />
 
+            {/* Desktop Pay Button (Hidden on Mobile) */}
             <button
                 type="submit"
                 disabled={isSubmitting}
-                className="hidden lg:flex w-full mt-3 bg-gold-g hover:opacity-95 text-black font-semibold text-body-c1 md:text-base py-3.5 px-6 rounded-sm transition-all shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center font-hanken"
+                className="hidden lg:flex w-full mt-3 h-12 bg-gold-gradient hover:opacity-95 text-black-900 font-bold font-hanken text-sm sm:text-base px-6 rounded-sm sm:rounded-md shadow-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center text-center gap-2"
             >
-                {isSubmitting
-                    ? "Processing Payment..."
-                    : `Pay ₦${totalAmount.toLocaleString()}`}
+                {isSubmitting && <Loader2 className="size-4 animate-spin" />}
+                <span>
+                    {isSubmitting
+                        ? "Processing Payment..."
+                        : totalAmount !== undefined
+                          ? `Pay ₦${totalAmount.toLocaleString()}`
+                          : "Proceed to Payment"}
+                </span>
             </button>
         </div>
     );
