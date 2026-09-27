@@ -7,17 +7,17 @@ import { PiSnapchatLogoLight } from "react-icons/pi";
 
 const QUICK_LINKS = [
     { label: "Shop", href: "/shop" },
-    { label: "About Us", href: "/about" },
-    { label: "FAQs", href: "/faq" },
+    { label: "About Us", href: "/#about" },
+    { label: "FAQs", href: "/#faqs" },
     { label: "Track Order", href: "/track-order" },
-    { label: "Terms & Conditions", href: "/terms" },
-    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms & Conditions", href: "/privacy-policy" },
+    { label: "Privacy Policy", href: "/privacy-policy" },
 ];
 
 // Shop Categories Data Array
 const SHOP_CATEGORIES = [
     { label: "Champagne", href: "/shop?category=champagne" },
-    { label: "Wine", href: "/shop?category=wine" },
+    { label: "Sweetwine", href: "/shop?category=sweetwine" },
     { label: "Whiskey", href: "/shop?category=whiskey" },
     { label: "Cognac", href: "/shop?category=cognac" },
     { label: "Tequila", href: "/shop?category=tequila" },
