@@ -62,13 +62,13 @@ export const IconicBrands = () => {
             name: "Clase Azul",
             logo: claseAzulLogo,
             href: "/shop?brand=tequila",
-            showMobile: true,
+            showMobile: false,
         },
         {
             name: "Don Julio",
             logo: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784784438/image_23_kj73da.png",
             href: "/shop?brand=don-julio",
-            showMobile: false,
+            showMobile: true,
         },
         {
             name: "Tequila ",
