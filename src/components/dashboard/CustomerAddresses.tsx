@@ -44,7 +44,9 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
     );
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
-    // Normalizing addresses from backend response
+    const addressOrderRef = React.useRef<string[]>([]);
+
+    // Normalizing addresses from backend response while preserving stable order
     const addresses: AddressItem[] = React.useMemo(() => {
         if (!addressesData?.data) return [];
         const rawData = addressesData.data;
@@ -57,7 +59,19 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
               ? (rawData as { addresses: AddressResponseItem[] }).addresses
               : [];
 
-        return rawList.map((raw, idx) => {
+        // Track and preserve existing order of addresses so they don't jump when made default
+        const orderMap = new Map<string, number>();
+        addressOrderRef.current.forEach((id, idx) => orderMap.set(id, idx));
+
+        rawList.forEach((raw, idx) => {
+            const id = raw.addressId || (raw as any).id || `addr-${idx}`;
+            if (id && !orderMap.has(id)) {
+                addressOrderRef.current.push(id);
+                orderMap.set(id, addressOrderRef.current.length - 1);
+            }
+        });
+
+        const mappedList = rawList.map((raw, idx) => {
             const id = raw.addressId || (raw as any).id || `addr-${idx}`;
             const street = raw.addressLine1 || (raw as any).address || "";
             const fullStreet = [street, raw.addressLine2]
@@ -86,7 +100,21 @@ export const CustomerAddresses: React.FC<CustomerAddressesProps> = ({
                 lastName: raw.lastName,
                 postalCode: raw.postalCode,
                 isDefault: Boolean(raw.isDefault),
+                createdAt: raw.createdAt,
             };
+        });
+
+        return mappedList.sort((a, b) => {
+            if (a.createdAt && b.createdAt) {
+                const timeA = new Date(a.createdAt).getTime();
+                const timeB = new Date(b.createdAt).getTime();
+                if (!isNaN(timeA) && !isNaN(timeB) && timeA !== timeB) {
+                    return timeA - timeB;
+                }
+            }
+            const idxA = orderMap.get(a.id) ?? 9999;
+            const idxB = orderMap.get(b.id) ?? 9999;
+            return idxA - idxB;
         });
     }, [addressesData]);
 

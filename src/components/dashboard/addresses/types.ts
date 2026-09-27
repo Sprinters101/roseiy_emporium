@@ -14,6 +14,7 @@ export interface AddressItem {
     lastName?: string;
     postalCode?: string;
     isDefault?: boolean;
+    createdAt?: string;
 }
 
 export interface AddressFormData {

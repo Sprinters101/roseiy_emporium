@@ -221,6 +221,8 @@ export const Checkout: React.FC = () => {
         return INITIAL_ADDRESSES;
     });
 
+    const addressOrderRef = React.useRef<string[]>([]);
+
     // Combined server and local addresses
     const addresses: AddressItem[] = useMemo(() => {
         let rawList: AddressResponseItem[] = [];
@@ -245,12 +247,25 @@ export const Checkout: React.FC = () => {
         }
 
         if (isAuthenticated && rawList.length > 0) {
-            return rawList.map((addr) => {
+            const orderMap = new Map<string, number>();
+            addressOrderRef.current.forEach((id, idx) => orderMap.set(id, idx));
+
+            rawList.forEach((raw, idx) => {
+                const id = raw.addressId || (raw as any).id || `addr-${idx}`;
+                if (id && !orderMap.has(id)) {
+                    addressOrderRef.current.push(id);
+                    orderMap.set(id, addressOrderRef.current.length - 1);
+                }
+            });
+
+            const mappedList = rawList.map((addr, idx) => {
+                const id = addr.addressId || `addr-${idx}`;
                 const fullStreet = [addr.addressLine1, addr.addressLine2]
                     .filter(Boolean)
                     .join(", ");
                 return {
-                    id: addr.addressId,
+                    id,
+                    addressId: addr.addressId,
                     title: addr.label || `${addr.city} Address`,
                     country: addr.country || "Nigeria",
                     state: addr.state || "Lagos",
@@ -258,7 +273,21 @@ export const Checkout: React.FC = () => {
                     address: fullStreet || addr.addressLine1 || "",
                     phone: addr.phoneNumber || personalInfo.phoneNumber,
                     isDefault: Boolean(addr.isDefault),
+                    createdAt: addr.createdAt,
                 };
+            });
+
+            return mappedList.sort((a, b) => {
+                if (a.createdAt && b.createdAt) {
+                    const timeA = new Date(a.createdAt).getTime();
+                    const timeB = new Date(b.createdAt).getTime();
+                    if (!isNaN(timeA) && !isNaN(timeB) && timeA !== timeB) {
+                        return timeA - timeB;
+                    }
+                }
+                const idxA = orderMap.get(a.id) ?? 9999;
+                const idxB = orderMap.get(b.id) ?? 9999;
+                return idxA - idxB;
             });
         }
         return localAddresses;
