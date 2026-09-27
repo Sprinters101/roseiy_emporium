@@ -277,3 +277,10 @@ input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+/* Prevent mobile browser automatic phone/email link underlining */
+a[href^="tel"],
+a[href^="mailto"] {
+  color: inherit;
+  text-decoration: none;
+}

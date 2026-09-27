@@ -179,7 +179,7 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                                 <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1 leading-relaxed">
                                     {selectedAddress.address}
                                 </p>
-                                <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1">
+                                <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1 no-underline hover:no-underline select-text">
                                     {selectedAddress.phone}
                                 </p>
                             </div>
@@ -254,7 +254,7 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                                         <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1 leading-relaxed">
                                             {address.address}
                                         </p>
-                                        <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1">
+                                        <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1 no-underline hover:no-underline select-text">
                                             {address.phone}
                                         </p>
                                     </div>

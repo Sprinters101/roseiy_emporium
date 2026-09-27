@@ -66,7 +66,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
                         {" state, "}
                         {address.country}
                     </p>
-                    <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1.5 pb-2">
+                    <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1.5 pb-2 no-underline hover:no-underline select-text">
                         {address.phone}
                     </p>
                 </div>
