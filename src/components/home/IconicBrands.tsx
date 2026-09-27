@@ -9,10 +9,7 @@ import {
     domPerignonLogo,
     veuveClicquotLogo,
     moetLogo,
-    hennessyLogo,
-    donJulioLogo,
     claseAzulLogo,
-    tequilaLogo,
 } from "@/lib/site_data";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -57,26 +54,27 @@ export const IconicBrands = () => {
     const bottomRowBrands: BrandItem[] = [
         {
             name: "Hennessy",
-            logo: hennessyLogo,
+            logo: "/icon/I_5.svg",
             href: "/shop?brand=hennessy",
             showMobile: true,
         },
         {
+            name: "Clase Azul",
+            logo: claseAzulLogo,
+            href: "/shop?brand=tequila",
+            showMobile: true,
+        },
+        {
             name: "Don Julio",
-            logo: donJulioLogo,
+            logo: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784784438/image_23_kj73da.png",
             href: "/shop?brand=don-julio",
             showMobile: false,
         },
         {
-            name: "Clase Azul",
-            logo: claseAzulLogo,
-            href: "/shop?brand=clase-azul",
-            showMobile: true,
-        },
-        {
             name: "Tequila ",
-            logo: tequilaLogo,
-            href: "/shop?brand=tequila",
+            // logo: tequilaLogo,
+            logo: "/icon/azul.svg",
+            href: "/shop?brand=clase-azul",
             showMobile: false,
         },
     ];
@@ -118,7 +116,7 @@ export const IconicBrands = () => {
                                 />
                                 <Link
                                     to={brand.href}
-                                    className="opacity-0 group-hover:opacity-100 min-h-7.75"
+                                    className="md:opacity-0 md:group-hover:opacity-100 min-h-7.75"
                                 >
                                     <Button className=" px-4 text-[0.8125rem] font-hanken bg-white/10 rounded-sm h-7 md:h-11 border border-neutral-700 text-white hover:bg-gold-gradient  transition-all cursor-pointer">
                                         Explore Collection
