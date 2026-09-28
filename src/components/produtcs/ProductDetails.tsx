@@ -337,33 +337,36 @@ export const ProductDetails: React.FC = () => {
     };
 
     // Add to Cart handler (Overrides existing cart quantities with exact local selections)
-    const handleAddToCart = () => {
+    const handleAddToCart = (): boolean => {
         const activePieces = includePieces ? piecesQty : 0;
         const activeCases = includeCases ? casesQty : 0;
 
         if (activePieces <= 0 && activeCases <= 0) {
             toast.warning("Please select at least one item quantity");
-            return;
+            return false;
         }
 
         if (activePieces > piecesLeft) {
             toast.warning(`Cannot exceed available pieces (${piecesLeft})`);
-            return;
+            return false;
         }
 
         if (activeCases > casesLeft) {
             toast.warning(`Cannot exceed available cases (${casesLeft})`);
-            return;
+            return false;
         }
 
         // Override cart item quantities with exact local choices
         setCartItemQuantities(product, activePieces, activeCases);
+        return true;
     };
 
-    // Buy Now handler
+    // Buy Now handler: Adds selected quantities and directly routes to Checkout page
     const handleBuyNow = () => {
-        handleAddToCart();
-        navigate("/checkout");
+        const success = handleAddToCart();
+        if (success) {
+            navigate("/checkout");
+        }
     };
 
     // 2. Fetch live related products
