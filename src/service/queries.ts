@@ -122,11 +122,15 @@ export const useGetProductBySlug = (
 /**
  * Fetch / Initialize Cart (Guest or Customer)
  */
-export const useGetCart = () => {
+export const useGetCart = (options?: { enabled?: boolean; staleTime?: number }) => {
     return useQuery({
         queryKey: queryKeys.cart.all,
         queryFn: () => getCartFunc(),
-        // staleTime: 1000 * 30, // 30 seconds
+        staleTime: options?.staleTime ?? 1000 * 60 * 5, // 5 minutes fresh in cache
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        ...options,
     });
 };
 

@@ -1,13 +1,14 @@
 import React from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { ArrowLeft, ShoppingBag } from "lucide-react";
+import { ArrowLeft, ShoppingBag, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OrderDetailsItemRow } from "./orders/OrderDetailsItemRow";
 import { OrderDetailsDeliveryInfo } from "./orders/OrderDetailsDeliveryInfo";
 import { useGetSingleOrder } from "@/service/queries";
+import { useReorder } from "@/service/mutation";
 import type { OrderDetailsData, OrderItemDetail } from "@/service/types";
-import { extractImageFromObject } from "@/context/CartContext";
+import { extractImageFromObject, useCart } from "@/context/CartContext";
 
 export const CustomerOrderDetails: React.FC = () => {
     const navigate = useNavigate();
@@ -17,6 +18,8 @@ export const CustomerOrderDetails: React.FC = () => {
     const { data: orderData, isLoading } = useGetSingleOrder(orderId, {
         enabled: Boolean(orderId),
     });
+    const reorderMutation = useReorder();
+    const { openCart } = useCart();
 
     const rawData = orderData?.data;
     const order: OrderDetailsData | undefined =
@@ -169,6 +172,16 @@ export const CustomerOrderDetails: React.FC = () => {
                 ? order.deliveryFee
                 : `₦${Number(order?.deliveryFee || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+    const handleOrderAgain = async () => {
+        if (!orderNumber) return;
+        try {
+            await reorderMutation.mutateAsync(orderNumber);
+            openCart();
+        } catch {
+            // Handled by onError in reorder mutation hook
+        }
+    };
+
     return (
         <div className="flex flex-col gap-6 w-full">
             {/* Header: Back Button & Title */}
@@ -211,16 +224,35 @@ export const CustomerOrderDetails: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Right: Track Order Button */}
-                    <Button
-                        type="button"
-                        onClick={() =>
-                            navigate(`/dashboard/track-order?id=${orderNumber}`)
-                        }
-                        className="bg-gold-gradient md:h-12 h-7 text-black-900 font-semibold font-hanken text-[0.5rem] sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-sm hover:opacity-90 transition-opacity cursor-pointer border-none w-full max-w-20 md:max-w-49.5"
-                    >
-                        Track Order
-                    </Button>
+                    {/* Right: Action Buttons */}
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                        <Button
+                            type="button"
+                            disabled={reorderMutation.isPending}
+                            onClick={handleOrderAgain}
+                            className="bg-transparent border border-gold-500 hover:bg-gold-500/10 text-gold-500 md:h-12 h-7 font-semibold font-hanken text-[0.5rem] sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-sm transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                            {reorderMutation.isPending ? (
+                                <>
+                                    <Loader2 className="size-3 sm:size-4 animate-spin" />
+                                    <span>Adding...</span>
+                                </>
+                            ) : (
+                                "Order Again"
+                            )}
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={() =>
+                                navigate(
+                                    `/dashboard/track-order?id=${orderNumber}`,
+                                )
+                            }
+                            className="bg-gold-gradient md:h-12 h-7 text-black-900 font-semibold font-hanken text-[0.5rem] sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-sm hover:opacity-90 transition-opacity cursor-pointer border-none"
+                        >
+                            Track Order
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Subheading: Items in your order */}

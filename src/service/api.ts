@@ -41,6 +41,8 @@ import type {
     SubmitReviewResponseData,
     LatestReviewsResponseData,
     PublishedReviewsResponseData,
+    ContactMessagePayload,
+    ContactMessageResponseData,
 } from "./types";
 
 // ==========================================
@@ -526,5 +528,22 @@ export const submitReviewFunc = async (
     const response = await apiClient.post<
         ApiResponse<SubmitReviewResponseData>
     >("/reviews", payload);
+    return response.data;
+};
+
+// ==========================================
+// 8. CONTACT US API
+// ==========================================
+
+/**
+ * 30. Send Contact Inquiry Message
+ * POST /contact
+ */
+export const sendContactMessageFunc = async (
+    payload: ContactMessagePayload,
+): Promise<ApiResponse<ContactMessageResponseData>> => {
+    const response = await apiClient.post<
+        ApiResponse<ContactMessageResponseData>
+    >("/contact", payload);
     return response.data;
 };

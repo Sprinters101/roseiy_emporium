@@ -2,29 +2,34 @@ import React from "react";
 import { Link } from "react-router";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { Phone, Mail, MapPin, ChevronRight } from "lucide-react";
+import { Phone, Mail, MapPin, ChevronRight, Loader2 } from "lucide-react";
 import { FaInstagram, FaSnapchatGhost } from "react-icons/fa";
 import { Hero } from "@/components/common/Hero";
 import Container from "@/components/common/Container";
 import { CustomInput } from "@/components/common/CustomInput";
-import { toast } from "@/components/ui/sonner";
+import { useSendContactMessage } from "@/service/mutation";
 
 const ContactValidationSchema = Yup.object().shape({
     fullName: Yup.string()
-        .min(2, "Name must be at least 2 characters")
+        .min(2, "Full name must be at least 2 characters")
+        .max(150, "Full name must be at most 150 characters")
         .required("Full name is required"),
     email: Yup.string()
         .email("Please enter a valid email address")
+        .max(255, "Email address is too long")
         .required("Email address is required"),
-    phone: Yup.string().optional(),
+    phone: Yup.string().max(50, "Phone number is too long").optional(),
     message: Yup.string()
-        .min(10, "Message must be at least 10 characters")
+        .min(5, "Message must be at least 5 characters")
+        .max(5000, "Message must be at most 5,000 characters")
         .required("Message is required"),
 });
 
 export const ContactUs: React.FC = () => {
+    const sendContactMessageMutation = useSendContactMessage();
+
     const handleSubmit = async (
-        _values: {
+        values: {
             fullName: string;
             email: string;
             phone?: string;
@@ -33,12 +38,15 @@ export const ContactUs: React.FC = () => {
         { resetForm }: { resetForm: () => void },
     ) => {
         try {
-            // Simulate API request delay
-            await new Promise((resolve) => setTimeout(resolve, 800));
-            toast.success("Your message has been sent successfully!");
+            await sendContactMessageMutation.mutateAsync({
+                fullName: values.fullName.trim(),
+                email: values.email.trim(),
+                phoneNumber: values.phone?.trim() || null,
+                message: values.message.trim(),
+            });
             resetForm();
-        } catch (error) {
-            toast.error("Failed to send your message. Please try again later.");
+        } catch {
+            // Handled in mutation onError toast
         }
     };
 
@@ -225,12 +233,22 @@ export const ContactUs: React.FC = () => {
 
                                     <button
                                         type="submit"
-                                        disabled={isSubmitting}
-                                        className="w-full h-10 md:h-12 mt-2 bg-gold-g hover:opacity-95 text-black font-semibold text-base py-3.5 px-6 rounded-sm transition-all shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                                        disabled={
+                                            isSubmitting ||
+                                            sendContactMessageMutation.isPending
+                                        }
+                                        className="w-full h-10 md:h-12 mt-2 bg-gold-g hover:opacity-95 text-black font-semibold text-base py-3.5 px-6 rounded-sm transition-all shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-hanken"
                                     >
-                                        {isSubmitting
-                                            ? "Sending Message..."
-                                            : "Send Message"}
+                                        {(isSubmitting ||
+                                            sendContactMessageMutation.isPending) && (
+                                            <Loader2 className="size-4 animate-spin" />
+                                        )}
+                                        <span>
+                                            {isSubmitting ||
+                                            sendContactMessageMutation.isPending
+                                                ? "Sending Message..."
+                                                : "Send Message"}
+                                        </span>
                                     </button>
                                 </Form>
                             )}

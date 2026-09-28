@@ -23,6 +23,7 @@ import {
     trackOrderFunc,
     reorderFunc,
     submitReviewFunc,
+    sendContactMessageFunc,
 } from "./api";
 import { queryKeys } from "./queries";
 import type {
@@ -42,6 +43,7 @@ import type {
     UpdateAddressPayload,
     TrackOrderPayload,
     SubmitReviewPayload,
+    ContactMessagePayload,
     ApiErrorResponse,
 } from "./types";
 
@@ -65,7 +67,8 @@ export const useRegisterCustomer = () => {
         mutationFn: (payload: RegisterPayload) => registerCustomerFunc(payload),
         onSuccess: (data) => {
             toast.success(
-                data?.message || "Registration successful. Please verify your email.",
+                data?.message ||
+                    "Registration successful. Please verify your email.",
             );
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
@@ -89,9 +92,7 @@ export const useVerifyEmail = () => {
             toast.success(data?.message || "Email verified successfully!");
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
-            toast.error(
-                getErrorMessage(err, "Invalid or expired OTP code."),
-            );
+            toast.error(getErrorMessage(err, "Invalid or expired OTP code."));
         },
     });
 };
@@ -152,9 +153,7 @@ export const useLogin = () => {
             toast.success(data?.message || "Login successful!");
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
-            toast.error(
-                getErrorMessage(err, "Invalid email or password."),
-            );
+            toast.error(getErrorMessage(err, "Invalid email or password."));
         },
     });
 };
@@ -199,10 +198,7 @@ export const useResetPassword = () => {
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
             toast.error(
-                getErrorMessage(
-                    err,
-                    "Invalid or expired password reset code.",
-                ),
+                getErrorMessage(err, "Invalid or expired password reset code."),
             );
         },
     });
@@ -222,8 +218,10 @@ export const useSetProductQuantities = () => {
     return useMutation({
         mutationFn: (payload: SetProductQuantitiesPayload) =>
             setProductQuantitiesFunc(payload),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
+        onSuccess: (data) => {
+            if (data?.data) {
+                queryClient.setQueryData(queryKeys.cart.all, data);
+            }
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
             toast.error(
@@ -242,13 +240,13 @@ export const useAddToCart = () => {
     return useMutation({
         mutationFn: (payload: AddToCartPayload) => addToCartFunc(payload),
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
+            if (data?.data) {
+                queryClient.setQueryData(queryKeys.cart.all, data);
+            }
             toast.success(data?.message || "Item added to cart");
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
-            toast.error(
-                getErrorMessage(err, "Failed to add item to cart."),
-            );
+            toast.error(getErrorMessage(err, "Failed to add item to cart."));
         },
     });
 };
@@ -262,13 +260,13 @@ export const useUpdateCartItem = () => {
     return useMutation({
         mutationFn: (payload: UpdateCartItemPayload) =>
             updateCartItemQuantityFunc(payload),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
+        onSuccess: (data) => {
+            if (data?.data) {
+                queryClient.setQueryData(queryKeys.cart.all, data);
+            }
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
-            toast.error(
-                getErrorMessage(err, "Failed to update quantity."),
-            );
+            toast.error(getErrorMessage(err, "Failed to update quantity."));
         },
     });
 };
@@ -282,7 +280,9 @@ export const useRemoveCartItem = () => {
     return useMutation({
         mutationFn: (cartItemId: string) => removeCartItemFunc(cartItemId),
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
+            if (data?.data) {
+                queryClient.setQueryData(queryKeys.cart.all, data);
+            }
             toast.info(data?.message || "Item removed from cart");
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
@@ -301,8 +301,11 @@ export const useClearCart = () => {
 
     return useMutation({
         mutationFn: () => clearCartFunc(),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
+        onSuccess: (data) => {
+            queryClient.setQueryData(queryKeys.cart.all, {
+                ...data,
+                data: { items: [], total: 0 },
+            });
             toast.info("Cart cleared");
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
@@ -323,9 +326,7 @@ export const useInitializeCheckout = () => {
         mutationFn: (payload: CheckoutAddressPayload) =>
             initializeCheckoutFunc(payload),
         onSuccess: (data) => {
-            toast.success(
-                data?.message || "Checkout initialized successfully",
-            );
+            toast.success(data?.message || "Checkout initialized successfully");
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
             toast.error(
@@ -358,9 +359,7 @@ export const useUpdateAccountProfile = () => {
             toast.success(data?.message || "Profile updated successfully!");
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
-            toast.error(
-                getErrorMessage(err, "Failed to update profile."),
-            );
+            toast.error(getErrorMessage(err, "Failed to update profile."));
         },
     });
 };
@@ -402,9 +401,7 @@ export const useCreateAddress = () => {
             toast.success(data?.message || "New address added successfully!");
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
-            toast.error(
-                getErrorMessage(err, "Failed to save new address."),
-            );
+            toast.error(getErrorMessage(err, "Failed to save new address."));
         },
     });
 };
@@ -425,9 +422,7 @@ export const useUpdateAddress = () => {
             toast.success(data?.message || "Address updated successfully!");
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
-            toast.error(
-                getErrorMessage(err, "Failed to update address."),
-            );
+            toast.error(getErrorMessage(err, "Failed to update address."));
         },
     });
 };
@@ -447,9 +442,7 @@ export const useDeleteAddress = () => {
             toast.success(data?.message || "Address deleted successfully.");
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
-            toast.error(
-                getErrorMessage(err, "Failed to delete address."),
-            );
+            toast.error(getErrorMessage(err, "Failed to delete address."));
         },
     });
 };
@@ -484,7 +477,9 @@ export const useReorder = () => {
     return useMutation({
         mutationFn: (orderNumber: string) => reorderFunc(orderNumber),
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
+            if (data?.data) {
+                queryClient.setQueryData(queryKeys.cart.all, data);
+            }
             toast.success(
                 data?.message ||
                     "Items from previous order added to your cart!",
@@ -525,6 +520,34 @@ export const useSubmitReview = () => {
                 getErrorMessage(
                     err,
                     "Failed to submit review. Please check your order details.",
+                ),
+            );
+        },
+    });
+};
+
+// ==========================================
+// 7. CONTACT US MUTATIONS
+// ==========================================
+
+/**
+ * Send Contact Inquiry Message Mutation
+ */
+export const useSendContactMessage = () => {
+    return useMutation({
+        mutationFn: (payload: ContactMessagePayload) =>
+            sendContactMessageFunc(payload),
+        onSuccess: (data) => {
+            toast.success(
+                data?.message ||
+                    "Thank you! Your message has been sent successfully. We will get back to you shortly.",
+            );
+        },
+        onError: (err: AxiosError<ApiErrorResponse>) => {
+            toast.error(
+                getErrorMessage(
+                    err,
+                    "Failed to send your message. Please review the form and try again.",
                 ),
             );
         },

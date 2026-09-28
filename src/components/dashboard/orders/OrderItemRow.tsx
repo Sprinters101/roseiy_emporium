@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router";
+import { Loader2 } from "lucide-react";
 import type { OrderItemData, OrderTabType } from "./types";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,12 +12,14 @@ interface OrderItemRowProps {
     order: OrderItemData;
     activeTab: OrderTabType;
     onOrderAgain: (order: OrderItemData) => void;
+    isReordering?: boolean;
 }
 
 export const OrderItemRow: React.FC<OrderItemRowProps> = ({
     order,
     activeTab,
     onOrderAgain,
+    isReordering = false,
 }) => {
     const navigate = useNavigate();
 
@@ -125,10 +128,18 @@ export const OrderItemRow: React.FC<OrderItemRowProps> = ({
                     <>
                         <Button
                             variant="link"
+                            disabled={isReordering}
                             onClick={() => onOrderAgain(order)}
-                            className="h-auto p-0 text-xs sm:text-sm text-gold-500 hover:text-gold-400 font-semibold font-hanken underline hover:no-underline underline-offset-2"
+                            className="h-auto p-0 text-xs sm:text-sm text-gold-500 hover:text-gold-400 font-semibold font-hanken underline hover:no-underline underline-offset-2 flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            Order Again
+                            {isReordering ? (
+                                <>
+                                    <Loader2 className="size-3 animate-spin inline" />
+                                    <span>Adding...</span>
+                                </>
+                            ) : (
+                                "Order Again"
+                            )}
                         </Button>
                         <Button
                             variant="link"

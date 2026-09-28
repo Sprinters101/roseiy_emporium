@@ -159,6 +159,10 @@ export interface CartContextType {
     isAddingProduct: (productIdOrSlug: string) => boolean;
     addingProductIds: string[];
     refetchCart: () => void;
+    isCartOpen: boolean;
+    setIsCartOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    openCart: () => void;
+    closeCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -528,6 +532,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Active product IDs currently undergoing add-to-cart mutation
     const [addingProductIds, setAddingProductIds] = useState<string[]>([]);
+
+    // Cart Drawer open/close state
+    const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+    const openCart = useCallback(() => setIsCartOpen(true), []);
+    const closeCart = useCallback(() => setIsCartOpen(false), []);
 
     // 2. React Query: Fetch server cart
     const {
@@ -1235,6 +1244,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
                 isAddingProduct,
                 addingProductIds,
                 refetchCart,
+                isCartOpen,
+                setIsCartOpen,
+                openCart,
+                closeCart,
             }}
         >
             {children}

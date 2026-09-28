@@ -587,3 +587,26 @@ export interface SubmitReviewResponseData {
         status: string;
     };
 }
+
+// ==========================================
+// 8. CONTACT US MESSAGE TYPES
+// ==========================================
+
+export interface ContactMessagePayload {
+    fullName: string;
+    email: string;
+    phoneNumber?: string | null;
+    message: string;
+}
+
+export interface ContactMessageItem {
+    contactMessageId: string;
+    fullName: string;
+    email: string;
+    phoneNumber?: string | null;
+    createdAt: string;
+}
+
+export interface ContactMessageResponseData {
+    contactMessage?: ContactMessageItem;
+}

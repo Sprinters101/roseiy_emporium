@@ -15,7 +15,7 @@ import { toast } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 
 interface CartDrawerProps {
-    children: React.ReactNode;
+    children?: React.ReactNode;
 }
 
 export const CartItemSkeleton = () => {
@@ -62,7 +62,6 @@ export const CartItemSkeleton = () => {
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
     const navigate = useNavigate();
-    const [isOpen, setIsOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
     const {
@@ -73,20 +72,20 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
         updateUnitQuantities,
         removeFromCart,
         refetchCart,
+        isCartOpen,
+        setIsCartOpen,
+        closeCart,
     } = useCart();
 
     // Refetch cart data from server whenever the cart drawer opens
     useEffect(() => {
-        if (isOpen) {
+        if (isCartOpen) {
             refetchCart();
         }
-    }, [isOpen, refetchCart]);
+    }, [isCartOpen, refetchCart]);
 
     const handleOpenChange = (open: boolean) => {
-        setIsOpen(open);
-        if (open) {
-            refetchCart();
-        }
+        setIsCartOpen(open);
     };
 
     // Monitor screen width to switch sheet side between bottom (mobile) and right (desktop)
@@ -131,8 +130,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
     };
 
     return (
-        <Sheet open={isOpen} onOpenChange={handleOpenChange}>
-            <SheetTrigger>{children}</SheetTrigger>
+        <Sheet open={isCartOpen} onOpenChange={handleOpenChange}>
+            {children ? <SheetTrigger>{children}</SheetTrigger> : null}
 
             {/* Slide out drawer panel (bottom on mobile, right on desktop) */}
             <SheetContent
@@ -168,7 +167,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                             <ShopEmptyState
                                 isCartEmpty={true}
                                 onButtonClick={() => {
-                                    setIsOpen(false);
+                                    closeCart();
                                     navigate("/shop");
                                 }}
                             />
@@ -495,7 +494,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                         <div className="space-y-3 md:space-y-4 pt-1">
                             <Link
                                 to="/checkout"
-                                onClick={() => setIsOpen(false)}
+                                onClick={closeCart}
                                 className="w-full h-10 md:h-12 sm:h-13 bg-gold-g hover:opacity-95 text-black-900 font-hanken font-bold text-[0.8125rem] sm:text-base rounded-lg shadow-lg flex items-center justify-center transition-all active:scale-[0.99]"
                             >
                                 Proceed to Checkout
@@ -503,7 +502,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
 
                             <button
                                 type="button"
-                                onClick={() => setIsOpen(false)}
+                                onClick={closeCart}
                                 className="w-full h-10 sm:h-12 bg-transparent hover:bg-white/10 border border-white/40 hover:border-gold-400 text-white font-hanken font-medium text-sm sm:text-base rounded-lg flex items-center justify-center transition-all active:scale-[0.99] cursor-pointer"
                             >
                                 Continue Shopping

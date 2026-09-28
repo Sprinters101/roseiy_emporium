@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { toast } from "@/components/ui/sonner";
 import { CustomerOrdersSkeleton } from "./CustomerOrdersSkeleton";
 import { OrdersTabs } from "./orders/OrdersTabs";
 import { OrderItemRow } from "./orders/OrderItemRow";
@@ -8,7 +7,7 @@ import { type OrderItemData, type OrderTabType } from "./orders/types";
 import { useGetCustomerOrders } from "@/service/queries";
 import { useReorder } from "@/service/mutation";
 import type { OrderSummaryItem } from "@/service/types";
-import { extractImageFromObject } from "@/context/CartContext";
+import { extractImageFromObject, useCart } from "@/context/CartContext";
 
 export interface CustomerOrdersProps {
     isLoading?: boolean;
@@ -18,9 +17,13 @@ export const CustomerOrders: React.FC<CustomerOrdersProps> = ({
     isLoading: propIsLoading,
 }) => {
     const [activeTab, setActiveTab] = useState<OrderTabType>("ongoing");
+    const [reorderingOrderNumber, setReorderingOrderNumber] = useState<
+        string | null
+    >(null);
     const { data: ordersData, isLoading: queryIsLoading } =
         useGetCustomerOrders();
     const reorderMutation = useReorder();
+    const { openCart } = useCart();
 
     const loading =
         propIsLoading !== undefined ? propIsLoading : queryIsLoading;
@@ -105,12 +108,13 @@ export const CustomerOrders: React.FC<CustomerOrdersProps> = ({
 
     const handleOrderAgain = async (order: OrderItemData) => {
         try {
+            setReorderingOrderNumber(order.orderNumber);
             await reorderMutation.mutateAsync(order.orderNumber);
-            toast.success(
-                `Items from Order ${order.orderNumber} added to cart!`,
-            );
+            openCart();
         } catch {
             // Handled by onError in reorder mutation hook
+        } finally {
+            setReorderingOrderNumber(null);
         }
     };
 
@@ -147,6 +151,9 @@ export const CustomerOrders: React.FC<CustomerOrdersProps> = ({
                                 order={order}
                                 activeTab={activeTab}
                                 onOrderAgain={handleOrderAgain}
+                                isReordering={
+                                    reorderingOrderNumber === order.orderNumber
+                                }
                             />
                         ))}
                     </div>
