@@ -53,9 +53,6 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
                             <h2 className="font-playfair font-bold text-xl sm:text-[1.25rem] text-white">
                                 Delivery Method & Area
                             </h2>
-                            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 border border-neutral-700">
-                                Optional
-                            </span>
                         </div>
                         <p className="text-xs text-neutral-400 font-hanken mt-0.5">
                             Select a shipping area for doorstep delivery, or
@@ -109,7 +106,10 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
                                             {selectedArea.estimatedDeliveryTime && (
                                                 <span className="text-[11px] text-gold-400/90 flex items-center gap-1 font-light">
                                                     <Clock className="size-2.5" />
-                                                    Est. {selectedArea.estimatedDeliveryTime}
+                                                    Est.{" "}
+                                                    {
+                                                        selectedArea.estimatedDeliveryTime
+                                                    }
                                                 </span>
                                             )}
                                         </div>
@@ -170,7 +170,8 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
                                             No Delivery / Store Pickup
                                         </span>
                                         <span className="text-[11px] text-neutral-400">
-                                            Pick up your order in store (No delivery fee)
+                                            Pick up your order in store (No
+                                            delivery fee)
                                         </span>
                                     </div>
                                 </div>
@@ -232,7 +233,10 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
                                                 {area.estimatedDeliveryTime && (
                                                     <span className="text-[11px] text-neutral-400 flex items-center gap-1 mt-0.5">
                                                         <Clock className="size-2.5 text-gold-400 shrink-0" />
-                                                        Est. {area.estimatedDeliveryTime}
+                                                        Est.{" "}
+                                                        {
+                                                            area.estimatedDeliveryTime
+                                                        }
                                                     </span>
                                                 )}
                                             </div>
@@ -266,7 +270,8 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
                                     </span>
                                     {selectedArea.estimatedDeliveryTime && (
                                         <span className="text-[11px] text-neutral-400 mt-0.5">
-                                            Estimated Arrival: {selectedArea.estimatedDeliveryTime}
+                                            Estimated Arrival:{" "}
+                                            {selectedArea.estimatedDeliveryTime}
                                         </span>
                                     )}
                                 </div>
@@ -285,7 +290,8 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
                         <div className="bg-black-900/40 rounded-xl p-3.5 border border-neutral-800/60 flex items-center gap-2.5 text-xs text-neutral-400 font-hanken">
                             <Store className="size-4 text-gold-500/70 shrink-0" />
                             <span>
-                                No delivery selected. You can pick up your order at our store at no additional cost.
+                                No delivery selected. You can pick up your order
+                                at our store at no additional cost.
                             </span>
                         </div>
                     )}
