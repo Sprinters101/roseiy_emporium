@@ -4,6 +4,7 @@ import {
     getBrandsFunc,
     getProductsFunc,
     getProductBySlugFunc,
+    getBestSellersFunc,
     getCartFunc,
     getDeliveryAreasFunc,
     getAccountProfileFunc,
@@ -13,8 +14,19 @@ import {
     getSingleOrderFunc,
     verifyCheckoutFunc,
     getLatestReviewsFunc,
+    getWishlistFunc,
+    checkWishlistStatusFunc,
+    searchStorefrontFunc,
 } from "./api";
-import type { GetProductsParams } from "./types";
+import type {
+    GetProductsParams,
+    GetBestSellersParams,
+    ApiResponse,
+    WishlistResponseData,
+    CheckWishlistStatusResponseData,
+    UniversalSearchParams,
+    UniversalSearchResponseData,
+} from "./types";
 
 /**
  * Standardized Query Keys Factory
@@ -31,7 +43,13 @@ export const queryKeys = {
         brands: ["brands"] as const,
         products: (params?: GetProductsParams) =>
             ["products", params || {}] as const,
+        bestSellers: (params?: GetBestSellersParams) =>
+            ["bestSellers", params || {}] as const,
         productBySlug: (slug: string) => ["product", slug] as const,
+    },
+    wishlist: {
+        all: ["wishlist"] as const,
+        check: (productId: string) => ["wishlist", "check", productId] as const,
     },
     cart: {
         all: ["cart"] as const,
@@ -57,6 +75,7 @@ export const queryKeys = {
         all: ["reviews"] as const,
         latest: ["reviews", "latest"] as const,
     },
+    search: (params: UniversalSearchParams) => ["search", params] as const,
 };
 
 // Backward-compatibility alias
@@ -112,6 +131,21 @@ export const useGetProductBySlug = (
         enabled:
             options?.enabled !== undefined ? options.enabled : Boolean(slug),
         // staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+};
+
+/**
+ * Fetch Best-Selling Products
+ */
+export const useGetBestSellers = (
+    params?: GetBestSellersParams,
+    options?: { enabled?: boolean; staleTime?: number },
+) => {
+    return useQuery({
+        queryKey: queryKeys.catalogue.bestSellers(params),
+        queryFn: () => getBestSellersFunc(params),
+        enabled: options?.enabled !== undefined ? options.enabled : true,
+        staleTime: options?.staleTime ?? 1000 * 60 * 5, // 5 minutes
     });
 };
 
@@ -258,3 +292,58 @@ export const useGetLatestReviews = () => {
         // staleTime: 1000 * 60 * 5, // 5 minutes
     });
 };
+
+// ==========================================
+// 7. WISHLIST QUERIES
+// ==========================================
+
+/**
+ * Fetch customer wishlist
+ */
+export const useGetWishlist = (options?: { enabled?: boolean }) => {
+    return useQuery<ApiResponse<WishlistResponseData>>({
+        queryKey: queryKeys.wishlist.all,
+        queryFn: () => getWishlistFunc(),
+        enabled: options?.enabled !== undefined ? options.enabled : true,
+    });
+};
+
+/**
+ * Check if a product is in customer wishlist
+ */
+export const useCheckWishlistStatus = (
+    productId: string,
+    options?: { enabled?: boolean },
+) => {
+    return useQuery<ApiResponse<CheckWishlistStatusResponseData>>({
+        queryKey: queryKeys.wishlist.check(productId),
+        queryFn: () => checkWishlistStatusFunc(productId),
+        enabled:
+            options?.enabled !== undefined
+                ? options.enabled
+                : Boolean(productId),
+    });
+};
+
+// ==========================================
+// 8. UNIVERSAL SEARCH QUERIES (Storefront)
+// ==========================================
+
+/**
+ * Fetch unified search results across products, categories, and brands
+ */
+export const useUniversalSearch = (
+    params: UniversalSearchParams,
+    options?: { enabled?: boolean },
+) => {
+    return useQuery<ApiResponse<UniversalSearchResponseData>>({
+        queryKey: queryKeys.search(params),
+        queryFn: () => searchStorefrontFunc(params),
+        enabled:
+            options?.enabled !== undefined
+                ? options.enabled
+                : Boolean(params?.q && params.q.trim().length > 0),
+        staleTime: 1000 * 60 * 2, // 2 minutes cache
+    });
+};
+

@@ -8,12 +8,11 @@ import {
 } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
-import { products as mockProducts } from "@/lib/site_data";
-import { ProductCard } from "@/components/common/ProductCard";
 import Container from "@/components/common/Container";
 import type { Product } from "@/config/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import DashboardRecommended from "../dashboard/DashboardRecommended";
 
 interface WishlistItemCardProps {
     item: Product;
@@ -22,11 +21,16 @@ interface WishlistItemCardProps {
 
 const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
     const { addToCart, cartItems, isAddingProduct } = useCart();
+    const { isItemLoading } = useWishlist();
 
     const resolvedId = String(
         (item as any).slug || (item as any).productId || item.id || "",
     );
     const cartId = String((item as any).productId || item.id || resolvedId);
+    const isRemoving =
+        isItemLoading(item.id) ||
+        isItemLoading(cartId) ||
+        isItemLoading(resolvedId);
 
     const cartItem = cartItems.find(
         (ci) => ci.id === cartId || ci.id === item.id || ci.id === resolvedId,
@@ -133,7 +137,8 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
                     {/* Top Row: Category Label & Trash Icon */}
                     <div className="flex items-center justify-between gap-2">
                         <span className="text-[10px] font-bold text-gold-500 uppercase tracking-widest font-hanken truncate">
-                            {typeof item.category === "object" && item.category !== null
+                            {typeof item.category === "object" &&
+                            item.category !== null
                                 ? (item.category as any).name
                                 : item.category || "Champagne"}
                         </span>
@@ -141,12 +146,20 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
                         {/* Trash Button */}
                         <button
                             type="button"
+                            disabled={isRemoving}
                             onClick={() => onRemove(item.id)}
-                            className="size-8 rounded-full bg-black-900 border border-neutral-800 text-rose-500 hover:bg-rose-950/60 flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
+                            className={cn(
+                                "size-8 rounded-full bg-black-900 border border-neutral-800 text-rose-500 hover:bg-rose-950/60 flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0",
+                                isRemoving && "opacity-80 cursor-wait",
+                            )}
                             title="Remove from wishlist"
                             aria-label="Remove item"
                         >
-                            <Trash2 className="size-3.5" />
+                            {isRemoving ? (
+                                <Loader2 className="size-3.5 animate-spin text-rose-500" />
+                            ) : (
+                                <Trash2 className="size-3.5" />
+                            )}
                         </button>
                     </div>
 
@@ -206,16 +219,27 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
                     {/* Remove Trash Button */}
                     <button
                         type="button"
+                        disabled={isRemoving}
                         onClick={() => onRemove(item.id)}
-                        className="size-11 rounded-[65px] bg-black-900 hover:bg-rose-950/70 text-rose-500 hover:text-rose-400 flex items-center justify-center transition-all duration-200 cursor-pointer shrink-0 border border-neutral-900"
+                        className={cn(
+                            "size-11 rounded-[65px] bg-black-900 hover:bg-rose-950/70 text-rose-500 hover:text-rose-400 flex items-center justify-center transition-all duration-200 cursor-pointer shrink-0 border border-neutral-900 active:scale-95",
+                            isRemoving && "opacity-80 cursor-wait",
+                        )}
                         title="Remove from wishlist"
                         aria-label="Remove item"
                     >
-                        <Trash2 className="size-4" />
+                        {isRemoving ? (
+                            <Loader2 className="size-4 animate-spin text-rose-500" />
+                        ) : (
+                            <Trash2 className="size-4" />
+                        )}
                     </button>
 
                     {/* Product Image Box */}
-                    <Link to={`/product/${resolvedId}`} className="block shrink-0">
+                    <Link
+                        to={`/product/${resolvedId}`}
+                        className="block shrink-0"
+                    >
                         <div className="size-37.5 bg-black-900 rounded-lg p-2.5 flex items-center justify-center overflow-hidden border border-neutral-900">
                             <img
                                 src={item.image}
@@ -228,7 +252,8 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
                     {/* Item Info */}
                     <div className="flex-1 min-w-0">
                         <span className="block text-xs font-bold text-gold-500 uppercase tracking-widest font-hanken mb-1">
-                            {typeof item.category === "object" && item.category !== null
+                            {typeof item.category === "object" &&
+                            item.category !== null
                                 ? (item.category as any).name
                                 : item.category || "Beverage"}
                         </span>
@@ -284,13 +309,8 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
 };
 
 export const Wishlist = () => {
-    const { wishlistItems, removeFromWishlist, wishlistCount } = useWishlist();
-
-    // Filter recommended products
-    const wishlistIds = new Set(wishlistItems.map((item) => item.id));
-    const recommendedProducts = mockProducts
-        .filter((p) => !wishlistIds.has(p.id))
-        .slice(0, 4);
+    const { wishlistItems, removeFromWishlist, wishlistCount, isLoading } =
+        useWishlist();
 
     return (
         <div className="bg-black-900 min-h-screen text-white pt-28 md:pt-36 pb-24">
@@ -313,7 +333,16 @@ export const Wishlist = () => {
                 </h1>
 
                 {/* Wishlist Items List */}
-                {wishlistItems.length > 0 ? (
+                {isLoading ? (
+                    <div className="space-y-4 md:space-y-6 mb-16 md:mb-24">
+                        {[1, 2, 3].map((n) => (
+                            <div
+                                key={n}
+                                className="w-full h-32 md:h-36 bg-[#111111] rounded-2xl border border-white/5 animate-pulse"
+                            />
+                        ))}
+                    </div>
+                ) : wishlistItems.length > 0 ? (
                     <div className="space-y-4 md:space-y-6 mb-16 md:mb-24">
                         {wishlistItems.map((item) => (
                             <WishlistItemCard
@@ -348,23 +377,8 @@ export const Wishlist = () => {
                 )}
 
                 {/* Recommended For You Section */}
-                {recommendedProducts.length > 0 && (
-                    <section className="pt-8 border-t border-neutral-900">
-                        <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6 md:mb-8">
-                            Recommended For You
-                        </h2>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                            {recommendedProducts.map((product) => (
-                                <ProductCard
-                                    key={product.id}
-                                    product={product}
-                                />
-                            ))}
-                        </div>
-                    </section>
-                )}
             </Container>
+            <DashboardRecommended />
         </div>
     );
 };

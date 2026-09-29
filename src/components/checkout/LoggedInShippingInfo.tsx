@@ -177,7 +177,11 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                                     {selectedAddress.title}
                                 </h3>
                                 <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1 leading-relaxed">
-                                    {selectedAddress.address}
+                                    {selectedAddress?.address},{" "}
+                                    {selectedAddress?.city},{" "}
+                                    {selectedAddress?.state}
+                                    {" state, "}
+                                    {selectedAddress?.country}
                                 </p>
                                 <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1 no-underline hover:no-underline select-text">
                                     {selectedAddress.phone}
@@ -252,7 +256,10 @@ export const LoggedInShippingInfo: React.FC<LoggedInShippingInfoProps> = ({
                                             {address.title}
                                         </h3>
                                         <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1 leading-relaxed">
-                                            {address.address}
+                                            {address.address}, {address.city},{" "}
+                                            {address.state}
+                                            {" state, "}
+                                            {address.country}
                                         </p>
                                         <p className="font-hanken text-xs sm:text-sm text-neutral-400 mt-1 no-underline hover:no-underline select-text">
                                             {address.phone}

@@ -35,13 +35,12 @@ export const ShopHeader = ({
     onClearAll,
 }: ShopHeaderProps) => {
     const SORT_OPTIONS = [
-        { label: "Recommended", value: "Recommended" },
-        { label: "Newest", value: "Newest" },
-        { label: "Price: Low to High", value: "PriceLowHigh" },
-        { label: "Price: High to Low", value: "PriceHighLow" },
-        { label: "Arrivals", value: "Arrivals" },
-        { label: "A-Z", value: "AZ" },
-        { label: "Z-A", value: "ZA" },
+        { label: "Newest Arrivals", value: "newest" },
+        { label: "Price: Low to High", value: "price_asc" },
+        { label: "Price: High to Low", value: "price_desc" },
+        { label: "Best Selling", value: "best_selling" },
+        { label: "Product Name: A to Z", value: "name_asc" },
+        { label: "Product Name: Z to A", value: "name_desc" },
     ];
 
     return (

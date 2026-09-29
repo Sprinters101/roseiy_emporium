@@ -53,6 +53,7 @@ export const useShopFilters = (
     const [searchParams] = useSearchParams();
     const urlCategory = searchParams.get("category");
     const urlBrand = searchParams.get("brand");
+    const urlSearch = searchParams.get("search") || searchParams.get("q");
 
     const [selectedCategories, setSelectedCategories] = useState<string[]>(() =>
         urlCategory ? [urlCategory] : [],
@@ -62,7 +63,7 @@ export const useShopFilters = (
     );
     const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
     const [brandSearch, setBrandSearch] = useState("");
-    const [sortBy, setSortBy] = useState("Recommended");
+    const [sortBy, setSortBy] = useState("newest");
 
     // Sync with URL parameters and resolve with categories
     useEffect(() => {
@@ -207,6 +208,27 @@ export const useShopFilters = (
     // Active product filtering & sorting computation
     const filteredProducts = useMemo(() => {
         let result = initialProducts.filter((product) => {
+            if (urlSearch && urlSearch.trim().length > 0) {
+                const q = urlSearch.toLowerCase().trim();
+                const nameMatch = product.name?.toLowerCase().includes(q);
+                const brandMatch = (
+                    product.brand || (product as any).brand?.name
+                )
+                    ?.toLowerCase()
+                    .includes(q);
+                const catMatch = (
+                    product.category || (product as any).category?.name
+                )
+                    ?.toLowerCase()
+                    .includes(q);
+                const descMatch = product.description
+                    ?.toLowerCase()
+                    .includes(q);
+                if (!nameMatch && !brandMatch && !catMatch && !descMatch) {
+                    return false;
+                }
+            }
+
             if (selectedCategories.length > 0) {
                 const matchesCat = selectedCategories.some((catFilter) => {
                     const matchedCategoryObj = customCategories.find(
@@ -328,23 +350,28 @@ export const useShopFilters = (
 
         // Apply Sorting
         switch (sortBy) {
+            case "price_asc":
             case "PriceLowHigh":
-                result = [...result].sort((a, b) => a.price - b.price);
+                result = [...result].sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
                 break;
+            case "price_desc":
             case "PriceHighLow":
-                result = [...result].sort((a, b) => b.price - a.price);
+                result = [...result].sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
                 break;
+            case "name_asc":
             case "AZ":
                 result = [...result].sort((a, b) =>
-                    a.name.localeCompare(b.name),
+                    (a.name || "").localeCompare(b.name || ""),
                 );
                 break;
+            case "name_desc":
             case "ZA":
                 result = [...result].sort((a, b) =>
-                    b.name.localeCompare(a.name),
+                    (b.name || "").localeCompare(a.name || ""),
                 );
                 break;
-            case "Newest":
+            case "best_selling":
+            case "newest":
             case "Arrivals":
             case "Recommended":
             default:
@@ -360,6 +387,7 @@ export const useShopFilters = (
         customCategories,
         customBrands,
         sortBy,
+        urlSearch,
     ]);
 
     return {

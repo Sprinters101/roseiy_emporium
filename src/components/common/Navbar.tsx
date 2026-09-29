@@ -14,30 +14,14 @@ import {
     SheetContent,
     SheetTrigger,
 } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
 import { CartDrawer } from "./CartDrawer";
 import { activeNavImg, logo, navLinks } from "@/lib/site_data";
 import Container from "./Container";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/context/AuthContext";
+import { NavSearch } from "./NavSearch";
 import { cn } from "@/lib/utils";
-
-const NavSearch = () => {
-    const [searchQuery, setSearchQuery] = useState("");
-    return (
-        <div className="relative hidden  lg:flex items-center bg-black/40 rounded-full px-3.5 py-1.5 w-full transition-colors">
-            <Search className="size-4 text-black-300 mr-1 shrink-0" />
-            <Input
-                type="text"
-                placeholder="Search products, brands...."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent text-body-c1 text-white w-full border-none h-6 focus-visible:ring-0 p-0"
-            />
-        </div>
-    );
-};
 
 export const Navbar = () => {
     const { totalItems } = useCart();
@@ -45,8 +29,14 @@ export const Navbar = () => {
     const { isAuthenticated, logout } = useAuth();
     const location = useLocation();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const isOverview = location.pathname === "/dashboard";
+
+    // Close mobile search when route changes
+    useEffect(() => {
+        setMobileSearchOpen(false);
+    }, [location.pathname]);
 
     // Track scroll position to toggle the black background
     useEffect(() => {
@@ -141,7 +131,7 @@ export const Navbar = () => {
                                         className={`relative text-sm font-medium tracking-wide transition-colors duration-200 h-7 shrink-0 overflow-hidden w-auto ${
                                             active
                                                 ? "gradient-text"
-                                                : "text-white hover:text-gold-300"
+                                                : "text-white hover:text-gold-500"
                                         }`}
                                     >
                                         {link.name}
@@ -161,15 +151,29 @@ export const Navbar = () => {
                         </nav>
 
                         {/* Integrated Right Action Pod */}
-                        <div className="bg-po bg-white/10 backdrop-blur-md flex items-center h-14 md:h-15 gap-3 md:gap-4 rounded-xl py-2 px-3 md:px-8 border-[0.5px] border-ivory-400/60 shadow-xl lg:w-full max-w-116">
-                            <div className="flex items-center gap-4">
-                                <NavSearch />
+                        <div className="bg-po bg-white/10 backdrop-blur-md flex items-center h-14 md:h-15 gap-2 md:gap-3 lg:gap-4 rounded-xl py-2 px-3 md:px-6 border-[0.5px] border-ivory-400/60 shadow-xl lg:w-full max-w-116">
+                            <div className="flex items-center gap-2 md:gap-3 flex-1">
+                                {/* Desktop Search */}
+                                <div className="hidden lg:block w-full max-w-48 xl:max-w-56">
+                                    <NavSearch />
+                                </div>
+
+                                {/* Mobile Search Button */}
+                                <button
+                                    type="button"
+                                    onClick={() => setMobileSearchOpen(true)}
+                                    className="lg:hidden relative flex size-9 shrink-0 items-center justify-center rounded-full bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors cursor-pointer"
+                                    aria-label="Open search"
+                                >
+                                    <Search className="size-4" />
+                                </button>
+
                                 <Link
                                     to="/wishlist"
                                     type="button"
-                                    className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors cursor-pointer"
+                                    className="relative flex size-9 md:size-10 shrink-0 items-center justify-center rounded-full bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors cursor-pointer"
                                 >
-                                    <Heart className="size-5" />
+                                    <Heart className="size-4 md:size-5" />
                                     {wishlistCount > 0 && (
                                         <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold-gradient text-[0.6rem] font-black text-black-900">
                                             {wishlistCount}
@@ -321,7 +325,7 @@ export const Navbar = () => {
 
                                 <SheetContent
                                     side="right"
-                                    className="bg-black-900 border-l border-neutral-900 text-white p-6 pt-8 flex flex-col gap-8 shadow-2xl"
+                                    className="bg-black-900 border-l border-neutral-900 text-white p-6 pt-8 flex flex-col gap-6 shadow-2xl"
                                     showCloseButton={false}
                                 >
                                     <div className="flex items-center justify-between w-full border-b border-neutral-900 pb-4">
@@ -333,6 +337,15 @@ export const Navbar = () => {
                                         <SheetClose className="text-neutral-400 hover:text-white transition-colors focus:outline-none">
                                             <X className="size-5" />
                                         </SheetClose>
+                                    </div>
+
+                                    {/* Search inside Mobile Drawer */}
+                                    <div className="w-full">
+                                        <NavSearch
+                                            onCloseMobile={() =>
+                                                setMobileOpen(false)
+                                            }
+                                        />
                                     </div>
 
                                     <nav className="flex flex-col gap-4 pl-2">
@@ -364,6 +377,19 @@ export const Navbar = () => {
                     </Container>
                 </motion.div>
             </div>
+
+            {/* Fullscreen Mobile Search Overlay Modal (Matches Figma design) */}
+            {mobileSearchOpen && (
+                <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-lg p-4 pt-8 flex flex-col items-center animate-in fade-in duration-200">
+                    <div className="w-full max-w-md flex flex-col gap-3">
+                        <NavSearch
+                            autoFocus
+                            isMobileModal
+                            onCloseMobile={() => setMobileSearchOpen(false)}
+                        />
+                    </div>
+                </div>
+            )}
         </header>
     );
 };

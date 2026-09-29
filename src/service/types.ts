@@ -157,13 +157,33 @@ export interface GetProductsParams {
     categoryId?: string;
     brandId?: string;
     featured?: boolean;
-    sort?: "newest" | "name_asc" | "name_desc";
+    minPrice?: number;
+    maxPrice?: number;
+    sort?:
+        | "price_asc"
+        | "price_desc"
+        | "newest"
+        | "best_selling"
+        | "name_asc"
+        | "name_desc"
+        | (string & {});
 }
 
 export interface ProductsResponseData {
     products: ProductItem[];
     items?: ProductItem[];
     pagination: PaginationMeta;
+}
+
+export interface GetBestSellersParams {
+    limit?: number;
+    categoryId?: string;
+}
+
+export interface BestSellersResponseData {
+    total?: number;
+    products?: ProductItem[];
+    items?: ProductItem[];
 }
 
 // ==========================================
@@ -610,3 +630,114 @@ export interface ContactMessageItem {
 export interface ContactMessageResponseData {
     contactMessage?: ContactMessageItem;
 }
+
+// ==========================================
+// 9. WISHLIST TYPES
+// ==========================================
+
+export interface WishlistProductDetails {
+    productId: string;
+    name: string;
+    slug: string;
+    description?: string;
+    status?: string;
+    category?: {
+        categoryId?: string;
+        name?: string;
+        slug?: string;
+    };
+    brand?: {
+        brandId?: string;
+        name?: string;
+        slug?: string;
+    };
+    primaryImage?: string;
+    images?: Array<{
+        imageId?: string;
+        imageUrl: string;
+        isPrimary?: boolean;
+    }>;
+    sellingUnits?: SellingUnit[];
+    piecePrice?: string | number;
+    inStock?: boolean;
+    totalStock?: number;
+    volume?: string;
+}
+
+export interface WishlistItem {
+    wishlistItemId: string;
+    productId: string;
+    addedAt?: string;
+    product: WishlistProductDetails;
+}
+
+export interface WishlistResponseData {
+    total: number;
+    items: WishlistItem[];
+}
+
+export interface AddToWishlistPayload {
+    productId: string;
+}
+
+export interface AddToWishlistResponseData {
+    added: boolean;
+    message: string;
+    wishlistItemId?: string;
+    productId?: string;
+}
+
+export interface RemoveFromWishlistResponseData {
+    removed: boolean;
+    message: string;
+}
+
+export interface CheckWishlistStatusResponseData {
+    productId: string;
+    inWishlist: boolean;
+    wishlistItemId?: string;
+}
+
+export interface ClearWishlistResponseData {
+    cleared: boolean;
+    message: string;
+}
+
+// ==========================================
+// 12. UNIVERSAL SEARCH TYPES (Storefront)
+// ==========================================
+
+export type StorefrontSearchType = "product" | "category" | "brand" | "order" | "customer" | string;
+
+export interface UniversalSearchResultItem {
+    searchType: StorefrontSearchType;
+    id: string;
+    title: string;
+    subtitle?: string;
+    image?: string | null;
+    url: string;
+    data?: Record<string, any>;
+}
+
+export interface UniversalSearchGrouped {
+    products?: UniversalSearchResultItem[];
+    categories?: UniversalSearchResultItem[];
+    brands?: UniversalSearchResultItem[];
+    orders?: UniversalSearchResultItem[];
+    customers?: UniversalSearchResultItem[];
+    [key: string]: UniversalSearchResultItem[] | undefined;
+}
+
+export interface UniversalSearchResponseData {
+    query: string;
+    totalResults: number;
+    results: UniversalSearchResultItem[];
+    grouped?: UniversalSearchGrouped;
+}
+
+export interface UniversalSearchParams {
+    q: string;
+    type?: "all" | "product" | "category" | "brand" | string;
+    limit?: number;
+}
+

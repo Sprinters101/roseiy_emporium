@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useSearchParams } from "react-router";
 import Container from "@/components/common/Container";
 import { ProductCard } from "@/components/common/ProductCard";
 import { ProductCardSkeleton } from "@/components/common/ProductCardSkeleton";
@@ -18,6 +19,8 @@ import type { FilterOption } from "./data/shopData";
 import type { ProductItem } from "@/service/types";
 
 export const Shop = () => {
+    const [searchParams] = useSearchParams();
+    const urlSearch = searchParams.get("search") || searchParams.get("q") || undefined;
     const [visibleCount, setVisibleCount] = useState(12);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -29,6 +32,7 @@ export const Shop = () => {
     // 2. Fetch live products from backend
     const { data: productsApi, isLoading } = useGetProducts({
         limit: 100,
+        search: urlSearch,
     });
 
     // Map backend products directly into the shop view (with fallback if backend is empty)
@@ -45,7 +49,17 @@ export const Shop = () => {
                         u.name.toLowerCase().includes("carton") ||
                         u.name.toLowerCase().includes("case"),
                 );
-                const primaryUnit = p.sellingUnits?.[0];
+                const primaryUnit = pieceUnit || p.sellingUnits?.[0];
+                const piecePrice =
+                    pieceUnit?.price !== undefined
+                        ? Number(pieceUnit.price)
+                        : (pieceUnit as any)?.unitPrice !== undefined
+                          ? Number((pieceUnit as any).unitPrice)
+                          : primaryUnit?.price !== undefined
+                            ? Number(primaryUnit.price)
+                            : (primaryUnit as any)?.unitPrice !== undefined
+                              ? Number((primaryUnit as any).unitPrice)
+                              : 0;
 
                 return {
                     id: p.productId,
@@ -63,7 +77,7 @@ export const Shop = () => {
                           ? primaryUnit.stock
                           : "",
                     casesLeft: cartonUnit ? cartonUnit.stock : "",
-                    price: primaryUnit ? Number(primaryUnit.price) : "",
+                    price: piecePrice,
                     image:
                         p.images?.find((i) => i.isPrimary)?.imageUrl ||
                         p.images?.[0]?.imageUrl ||

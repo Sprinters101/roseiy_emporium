@@ -3,13 +3,18 @@ import { Footer } from "@/components/common/Footer";
 import { Hero } from "@/components/common/Hero";
 import { Navbar } from "@/components/common/Navbar";
 import ScrollToTop from "@/components/common/ScrollToTop";
-import { Outlet } from "react-router";
+import DashboardRecommended from "@/components/dashboard/DashboardRecommended";
+import { Outlet, useLocation } from "react-router";
 
 interface DashboardLayoutProps {
     isAdmin?: boolean;
 }
 
 export const DashboardLayout = ({ isAdmin = false }: DashboardLayoutProps) => {
+    const { pathname } = useLocation();
+
+    const isOverViewPage =
+        pathname === "/dashboard" || pathname === "/overview";
     return (
         <div className="flex min-h-screen flex-col antialiased bg-black-900 text-white">
             <ScrollToTop />
@@ -20,7 +25,8 @@ export const DashboardLayout = ({ isAdmin = false }: DashboardLayoutProps) => {
                 title={isAdmin ? "Admin Portal" : "My Account"}
                 subtitle={
                     <div className="mt-1 font-hanken text-sm sm:text-base">
-                        Manage your orders, addresses and personal information all in one place.
+                        Manage your orders, addresses and personal information
+                        all in one place.
                     </div>
                 }
             />
@@ -30,6 +36,8 @@ export const DashboardLayout = ({ isAdmin = false }: DashboardLayoutProps) => {
                 <Outlet />
             </main>
 
+            {/* Best Sellers / Recommended For You Section */}
+            {isOverViewPage && <DashboardRecommended title="Best Sellers" />}
             <BackToTop />
             <Footer />
         </div>

@@ -16,6 +16,8 @@ import type {
     BrandsResponseData,
     GetProductsParams,
     ProductsResponseData,
+    GetBestSellersParams,
+    BestSellersResponseData,
     ProductItem,
     CartResponseData,
     AddToCartPayload,
@@ -43,6 +45,14 @@ import type {
     PublishedReviewsResponseData,
     ContactMessagePayload,
     ContactMessageResponseData,
+    WishlistResponseData,
+    AddToWishlistPayload,
+    AddToWishlistResponseData,
+    RemoveFromWishlistResponseData,
+    CheckWishlistStatusResponseData,
+    ClearWishlistResponseData,
+    UniversalSearchParams,
+    UniversalSearchResponseData,
 } from "./types";
 
 // ==========================================
@@ -184,6 +194,20 @@ export const getProductBySlugFunc = async (
 ): Promise<ApiResponse<ProductItem>> => {
     const response = await apiClient.get<ApiResponse<ProductItem>>(
         `/products/${slug}`,
+    );
+    return response.data;
+};
+
+/**
+ * 8b. Get Best-Selling Products
+ * GET /products/best-sellers
+ */
+export const getBestSellersFunc = async (
+    params?: GetBestSellersParams,
+): Promise<ApiResponse<BestSellersResponseData>> => {
+    const response = await apiClient.get<ApiResponse<BestSellersResponseData>>(
+        "/products/best-sellers",
+        { params },
     );
     return response.data;
 };
@@ -547,3 +571,88 @@ export const sendContactMessageFunc = async (
     >("/contact", payload);
     return response.data;
 };
+
+// ==========================================
+// 9. WISHLIST API
+// ==========================================
+
+/**
+ * 31. Get Customer Wishlist
+ * GET /account/wishlist
+ */
+export const getWishlistFunc = async (): Promise<
+    ApiResponse<WishlistResponseData>
+> => {
+    const response =
+        await apiClient.get<ApiResponse<WishlistResponseData>>(
+            "/account/wishlist",
+        );
+    return response.data;
+};
+
+/**
+ * 32. Add Product to Wishlist
+ * POST /account/wishlist
+ */
+export const addToWishlistFunc = async (
+    payload: AddToWishlistPayload,
+): Promise<ApiResponse<AddToWishlistResponseData>> => {
+    const response = await apiClient.post<
+        ApiResponse<AddToWishlistResponseData>
+    >("/account/wishlist", payload);
+    return response.data;
+};
+
+/**
+ * 33. Remove Product from Wishlist
+ * DELETE /account/wishlist/:productId
+ */
+export const removeFromWishlistFunc = async (
+    productId: string,
+): Promise<ApiResponse<RemoveFromWishlistResponseData>> => {
+    const response = await apiClient.delete<
+        ApiResponse<RemoveFromWishlistResponseData>
+    >(`/account/wishlist/${productId}`);
+    return response.data;
+};
+
+/**
+ * 34. Check Wishlist Status for a Product
+ * GET /account/wishlist/check/:productId
+ */
+export const checkWishlistStatusFunc = async (
+    productId: string,
+): Promise<ApiResponse<CheckWishlistStatusResponseData>> => {
+    const response = await apiClient.get<
+        ApiResponse<CheckWishlistStatusResponseData>
+    >(`/account/wishlist/check/${productId}`);
+    return response.data;
+};
+
+/**
+ * 35. Clear Customer Wishlist
+ * DELETE /account/wishlist
+ */
+export const clearWishlistFunc = async (): Promise<
+    ApiResponse<ClearWishlistResponseData>
+> => {
+    const response = await apiClient.delete<
+        ApiResponse<ClearWishlistResponseData>
+    >("/account/wishlist");
+    return response.data;
+};
+
+/**
+ * 36. Universal Search (Storefront)
+ * GET /search
+ */
+export const searchStorefrontFunc = async (
+    params: UniversalSearchParams,
+): Promise<ApiResponse<UniversalSearchResponseData>> => {
+    const response = await apiClient.get<ApiResponse<UniversalSearchResponseData>>(
+        "/search",
+        { params },
+    );
+    return response.data;
+};
+

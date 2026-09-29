@@ -6,8 +6,9 @@ import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useCart } from "@/context/CartContext";
-import { useGetProducts } from "@/service/queries";
+import { useGetProducts, useGetBestSellers } from "@/service/queries";
 import type { ProductItem } from "@/service/types";
+import Container from "../common/Container";
 
 export interface BestSellerProduct {
     id: string;
@@ -170,17 +171,67 @@ const HorizontalProductCard = ({ product }: { product: BestSellerProduct }) => {
 };
 
 export const BestSellers = () => {
-    // 1. Fetch live featured / best seller products
-    const { data: apiResponse, isLoading } = useGetProducts({
-        limit: 3,
-        featured: true,
-    });
+    // 1. Fetch live best sellers from endpoint
+    const { data: bestSellersResponse, isLoading: isBestSellersLoading } =
+        useGetBestSellers({ limit: 3 });
+
+    // 2. Fetch featured products as fallback if best sellers are empty
+    const { data: featuredResponse, isLoading: isFeaturedLoading } =
+        useGetProducts({
+            limit: 3,
+            featured: true,
+        });
 
     const fallbackBestSellers: BestSellerProduct[] = useMemo(() => [], []);
 
     const bestSellers: BestSellerProduct[] = useMemo(() => {
-        const liveItems =
-            apiResponse?.data?.products || apiResponse?.data?.items;
+        let liveItems: ProductItem[] = [];
+
+        // Check best sellers response
+        if (bestSellersResponse?.data) {
+            if (
+                Array.isArray(bestSellersResponse.data) &&
+                bestSellersResponse.data.length > 0
+            ) {
+                liveItems = bestSellersResponse.data;
+            } else if (
+                Array.isArray(bestSellersResponse.data.products) &&
+                bestSellersResponse.data.products.length > 0
+            ) {
+                liveItems = bestSellersResponse.data.products;
+            } else if (
+                Array.isArray(bestSellersResponse.data.items) &&
+                bestSellersResponse.data.items.length > 0
+            ) {
+                liveItems = bestSellersResponse.data.items;
+            } else if (
+                Array.isArray((bestSellersResponse.data as any).bestSellers) &&
+                (bestSellersResponse.data as any).bestSellers.length > 0
+            ) {
+                liveItems = (bestSellersResponse.data as any).bestSellers;
+            }
+        }
+
+        // Fallback to featured products if best sellers is empty
+        if (liveItems.length === 0 && featuredResponse?.data) {
+            if (
+                Array.isArray(featuredResponse.data) &&
+                featuredResponse.data.length > 0
+            ) {
+                liveItems = featuredResponse.data;
+            } else if (
+                Array.isArray(featuredResponse.data.products) &&
+                featuredResponse.data.products.length > 0
+            ) {
+                liveItems = featuredResponse.data.products;
+            } else if (
+                Array.isArray(featuredResponse.data.items) &&
+                featuredResponse.data.items.length > 0
+            ) {
+                liveItems = featuredResponse.data.items;
+            }
+        }
+
         if (liveItems && liveItems.length > 0) {
             return liveItems.slice(0, 3).map((p: ProductItem) => {
                 const pieceUnit = p.sellingUnits?.find((u) =>
@@ -191,7 +242,7 @@ export const BestSellers = () => {
                         u.name.toLowerCase().includes("carton") ||
                         u.name.toLowerCase().includes("case"),
                 );
-                const primaryUnit = p.sellingUnits?.[0];
+                const primaryUnit = pieceUnit || p.sellingUnits?.[0];
 
                 return {
                     id: p.slug || p.productId,
@@ -199,7 +250,10 @@ export const BestSellers = () => {
                     slug: p.slug,
                     name: p.name,
                     title: p.name,
-                    category: p.category?.name || "",
+                    category:
+                        typeof p.category === "object" && p.category !== null
+                            ? (p.category as any).name || ""
+                            : p.category || "",
                     volume: (p as any).volume || p?.description || "",
                     piecesLeft: pieceUnit
                         ? pieceUnit.stock
@@ -218,6 +272,7 @@ export const BestSellers = () => {
                             )
                           : 650000,
                     image:
+                        (p as any).image ||
                         p.images?.find((i) => i.isPrimary)?.imageUrl ||
                         p.images?.[0]?.imageUrl ||
                         "",
@@ -226,12 +281,15 @@ export const BestSellers = () => {
             });
         }
         return fallbackBestSellers;
-    }, [apiResponse, fallbackBestSellers]);
+    }, [bestSellersResponse, featuredResponse, fallbackBestSellers]);
+
+    const isLoading =
+        (isBestSellersLoading || isFeaturedLoading) && bestSellers.length === 0;
 
     return (
-        <section className="w-full bg-black-900 pt-16 md:py-24 border-t border-white/5">
+        <Container className="w-full bg-black-900 pt-16 md:py-24 border-t border-white/5">
             <div className="flex flex-col items-center">
-                <div className="w-full max-w-[1600px] mx-auto flex flex-col items-center">
+                <div className="w-full  mx-auto flex flex-col items-center">
                     {/* Section Title Header: Fades in directly */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -281,7 +339,7 @@ export const BestSellers = () => {
                     </div>
                 </div>
             </div>
-        </section>
+        </Container>
     );
 };
 

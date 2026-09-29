@@ -1,5 +1,9 @@
+import type { ProductItem } from "@/service/types";
+
 export interface Product {
     id: string;
+    productId?: string;
+    slug?: string;
     name: string;
     category: string;
     volume: string;
@@ -11,6 +15,7 @@ export interface Product {
     brand?: string;
     gallery?: string[];
     description?: string;
+    sellingUnits?: any[];
     tastingNotes?: {
         nose?: string;
         taste?: string;
@@ -24,9 +29,10 @@ export interface Product {
 }
 
 export interface ProductCardProps {
-    product: Product;
+    product: Product | ProductItem | any;
     onAddToCart?: (product: Product) => void;
     onToggleWishlist?: (productId: string) => void;
     className?: string;
     isLandingPage?: boolean;
 }
+

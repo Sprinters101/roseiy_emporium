@@ -24,6 +24,9 @@ import {
     reorderFunc,
     submitReviewFunc,
     sendContactMessageFunc,
+    addToWishlistFunc,
+    removeFromWishlistFunc,
+    clearWishlistFunc,
 } from "./api";
 import { queryKeys } from "./queries";
 import type {
@@ -44,6 +47,7 @@ import type {
     TrackOrderPayload,
     SubmitReviewPayload,
     ContactMessagePayload,
+    AddToWishlistPayload,
     ApiErrorResponse,
 } from "./types";
 
@@ -306,7 +310,7 @@ export const useClearCart = () => {
                 ...data,
                 data: { items: [], total: 0 },
             });
-            toast.info("Cart cleared");
+            // toast.info("Cart cleared");
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
             toast.error(getErrorMessage(err, "Failed to clear cart."));
@@ -550,6 +554,72 @@ export const useSendContactMessage = () => {
                     "Failed to send your message. Please review the form and try again.",
                 ),
             );
+        },
+    });
+};
+
+// ==========================================
+// 8. WISHLIST MUTATIONS
+// ==========================================
+
+/**
+ * Add Product to Wishlist Mutation
+ */
+export const useAddToWishlist = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (payload: AddToWishlistPayload) =>
+            addToWishlistFunc(payload),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.wishlist.all,
+            });
+        },
+        onError: (err: AxiosError<ApiErrorResponse>) => {
+            toast.error(
+                getErrorMessage(err, "Failed to add product to wishlist"),
+            );
+        },
+    });
+};
+
+/**
+ * Remove Product from Wishlist Mutation
+ */
+export const useRemoveFromWishlist = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (productId: string) => removeFromWishlistFunc(productId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.wishlist.all,
+            });
+        },
+        onError: (err: AxiosError<ApiErrorResponse>) => {
+            toast.error(
+                getErrorMessage(err, "Failed to remove product from wishlist"),
+            );
+        },
+    });
+};
+
+/**
+ * Clear Customer Wishlist Mutation
+ */
+export const useClearWishlist = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: () => clearWishlistFunc(),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.wishlist.all,
+            });
+        },
+        onError: (err: AxiosError<ApiErrorResponse>) => {
+            toast.error(getErrorMessage(err, "Failed to clear wishlist"));
         },
     });
 };

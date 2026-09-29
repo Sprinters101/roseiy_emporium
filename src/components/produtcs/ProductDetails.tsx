@@ -158,8 +158,10 @@ export const ProductDetails: React.FC = () => {
         piecesLeft <= 0 && casesLeft > 0 ? 1 : 0,
     );
 
-    const { isInWishlist, toggleWishlist } = useWishlist();
-    const isWishlisted = isInWishlist(product.id);
+    const { isInWishlist, toggleWishlist, isItemLoading } = useWishlist();
+    const resolvedProductId = String(product.productId || product.id || product.slug || "");
+    const isWishlisted = isInWishlist(resolvedProductId);
+    const isWishlistProcessing = isItemLoading(resolvedProductId);
 
     // Sync local quantities with cart item whenever cart state or stock updates
     useEffect(() => {
@@ -499,18 +501,27 @@ export const ProductDetails: React.FC = () => {
                                         </div>
                                         <button
                                             type="button"
+                                            disabled={isWishlistProcessing}
                                             onClick={handleWishlistToggle}
-                                            className="size-10 rounded-full bg-black/50 border border-neutral-800 flex items-center justify-center text-white hover:bg-neutral-800 transition-colors cursor-pointer"
+                                            className={cn(
+                                                "size-10 rounded-full bg-black/50 border border-neutral-800 flex items-center justify-center text-white hover:bg-neutral-800 transition-all duration-200 cursor-pointer active:scale-90",
+                                                isWishlisted && "bg-black/80 border-gold-500/60 shadow-[0_0_12px_rgba(212,175,55,0.35)]",
+                                                isWishlistProcessing && "opacity-80 cursor-wait",
+                                            )}
                                             aria-label="Add to wishlist"
                                         >
-                                            <Heart
-                                                className={cn(
-                                                    "size-5 transition-colors",
-                                                    isWishlisted
-                                                        ? "fill-gold-400 text-gold-400"
-                                                        : "text-white hover:text-white",
-                                                )}
-                                            />
+                                            {isWishlistProcessing ? (
+                                                <Loader2 className="size-4 animate-spin text-gold-500" />
+                                            ) : (
+                                                <Heart
+                                                    className={cn(
+                                                        "size-5 transition-transform duration-300",
+                                                        isWishlisted
+                                                            ? "fill-gold-400 text-gold-400 scale-110"
+                                                            : "text-white hover:scale-105",
+                                                    )}
+                                                />
+                                            )}
                                         </button>
                                     </div>
 

@@ -16,7 +16,7 @@ export const ProductCard = ({
     isLandingPage = false,
 }: ProductCardProps & { product: Product | ProductItem | any }) => {
     const { cartItems, addToCart, isAddingProduct } = useCart();
-    const { isInWishlist, toggleWishlist } = useWishlist();
+    const { isInWishlist, toggleWishlist, isItemLoading } = useWishlist();
 
     // Standardize product fields across mock and live API objects
     const resolvedId = String(
@@ -25,7 +25,9 @@ export const ProductCard = ({
     const cartId = String(product.productId || product.id || resolvedId);
     const resolvedName = product.name || "Product";
 
-    const isWishlisted = isInWishlist(cartId);
+    const isWishlisted = isInWishlist(cartId) || isInWishlist(resolvedId);
+    const isWishlistProcessing =
+        isItemLoading(cartId) || isItemLoading(resolvedId);
     const cartItem = cartItems.find(
         (item) => item.id === cartId || item.id === resolvedId,
     );
@@ -174,20 +176,30 @@ export const ProductCard = ({
             )}
         >
             {/* Top Action Header: Wishlist Button */}
-            <div className="  flex justify-end w-full relative z-10">
+            <div className="flex justify-end w-full relative z-10">
                 <button
                     type="button"
+                    disabled={isWishlistProcessing}
                     onClick={handleWishlist}
-                    className="flex size-6 md:size-10 items-center justify-center rounded-full bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors cursor-pointer absolute"
+                    className={cn(
+                        "flex size-6 md:size-10 items-center justify-center rounded-full bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-all duration-200 cursor-pointer absolute active:scale-90",
+                        isWishlisted && "bg-black/80 border-gold-500/60 ",
+                        isWishlistProcessing && "opacity-80 cursor-wait",
+                    )}
                     aria-label="Add to wishlist"
                 >
-                    <Heart
-                        className={`size-3 md:size-4 transition-colors ${
-                            isWishlisted
-                                ? "fill-gold-500 text-gold-500"
-                                : "text-gray-300"
-                        }`}
-                    />
+                    {isWishlistProcessing ? (
+                        <Loader2 className="size-3 md:size-4 animate-spin text-gold-500" />
+                    ) : (
+                        <Heart
+                            className={cn(
+                                "size-3 md:size-4 transition-transform duration-300",
+                                isWishlisted
+                                    ? "fill-gold-500 text-gold-500 scale-110"
+                                    : "text-gray-300 hover:text-white",
+                            )}
+                        />
+                    )}
                 </button>
             </div>
 

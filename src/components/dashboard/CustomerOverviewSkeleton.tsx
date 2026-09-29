@@ -19,4 +19,3 @@ export const CustomerOverviewSkeleton: React.FC = () => {
 };
 
 export default CustomerOverviewSkeleton;
-

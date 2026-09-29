@@ -1,6 +1,7 @@
 import React from "react";
 import { DashboardStatsCard } from "./DashboardStatsCard";
 import { RecentOrdersList } from "./RecentOrdersList";
+// import { DashboardRecommended } from "./DashboardRecommended";
 import { CustomerOverviewSkeleton } from "./CustomerOverviewSkeleton";
 import { useGetCustomerOrders, useGetAddresses } from "@/service/queries";
 import type { OrderSummaryItem, AddressResponseItem } from "@/service/types";
