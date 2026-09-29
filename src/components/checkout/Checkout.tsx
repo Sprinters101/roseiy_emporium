@@ -18,6 +18,7 @@ import {
     type PersonalInfoData,
 } from "./LoggedInPersonalInfo";
 import { LoggedInShippingInfo } from "./LoggedInShippingInfo";
+import { DeliveryMethodSection } from "./DeliveryMethodSection";
 import { OrderSummarySection } from "./OrderSummarySection";
 import { OrderSuccessModal } from "./OrderSuccessModal";
 import { CheckoutSkeleton } from "./CheckoutSkeleton";
@@ -38,10 +39,12 @@ import {
     useVerifyCheckout,
     useGetAddresses,
     useGetAccountProfile,
+    useGetDeliveryAreas,
 } from "@/service/queries";
 import type {
     CheckoutAddressPayload,
     AddressResponseItem,
+    DeliveryArea,
 } from "@/service/types";
 
 const CheckoutValidationSchema = Yup.object().shape({
@@ -340,7 +343,83 @@ export const Checkout: React.FC = () => {
         }
     };
 
-    // Calculate subtotal and total
+    // 4. Fetch Delivery Areas & Shipping Rates
+    const { data: serverDeliveryAreas, isLoading: isDeliveryAreasLoading } =
+        useGetDeliveryAreas();
+
+    const deliveryAreas: DeliveryArea[] = useMemo(() => {
+        const raw = serverDeliveryAreas?.data;
+        let list: DeliveryArea[] = [];
+        if (Array.isArray(raw)) {
+            list = raw;
+        } else if (raw && Array.isArray((raw as any).deliveryAreas)) {
+            list = (raw as any).deliveryAreas;
+        } else if (raw && Array.isArray((raw as any).areas)) {
+            list = (raw as any).areas;
+        }
+        if (list.length > 0) return list;
+        return [
+            {
+                deliveryAreaId: "area-lagos-island",
+                name: "Lagos Island (Ikoyi, Victoria Island, Lekki)",
+                fee: 5000,
+                state: "Lagos",
+                city: "Lagos",
+                estimatedDeliveryTime: "Same Day / 24 Hours",
+            },
+            {
+                deliveryAreaId: "area-lagos-mainland",
+                name: "Lagos Mainland (Ikeja, Surulere, Yaba, Maryland)",
+                fee: 3500,
+                state: "Lagos",
+                city: "Lagos",
+                estimatedDeliveryTime: "1 - 2 Business Days",
+            },
+            {
+                deliveryAreaId: "area-lagos-outskirts",
+                name: "Lagos Outskirts (Ajah, Ikorodu, Epe, Badagry)",
+                fee: 6500,
+                state: "Lagos",
+                city: "Lagos",
+                estimatedDeliveryTime: "2 - 3 Business Days",
+            },
+            {
+                deliveryAreaId: "area-abuja",
+                name: "Abuja (FCT)",
+                fee: 7500,
+                state: "Abuja",
+                city: "Abuja",
+                estimatedDeliveryTime: "2 - 4 Business Days",
+            },
+            {
+                deliveryAreaId: "area-interstate",
+                name: "Interstate Delivery (Other States)",
+                fee: 8500,
+                state: "Other",
+                city: "Other",
+                estimatedDeliveryTime: "3 - 5 Business Days",
+            },
+        ];
+    }, [serverDeliveryAreas]);
+
+    const [selectedDeliveryAreaId, setSelectedDeliveryAreaId] =
+        useState<string>("");
+
+    const selectedDeliveryArea = useMemo(() => {
+        if (!selectedDeliveryAreaId) return null;
+        return (
+            deliveryAreas.find(
+                (a) => a.deliveryAreaId === selectedDeliveryAreaId,
+            ) || null
+        );
+    }, [deliveryAreas, selectedDeliveryAreaId]);
+
+    const deliveryFee = useMemo(() => {
+        if (!selectedDeliveryArea) return 0;
+        return Number(selectedDeliveryArea.fee) || 0;
+    }, [selectedDeliveryArea]);
+
+    // Calculate subtotal and total (subtotal + delivery fee)
     const subtotal = useMemo(() => {
         if (overrideItems === null && contextSubtotal > 0) {
             return contextSubtotal;
@@ -351,7 +430,7 @@ export const Checkout: React.FC = () => {
         );
     }, [displayItems, overrideItems, contextSubtotal]);
 
-    const total = subtotal;
+    const total = subtotal + deliveryFee;
 
     const handleSelectAddress = (id: string) => {
         setSelectedAddressId(id);
@@ -541,6 +620,7 @@ export const Checkout: React.FC = () => {
             city: selectedAddr?.city || "Lagos",
             state: selectedAddr?.state || "Lagos",
             country: selectedAddr?.country || "Nigeria",
+            deliveryAreaId: selectedDeliveryArea?.deliveryAreaId,
             callbackUrl: `${window.location.origin}/payment/callback`,
         };
 
@@ -600,6 +680,7 @@ export const Checkout: React.FC = () => {
             city: values.city.trim(),
             state: values.state.trim(),
             country: values.country.trim() || "Nigeria",
+            deliveryAreaId: selectedDeliveryArea?.deliveryAreaId,
             callbackUrl: `${window.location.origin}/payment/callback`,
         };
 
@@ -721,6 +802,14 @@ export const Checkout: React.FC = () => {
                                 isLoading={isAddressesLoading}
                             />
 
+                            {/* Delivery Method & Area Selection */}
+                            <DeliveryMethodSection
+                                deliveryAreas={deliveryAreas}
+                                selectedAreaId={selectedDeliveryAreaId}
+                                onSelectArea={setSelectedDeliveryAreaId}
+                                isLoading={isDeliveryAreasLoading}
+                            />
+
                             {/* Desktop Pay Button (Hidden on Mobile) */}
                             <button
                                 type="button"
@@ -747,6 +836,8 @@ export const Checkout: React.FC = () => {
                                 items={displayItems}
                                 onRemoveItem={handleRemoveItem}
                                 subtotal={subtotal}
+                                deliveryFee={deliveryFee}
+                                deliveryAreaName={selectedDeliveryArea?.name}
                                 total={total}
                                 isLoading={isCartLoading}
                                 isProcessing={isProcessing}
@@ -799,7 +890,35 @@ export const Checkout: React.FC = () => {
                                                 isSubmitting={
                                                     isSubmitting || isProcessing
                                                 }
+                                                showPayButton={false}
                                             />
+                                            <DeliveryMethodSection
+                                                deliveryAreas={deliveryAreas}
+                                                selectedAreaId={selectedDeliveryAreaId}
+                                                onSelectArea={setSelectedDeliveryAreaId}
+                                                isLoading={isDeliveryAreasLoading}
+                                            />
+                                            {/* Desktop Pay Button for Guest */}
+                                            <button
+                                                type="submit"
+                                                disabled={
+                                                    isSubmitting ||
+                                                    isProcessing ||
+                                                    displayItems.length === 0
+                                                }
+                                                className="hidden lg:flex w-full h-12 bg-gold-gradient text-black-900 font-bold font-hanken text-sm sm:text-base px-6 rounded-sm sm:rounded-md shadow-xl hover:opacity-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center text-center gap-2"
+                                            >
+                                                {(isSubmitting ||
+                                                    isProcessing) && (
+                                                    <Loader2 className="size-4 animate-spin" />
+                                                )}
+                                                <span>
+                                                    {isSubmitting ||
+                                                    isProcessing
+                                                        ? "Processing Payment..."
+                                                        : `Pay ₦${total.toLocaleString()}`}
+                                                </span>
+                                            </button>
                                         </div>
 
                                         {/* Right Column: Order Summary */}
@@ -808,6 +927,8 @@ export const Checkout: React.FC = () => {
                                                 items={displayItems}
                                                 onRemoveItem={handleRemoveItem}
                                                 subtotal={subtotal}
+                                                deliveryFee={deliveryFee}
+                                                deliveryAreaName={selectedDeliveryArea?.name}
                                                 total={total}
                                                 isLoading={isCartLoading}
                                                 isSubmitting={isSubmitting}

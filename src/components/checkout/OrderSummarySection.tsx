@@ -8,6 +8,8 @@ export interface OrderSummarySectionProps {
     items: CartItem[];
     onRemoveItem: (id: string) => void;
     subtotal: number;
+    deliveryFee?: number;
+    deliveryAreaName?: string;
     total: number;
     isLoading?: boolean;
     isSubmitting?: boolean;
@@ -21,6 +23,8 @@ export const OrderSummarySection: React.FC<OrderSummarySectionProps> = ({
     items,
     onRemoveItem,
     subtotal,
+    deliveryFee = 0,
+    deliveryAreaName,
     total,
     isLoading = false,
     isSubmitting = false,
@@ -84,6 +88,19 @@ export const OrderSummarySection: React.FC<OrderSummarySectionProps> = ({
                         <span className="text-neutral-300">Subtotal</span>
                         <span className="text-white font-bold font-hanken">
                             ₦{subtotal.toLocaleString()}
+                        </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs sm:text-sm font-hanken">
+                        <div className="flex flex-col min-w-0 pr-2">
+                            <span className="text-neutral-300">Delivery</span>
+                            <span className="text-[11px] text-neutral-400 font-light truncate max-w-[200px]">
+                                {deliveryAreaName || "Store Pickup / None"}
+                            </span>
+                        </div>
+                        <span className="text-white font-bold font-hanken shrink-0">
+                            {deliveryFee !== undefined && deliveryFee > 0
+                                ? `₦${deliveryFee.toLocaleString()}`
+                                : "₦0"}
                         </span>
                     </div>
                 </div>

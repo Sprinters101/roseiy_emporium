@@ -8,11 +8,13 @@ import { CustomSelect } from "@/components/common/CustomSelect";
 export interface ShippingInfoSectionProps {
     totalAmount?: number;
     isSubmitting?: boolean;
+    showPayButton?: boolean;
 }
 
 export const ShippingInfoSection: React.FC<ShippingInfoSectionProps> = ({
     totalAmount,
     isSubmitting = false,
+    showPayButton = false,
 }) => {
     const { values, setFieldValue } = useFormikContext<{
         country?: string;
@@ -92,20 +94,22 @@ export const ShippingInfoSection: React.FC<ShippingInfoSectionProps> = ({
             />
 
             {/* Desktop Pay Button (Hidden on Mobile) */}
-            <button
-                type="submit"
-                disabled={isSubmitting}
-                className="hidden lg:flex w-full mt-3 h-12 bg-gold-gradient hover:opacity-95 text-black-900 font-bold font-hanken text-sm sm:text-base px-6 rounded-sm sm:rounded-md shadow-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center text-center gap-2"
-            >
-                {isSubmitting && <Loader2 className="size-4 animate-spin" />}
-                <span>
-                    {isSubmitting
-                        ? "Processing Payment..."
-                        : totalAmount !== undefined
-                          ? `Pay ₦${totalAmount.toLocaleString()}`
-                          : "Proceed to Payment"}
-                </span>
-            </button>
+            {showPayButton && (
+                <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="hidden lg:flex w-full mt-3 h-12 bg-gold-gradient hover:opacity-95 text-black-900 font-bold font-hanken text-sm sm:text-base px-6 rounded-sm sm:rounded-md shadow-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center text-center gap-2"
+                >
+                    {isSubmitting && <Loader2 className="size-4 animate-spin" />}
+                    <span>
+                        {isSubmitting
+                            ? "Processing Payment..."
+                            : totalAmount !== undefined
+                              ? `Pay ₦${totalAmount.toLocaleString()}`
+                              : "Proceed to Payment"}
+                    </span>
+                </button>
+            )}
         </div>
     );
 };
