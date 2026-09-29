@@ -232,7 +232,7 @@ export const NavSearch: React.FC<NavSearchProps> = ({
                 {/* Right Action: Spinner or Clear Button */}
                 {isSearching ? (
                     <Loader2 className="size-4 text-neutral-400 animate-spin shrink-0 ml-1" />
-                ) : searchQuery.length > 0 ? (
+                ) : (
                     <button
                         type="button"
                         onClick={handleClear}
@@ -241,7 +241,7 @@ export const NavSearch: React.FC<NavSearchProps> = ({
                     >
                         <X className="size-4" />
                     </button>
-                ) : null}
+                )}
             </form>
 
             {/* Results Dropdown Menu matching Figma design */}
