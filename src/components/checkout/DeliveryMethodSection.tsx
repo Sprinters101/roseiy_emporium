@@ -7,6 +7,7 @@ import {
     ChevronDown,
     X,
     ShieldCheck,
+    Sparkles,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -24,6 +25,10 @@ export interface DeliveryMethodSectionProps {
     selectedAreaId: string;
     onSelectArea: (areaId: string) => void;
     isLoading?: boolean;
+    subtotal?: number;
+    freeDeliveryThreshold?: number;
+    isFreeDeliveryUnlocked?: boolean;
+    isFreeDeliveryEnabled?: boolean;
 }
 
 export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
@@ -31,6 +36,10 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
     selectedAreaId,
     onSelectArea,
     isLoading = false,
+    subtotal = 0,
+    freeDeliveryThreshold = 50000,
+    isFreeDeliveryUnlocked = false,
+    isFreeDeliveryEnabled = true,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -39,6 +48,8 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
     );
 
     const isNoDeliverySelected = !selectedAreaId || !selectedArea;
+
+    const remainingForFreeDelivery = Math.max(0, freeDeliveryThreshold - subtotal);
 
     return (
         <div className="bg-black-700 rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-neutral-800/60 shadow-xl flex flex-col gap-5 w-full">
@@ -61,6 +72,27 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
                     </div>
                 </div>
             </div>
+
+            {/* Free Delivery Status Banner */}
+            {isFreeDeliveryEnabled && (
+                <div>
+                    {isFreeDeliveryUnlocked ? (
+                        <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 sm:p-3.5 flex items-center gap-2.5 text-xs text-green-400 font-hanken">
+                            <Sparkles className="size-4 text-green-400 shrink-0" />
+                            <span>
+                                <strong>Free Delivery Unlocked!</strong> Your order qualifies for ₦0 shipping (over ₦{freeDeliveryThreshold.toLocaleString()}).
+                            </span>
+                        </div>
+                    ) : remainingForFreeDelivery > 0 && subtotal > 0 ? (
+                        <div className="bg-gold-500/10 border border-gold-500/20 rounded-xl p-3 sm:p-3.5 flex items-center gap-2.5 text-xs text-neutral-300 font-hanken">
+                            <Sparkles className="size-4 text-gold-400 shrink-0" />
+                            <span>
+                                Add <strong className="text-gold-400">₦{remainingForFreeDelivery.toLocaleString()}</strong> more to your cart to unlock <strong>Free Delivery</strong>!
+                            </span>
+                        </div>
+                    ) : null}
+                </div>
+            )}
 
             {/* Dropdown Container */}
             {isLoading ? (
@@ -106,10 +138,7 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
                                             {selectedArea.estimatedDeliveryTime && (
                                                 <span className="text-[11px] text-gold-400/90 flex items-center gap-1 font-light">
                                                     <Clock className="size-2.5" />
-                                                    Est.{" "}
-                                                    {
-                                                        selectedArea.estimatedDeliveryTime
-                                                    }
+                                                    Est. {selectedArea.estimatedDeliveryTime}
                                                 </span>
                                             )}
                                         </div>
@@ -122,16 +151,18 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
                                 <span
                                     className={cn(
                                         "text-xs font-bold px-2.5 py-1 rounded-md tracking-wider font-hanken",
-                                        isNoDeliverySelected
+                                        isNoDeliverySelected || isFreeDeliveryUnlocked
                                             ? "bg-green-500/10 text-green-400 border border-green-500/20"
                                             : "bg-gold-500/10 text-gold-400 border border-gold-500/20",
                                     )}
                                 >
                                     {isNoDeliverySelected
                                         ? "₦0 (Free)"
-                                        : Number(selectedArea.fee) > 0
-                                          ? `₦${Number(selectedArea.fee).toLocaleString()}`
-                                          : "Free"}
+                                        : isFreeDeliveryUnlocked
+                                          ? "Free"
+                                          : Number(selectedArea.fee) > 0
+                                            ? `₦${Number(selectedArea.fee).toLocaleString()}`
+                                            : "Free"}
                                 </span>
                                 <ChevronDown
                                     className={cn(
@@ -170,8 +201,7 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
                                             No Delivery / Store Pickup
                                         </span>
                                         <span className="text-[11px] text-neutral-400">
-                                            Pick up your order in store (No
-                                            delivery fee)
+                                            Pick up your order in store (No delivery fee)
                                         </span>
                                     </div>
                                 </div>
@@ -233,19 +263,27 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
                                                 {area.estimatedDeliveryTime && (
                                                     <span className="text-[11px] text-neutral-400 flex items-center gap-1 mt-0.5">
                                                         <Clock className="size-2.5 text-gold-400 shrink-0" />
-                                                        Est.{" "}
-                                                        {
-                                                            area.estimatedDeliveryTime
-                                                        }
+                                                        Est. {area.estimatedDeliveryTime}
                                                     </span>
                                                 )}
                                             </div>
                                         </div>
 
                                         <div className="flex items-center gap-2 shrink-0 pl-2">
-                                            <span className="text-xs font-bold text-gold-400 bg-gold-500/10 px-2 py-0.5 rounded border border-gold-500/20">
-                                                ₦{feeNumber.toLocaleString()}
-                                            </span>
+                                            {isFreeDeliveryUnlocked ? (
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-xs line-through text-neutral-500">
+                                                        ₦{feeNumber.toLocaleString()}
+                                                    </span>
+                                                    <span className="text-xs font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">
+                                                        Free
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-xs font-bold text-gold-400 bg-gold-500/10 px-2 py-0.5 rounded border border-gold-500/20">
+                                                    ₦{feeNumber.toLocaleString()}
+                                                </span>
+                                            )}
                                             {isSelected && (
                                                 <Check className="size-4 text-gold-400 ml-1" />
                                             )}
@@ -268,12 +306,18 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
                                             {selectedArea.name}
                                         </strong>
                                     </span>
-                                    {selectedArea.estimatedDeliveryTime && (
-                                        <span className="text-[11px] text-neutral-400 mt-0.5">
-                                            Estimated Arrival:{" "}
-                                            {selectedArea.estimatedDeliveryTime}
-                                        </span>
-                                    )}
+                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-neutral-400">
+                                        {selectedArea.estimatedDeliveryTime && (
+                                            <span>
+                                                Estimated Arrival: {selectedArea.estimatedDeliveryTime}
+                                            </span>
+                                        )}
+                                        {isFreeDeliveryUnlocked && (
+                                            <span className="text-green-400 font-medium">
+                                                • Free Delivery threshold applied (₦0.00)
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             <button
@@ -290,8 +334,7 @@ export const DeliveryMethodSection: React.FC<DeliveryMethodSectionProps> = ({
                         <div className="bg-black-900/40 rounded-xl p-3.5 border border-neutral-800/60 flex items-center gap-2.5 text-xs text-neutral-400 font-hanken">
                             <Store className="size-4 text-gold-500/70 shrink-0" />
                             <span>
-                                No delivery selected. You can pick up your order
-                                at our store at no additional cost.
+                                No delivery selected. You can pick up your order at our store at no additional cost.
                             </span>
                         </div>
                     )}

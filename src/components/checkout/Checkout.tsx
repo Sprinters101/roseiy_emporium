@@ -45,6 +45,7 @@ import type {
     CheckoutAddressPayload,
     AddressResponseItem,
     DeliveryArea,
+    DeliverySetting,
 } from "@/service/types";
 
 const CheckoutValidationSchema = Yup.object().shape({
@@ -402,6 +403,40 @@ export const Checkout: React.FC = () => {
         ];
     }, [serverDeliveryAreas]);
 
+    const deliverySettings: DeliverySetting | undefined = useMemo(() => {
+        const raw = serverDeliveryAreas?.data;
+        if (raw && !Array.isArray(raw) && (raw as any).settings) {
+            return (raw as any).settings;
+        }
+        return {
+            freeDeliveryEnabled: true,
+            freeDeliveryThreshold: 50000,
+        };
+    }, [serverDeliveryAreas]);
+
+    const freeDeliveryThreshold = useMemo(() => {
+        return Number(deliverySettings?.freeDeliveryThreshold) || 50000;
+    }, [deliverySettings]);
+
+    const isFreeDeliveryEnabled = Boolean(
+        deliverySettings?.freeDeliveryEnabled ?? true,
+    );
+
+    // Calculate subtotal
+    const subtotal = useMemo(() => {
+        if (overrideItems === null && contextSubtotal > 0) {
+            return contextSubtotal;
+        }
+        return displayItems.reduce(
+            (sum, item) => sum + calculateCartItemTotal(item),
+            0,
+        );
+    }, [displayItems, overrideItems, contextSubtotal]);
+
+    const isFreeDeliveryUnlocked = useMemo(() => {
+        return isFreeDeliveryEnabled && subtotal >= freeDeliveryThreshold;
+    }, [isFreeDeliveryEnabled, subtotal, freeDeliveryThreshold]);
+
     const [selectedDeliveryAreaId, setSelectedDeliveryAreaId] =
         useState<string>("");
 
@@ -416,19 +451,9 @@ export const Checkout: React.FC = () => {
 
     const deliveryFee = useMemo(() => {
         if (!selectedDeliveryArea) return 0;
+        if (isFreeDeliveryUnlocked) return 0;
         return Number(selectedDeliveryArea.fee) || 0;
-    }, [selectedDeliveryArea]);
-
-    // Calculate subtotal and total (subtotal + delivery fee)
-    const subtotal = useMemo(() => {
-        if (overrideItems === null && contextSubtotal > 0) {
-            return contextSubtotal;
-        }
-        return displayItems.reduce(
-            (sum, item) => sum + calculateCartItemTotal(item),
-            0,
-        );
-    }, [displayItems, overrideItems, contextSubtotal]);
+    }, [selectedDeliveryArea, isFreeDeliveryUnlocked]);
 
     const total = subtotal + deliveryFee;
 
@@ -808,6 +833,10 @@ export const Checkout: React.FC = () => {
                                 selectedAreaId={selectedDeliveryAreaId}
                                 onSelectArea={setSelectedDeliveryAreaId}
                                 isLoading={isDeliveryAreasLoading}
+                                subtotal={subtotal}
+                                freeDeliveryThreshold={freeDeliveryThreshold}
+                                isFreeDeliveryUnlocked={isFreeDeliveryUnlocked}
+                                isFreeDeliveryEnabled={isFreeDeliveryEnabled}
                             />
 
                             {/* Desktop Pay Button (Hidden on Mobile) */}
@@ -838,6 +867,7 @@ export const Checkout: React.FC = () => {
                                 subtotal={subtotal}
                                 deliveryFee={deliveryFee}
                                 deliveryAreaName={selectedDeliveryArea?.name}
+                                isFreeDeliveryUnlocked={isFreeDeliveryUnlocked}
                                 total={total}
                                 isLoading={isCartLoading}
                                 isProcessing={isProcessing}
@@ -897,6 +927,10 @@ export const Checkout: React.FC = () => {
                                                 selectedAreaId={selectedDeliveryAreaId}
                                                 onSelectArea={setSelectedDeliveryAreaId}
                                                 isLoading={isDeliveryAreasLoading}
+                                                subtotal={subtotal}
+                                                freeDeliveryThreshold={freeDeliveryThreshold}
+                                                isFreeDeliveryUnlocked={isFreeDeliveryUnlocked}
+                                                isFreeDeliveryEnabled={isFreeDeliveryEnabled}
                                             />
                                             {/* Desktop Pay Button for Guest */}
                                             <button
@@ -929,6 +963,7 @@ export const Checkout: React.FC = () => {
                                                 subtotal={subtotal}
                                                 deliveryFee={deliveryFee}
                                                 deliveryAreaName={selectedDeliveryArea?.name}
+                                                isFreeDeliveryUnlocked={isFreeDeliveryUnlocked}
                                                 total={total}
                                                 isLoading={isCartLoading}
                                                 isSubmitting={isSubmitting}

@@ -275,10 +275,24 @@ export interface DeliveryArea {
     updatedAt?: string;
 }
 
+export interface DeliverySetting {
+    deliverySettingId?: string;
+    freeDeliveryEnabled?: boolean;
+    freeDeliveryThreshold?: string | number;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
 export type DeliveryAreasResponseData =
     | DeliveryArea[]
-    | { deliveryAreas: DeliveryArea[] }
-    | { areas: DeliveryArea[] };
+    | {
+          deliveryAreas?: DeliveryArea[];
+          settings?: DeliverySetting;
+      }
+    | {
+          areas?: DeliveryArea[];
+          settings?: DeliverySetting;
+      };
 
 export interface CheckoutAddressPayload {
     deliveryAreaId?: string;

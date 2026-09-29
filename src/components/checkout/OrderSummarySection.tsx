@@ -10,6 +10,7 @@ export interface OrderSummarySectionProps {
     subtotal: number;
     deliveryFee?: number;
     deliveryAreaName?: string;
+    isFreeDeliveryUnlocked?: boolean;
     total: number;
     isLoading?: boolean;
     isSubmitting?: boolean;
@@ -25,6 +26,7 @@ export const OrderSummarySection: React.FC<OrderSummarySectionProps> = ({
     subtotal,
     deliveryFee = 0,
     deliveryAreaName,
+    isFreeDeliveryUnlocked = false,
     total,
     isLoading = false,
     isSubmitting = false,
@@ -97,11 +99,18 @@ export const OrderSummarySection: React.FC<OrderSummarySectionProps> = ({
                                 {deliveryAreaName || "Store Pickup / None"}
                             </span>
                         </div>
-                        <span className="text-white font-bold font-hanken shrink-0">
-                            {deliveryFee !== undefined && deliveryFee > 0
-                                ? `₦${deliveryFee.toLocaleString()}`
-                                : "₦0"}
-                        </span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                            {isFreeDeliveryUnlocked && deliveryAreaName && (
+                                <span className="text-[10px] uppercase font-bold text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded border border-green-500/20">
+                                    Free
+                                </span>
+                            )}
+                            <span className="text-white font-bold font-hanken">
+                                {deliveryFee !== undefined && deliveryFee > 0
+                                    ? `₦${deliveryFee.toLocaleString()}`
+                                    : "₦0"}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
