@@ -224,7 +224,7 @@ export const ContactUs: React.FC = () => {
 
                                     <CustomInput
                                         name="message"
-                                        isTextArea
+                                        isTextArea={true}
                                         rows={4}
                                         label="MESSAGE"
                                         placeholder="Enter your message......"

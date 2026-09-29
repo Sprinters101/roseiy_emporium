@@ -46,6 +46,8 @@ export const router = createBrowserRouter([
             { path: "register", element: <Register /> },
             { path: "signup", element: <Register /> },
             { path: "verify-otp", element: <VerifyOtp /> },
+            { path: "verify-email", element: <VerifyOtp /> },
+            { path: "verify-password", element: <VerifyOtp /> },
             { path: "forgot-password", element: <ForgotPassword /> },
             { path: "reset-password", element: <ResetPassword /> },
             { path: "product/:id", element: <ProductDetails /> },

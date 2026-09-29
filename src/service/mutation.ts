@@ -157,7 +157,16 @@ export const useLogin = () => {
             toast.success(data?.message || "Login successful!");
         },
         onError: (err: AxiosError<ApiErrorResponse>) => {
-            toast.error(getErrorMessage(err, "Invalid email or password."));
+            const message =
+                err?.response?.data?.message || err?.message || "";
+            const isUnverified =
+                message.toLowerCase().includes("verify your email") ||
+                message.toLowerCase().includes("verify email") ||
+                message.toLowerCase().includes("not verified");
+
+            if (!isUnverified) {
+                toast.error(getErrorMessage(err, "Invalid email or password."));
+            }
         },
     });
 };

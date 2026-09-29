@@ -6,14 +6,14 @@ export const AuthFooter: React.FC = () => {
         <div className="text-xs sm:text-sm text-white font-hanken text-center mt-8 px-4 leading-relaxed max-w-82.25">
             By continuing you agree to Roseiy Emporium’s{" "}
             <Link
-                to="/terms"
+                to="/privacy-policy"
                 className="gradient-text font-semibold hover:underline"
             >
                 Terms and Conditions
             </Link>{" "}
             &amp;{" "}
             <Link
-                to="/privacy"
+                to="/privacy-policy"
                 className="gradient-text font-semibold hover:underline"
             >
                 Privacy Policy

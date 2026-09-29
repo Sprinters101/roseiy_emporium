@@ -4,6 +4,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Container from "@/components/common/Container";
 import { CustomInput } from "@/components/common/CustomInput";
+import { toast } from "@/components/ui/sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useLogin, type LoginPayload } from "@/service";
 import { AuthHeader } from "./AuthHeader";
@@ -30,6 +31,8 @@ export const Login: React.FC = () => {
     const searchParams = new URLSearchParams(location.search);
     const redirectParam =
         searchParams.get("redirect") || searchParams.get("from");
+    const initialEmail =
+        location.state?.email || searchParams.get("email") || "";
 
     let fromPath = "";
     if (typeof fromState === "string") {
@@ -54,9 +57,11 @@ export const Login: React.FC = () => {
         values: LoginPayload,
         { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
     ) => {
+        const cleanEmail = values.email.trim();
+
         loginMutation(
             {
-                email: values.email.trim(),
+                email: cleanEmail,
                 password: values.password,
             },
             {
@@ -66,6 +71,28 @@ export const Login: React.FC = () => {
                     }
                     navigate(targetDestination, { replace: true });
                 },
+                onError: (err: any) => {
+                    const message =
+                        err?.response?.data?.message || err?.message || "";
+                    const isUnverified =
+                        message.toLowerCase().includes("verify your email") ||
+                        message.toLowerCase().includes("verify email") ||
+                        message.toLowerCase().includes("not verified");
+
+                    if (isUnverified) {
+                        toast.info(
+                            message ||
+                                "Please verify your email before logging in.",
+                        );
+                        navigate("/verify-otp", {
+                            state: {
+                                email: cleanEmail,
+                                from: targetDestination,
+                                autoResend: true,
+                            },
+                        });
+                    }
+                },
                 onSettled: () => {
                     setSubmitting(false);
                 },
@@ -74,7 +101,7 @@ export const Login: React.FC = () => {
     };
 
     return (
-        <div className="w-full   text-white pt-24 md:pt-32 pb-20 flex flex-col justify-center items-center">
+        <div className="w-full text-white pt-24 md:pt-32 pb-20 flex flex-col justify-center items-center">
             <Container className="flex flex-col items-center z-10">
                 {/* Header */}
                 <AuthHeader
@@ -86,9 +113,10 @@ export const Login: React.FC = () => {
                 <div className="bg-black-700 rounded-lg p-6 sm:p-8 max-w-md w-full border border-neutral-800/60 shadow-2xl mt-6">
                     <Formik
                         initialValues={{
-                            email: "",
+                            email: initialEmail,
                             password: "",
                         }}
+                        enableReinitialize
                         validationSchema={LoginValidationSchema}
                         onSubmit={handleSubmit}
                     >
