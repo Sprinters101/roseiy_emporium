@@ -95,7 +95,13 @@ export const DashboardRecommended: React.FC<DashboardRecommendedProps> = ({
                               (product as any).id ||
                               (product as any).slug ||
                               product.name;
-                          return <ProductCard key={key} product={product} />;
+                          return (
+                              <ProductCard
+                                  key={key}
+                                  product={product}
+                                  className="last:hidden md:last:block"
+                              />
+                          );
                       })}
             </div>
         </Container>
