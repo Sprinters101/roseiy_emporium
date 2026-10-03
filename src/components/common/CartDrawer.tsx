@@ -121,7 +121,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
 
         const parts: string[] = [];
         if (cQty > 0) {
-            parts.push(`${cQty} ${cQty === 1 ? "Case" : "Cases"}`);
+            parts.push(`${cQty} ${cQty === 1 ? "Carton" : "Cartons"}`);
         }
         if (pQty > 0 || parts.length === 0) {
             parts.push(`${pQty} ${pQty === 1 ? "Piece" : "Pieces"}`);
@@ -356,11 +356,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                             </div>
                                         </div>
 
-                                        {/* Counter 2: QUANTITY IN CASES */}
+                                        {/* Counter 2: QUANTITY IN CARTONS */}
                                         <div className="pt-2 md:pt-3">
                                             <div className="flex items-center justify-between">
                                                 <label className="block text-white text-[0.375rem] md:text-[0.625rem] font-semibold tracking-wider uppercase font-hanken">
-                                                    QUANTITY IN CASES
+                                                    QUANTITY IN CARTONS
                                                 </label>
                                                 <span className="text-[0.5rem] md:text-[0.625rem] font-hanken">
                                                     {isCaseOutOfStock ? (
@@ -390,7 +390,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                             cQty <= 0
                                                         ) {
                                                             toast.error(
-                                                                "Cases are out of stock",
+                                                                "Cartons are out of stock",
                                                             );
                                                             return;
                                                         }
@@ -408,7 +408,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                             ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
                                                             : "border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 cursor-pointer",
                                                     )}
-                                                    aria-label="Decrease cases quantity"
+                                                    aria-label="Decrease cartons quantity"
                                                 >
                                                     <Minus className="size-3" />
                                                 </button>
@@ -427,7 +427,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                     onClick={() => {
                                                         if (isCaseOutOfStock) {
                                                             toast.error(
-                                                                "Cases are out of stock",
+                                                                "Cartons are out of stock",
                                                             );
                                                             return;
                                                         }
@@ -436,7 +436,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                             cQty >= casesLeft
                                                         ) {
                                                             toast.warning(
-                                                                `Maximum available cases in stock is ${casesLeft}`,
+                                                                `Maximum available cartons in stock is ${casesLeft}`,
                                                             );
                                                             return;
                                                         }
@@ -454,7 +454,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ children }) => {
                                                             ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
                                                             : "border-gold-500/80 bg-neutral-900/60 hover:bg-neutral-800 text-gold-500 cursor-pointer",
                                                     )}
-                                                    aria-label="Increase cases quantity"
+                                                    aria-label="Increase cartons quantity"
                                                 >
                                                     <Plus className="size-3" />
                                                 </button>

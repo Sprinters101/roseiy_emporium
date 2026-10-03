@@ -118,7 +118,7 @@ const HorizontalProductCard = ({ product }: { product: BestSellerProduct }) => {
                     {product.piecesLeft !== undefined &&
                         ` • ${product.piecesLeft} Pieces Left`}
                     {product.casesLeft !== undefined &&
-                        ` • ${product.casesLeft} Cases Left`}
+                        ` • ${product.casesLeft} ${product.casesLeft === 1 ? "Carton" : "Cartons"} Left`}
                 </p>
 
                 {/* Big Price Tag */}

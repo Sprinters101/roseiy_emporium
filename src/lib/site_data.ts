@@ -29,7 +29,8 @@ export const decorativeDivider =
 export const badgeOrnament =
     "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784546318/badge_ardoment_hwzvqz.png";
 
-export const hennessyLogo = "";
+export const hennessyLogo =
+    "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784784391/image_17_qsj73y.png";
 export const chamdorLogo =
     "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784784581/image_25_rclwv6.png";
 export const evaLogo = "/assets/brands/eva.png";

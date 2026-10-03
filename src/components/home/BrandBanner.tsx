@@ -4,14 +4,21 @@ import {
     johnnieWalkerLogo,
     brandDivider,
     topFlourishOrnament,
+    glenfiddichLogo,
+    domPerignonLogo,
+    veuveClicquotLogo,
+    moetLogo,
 } from "@/lib/site_data";
 
 export const BrandBanner = () => {
     const brandLogos = [
         { name: "Hennessy", src: hennessyLogo },
         { name: "Chamdor", src: chamdorLogo },
-        // { name: "Eva", src: evaLogo },
         { name: "Johnnie Walker", src: johnnieWalkerLogo },
+        { name: "Glenfiddich", src: glenfiddichLogo },
+        { name: "Dom Pérignon", src: domPerignonLogo },
+        { name: "Veuve Clicquot", src: veuveClicquotLogo },
+        { name: "Moët & Chandon", src: moetLogo },
     ];
 
     // Double the array to guarantee seamless looping without jumps

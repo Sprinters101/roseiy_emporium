@@ -106,7 +106,7 @@ const WishlistItemCard = ({ item, onRemove }: WishlistItemCardProps) => {
         specs.push(`In Cart: ${inCartQty}`);
     } else if (piecesLeft !== undefined && casesLeft !== undefined) {
         specs.push(
-            `${casesLeft > 0 ? `${casesLeft} Case` : ""}${
+            `${casesLeft > 0 ? `${casesLeft} Carton` : ""}${
                 casesLeft > 1 ? "s" : ""
             } ${piecesLeft > 0 ? `and ${piecesLeft} Pieces` : ""}`,
         );

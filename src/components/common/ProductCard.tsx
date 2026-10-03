@@ -252,7 +252,7 @@ export const ProductCard = ({
                 >
                     {product.volume || product.description || ""}
                     {piecesLeft !== undefined && ` • ${piecesLeft} Pieces Left`}
-                    {casesLeft !== undefined && ` • ${casesLeft} Cases Left`}
+                    {casesLeft !== undefined && ` • ${casesLeft} ${casesLeft === 1 ? "Carton" : "Cartons"} Left`}
                 </p>
 
                 <div className={cn("mt-0", isLandingPage && "mt-2")}>

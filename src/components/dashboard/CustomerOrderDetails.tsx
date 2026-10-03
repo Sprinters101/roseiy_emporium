@@ -115,26 +115,40 @@ export const CustomerOrderDetails: React.FC = () => {
               ? order.total
               : `₦${Number(order?.total || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+    const formatCustomerUnit = (name?: string, qty: number = 1): string => {
+        if (!name) return qty === 1 ? "Piece" : "Pieces";
+        if (name.toLowerCase().includes("case")) {
+            return name
+                .replace(/\bcases\b/gi, "Cartons")
+                .replace(/\bcase\b/gi, "Carton");
+        }
+        return name;
+    };
+
     const items = (order?.items || []).map(
-        (item: OrderItemDetail, idx: number) => ({
-            id: item.orderItemId || `item-${idx}`,
-            category: item.sellingUnitName
-                ? item.sellingUnitName.toUpperCase()
-                : "",
-            name: item.productName || item.name || "",
-            volume:
-                item.volume ||
-                (item.sellingUnitName ? item.sellingUnitName : ""),
-            quantityText: `Quantity: ${item.quantity} ${item.sellingUnitName || (item.quantity === 1 ? "Piece" : "Pieces")}`,
-            price:
-                typeof item.lineTotal === "number"
-                    ? `₦${item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                    : typeof item.lineTotal === "string" &&
-                        item.lineTotal.startsWith("₦")
-                      ? item.lineTotal
-                      : `₦${Number(item.lineTotal || Number(item.unitPrice || item.price || 0) * (item.quantity || 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-            image: extractImageFromObject(item) || "",
-        }),
+        (item: OrderItemDetail, idx: number) => {
+            const displayUnit = formatCustomerUnit(
+                item.sellingUnitName,
+                item.quantity || 1,
+            );
+            return {
+                id: item.orderItemId || `item-${idx}`,
+                category: displayUnit ? displayUnit.toUpperCase() : "",
+                name: item.productName || item.name || "",
+                volume:
+                    item.volume ||
+                    (displayUnit ? displayUnit : ""),
+                quantityText: `Quantity: ${item.quantity} ${displayUnit}`,
+                price:
+                    typeof item.lineTotal === "number"
+                        ? `₦${item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        : typeof item.lineTotal === "string" &&
+                            item.lineTotal.startsWith("₦")
+                          ? item.lineTotal
+                          : `₦${Number(item.lineTotal || Number(item.unitPrice || item.price || 0) * (item.quantity || 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                image: extractImageFromObject(item) || "",
+            };
+        },
     );
 
     const fullStreetAddress =

@@ -259,7 +259,7 @@ export const ProductDetails: React.FC = () => {
 
     const handleDecrementCases = () => {
         if (casesLeft <= 0) {
-            toast.error("Cases are out of stock");
+            toast.error("Cartons are out of stock");
             return;
         }
         if (casesQty > 1) {
@@ -269,11 +269,11 @@ export const ProductDetails: React.FC = () => {
 
     const handleIncrementCases = () => {
         if (casesLeft <= 0) {
-            toast.error("Cases are out of stock");
+            toast.error("Cartons are out of stock");
             return;
         }
         if (casesQty >= casesLeft) {
-            toast.warning(`Maximum available cases in stock is ${casesLeft}`);
+            toast.warning(`Maximum available cartons in stock is ${casesLeft}`);
             return;
         }
         setCasesQty((prev) => prev + 1);
@@ -300,7 +300,7 @@ export const ProductDetails: React.FC = () => {
 
     const toggleIncludeCases = () => {
         if (casesLeft <= 0) {
-            toast.error("Cases are out of stock");
+            toast.error("Cartons are out of stock");
             return;
         }
 
@@ -316,12 +316,12 @@ export const ProductDetails: React.FC = () => {
         }
     };
 
-    // Format Total Quantity Summary String (e.g. "1 Case and 2 Pieces")
+    // Format Total Quantity Summary String (e.g. "1 Carton and 2 Pieces")
     const totalQuantitySummary = useMemo(() => {
         const parts: string[] = [];
 
         if (includeCases && casesQty > 0) {
-            parts.push(`${casesQty} ${casesQty === 1 ? "Case" : "Cases"}`);
+            parts.push(`${casesQty} ${casesQty === 1 ? "Carton" : "Cartons"}`);
         }
 
         if (includePieces && piecesQty > 0) {
@@ -354,7 +354,7 @@ export const ProductDetails: React.FC = () => {
         }
 
         if (activeCases > casesLeft) {
-            toast.warning(`Cannot exceed available cases (${casesLeft})`);
+            toast.warning(`Cannot exceed available cartons (${casesLeft})`);
             return false;
         }
 
@@ -536,7 +536,8 @@ export const ProductDetails: React.FC = () => {
                                 {/* Stock & Volume Information Bar */}
                                 <div className="text-black-200 font-hanken text-[0.625rem] sm:text-base md:text-[1.25rem] font-normal tracking-wide mt-1.5">
                                     {product.volume || product.description} •{" "}
-                                    {piecesLeft} Pieces Left • {casesLeft} Cases
+                                    {piecesLeft} Pieces Left • {casesLeft}{" "}
+                                    {casesLeft === 1 ? "Carton" : "Cartons"}{" "}
                                     Left
                                 </div>
 
@@ -547,7 +548,7 @@ export const ProductDetails: React.FC = () => {
                                     </span>
                                 </div>
 
-                                {/* Purchase Unit Selector (Checkboxes for Pieces and Cases) */}
+                                {/* Purchase Unit Selector (Checkboxes for Pieces and Cartons) */}
                                 <div className="pt-6 ">
                                     <label className="block text-white text-xs md:text-base font-semibold tracking-widest uppercase font-hanken">
                                         PURCHASE UNIT
@@ -594,7 +595,7 @@ export const ProductDetails: React.FC = () => {
                                             </span>
                                         </button>
 
-                                        {/* Option 2: Cases Checkbox */}
+                                        {/* Option 2: Cartons Checkbox */}
                                         <button
                                             type="button"
                                             onClick={toggleIncludeCases}
@@ -626,7 +627,7 @@ export const ProductDetails: React.FC = () => {
                                                         : "text-white",
                                                 )}
                                             >
-                                                Cases{" "}
+                                                Cartons{" "}
                                                 {casesLeft <= 0 && (
                                                     <span className="text-red-400 text-xs ml-1">
                                                         (Out of Stock)
@@ -698,12 +699,12 @@ export const ProductDetails: React.FC = () => {
                                     </div>
                                 )}
 
-                                {/* QUANTITY IN CASES Counter */}
+                                {/* QUANTITY IN CARTONS Counter */}
                                 {(includeCases || casesLeft <= 0) && (
                                     <div className="space-y-3 pt-8">
                                         <div className="flex items-center justify-between">
                                             <label className="block text-white text-xs md:text-base font-semibold tracking-widest uppercase font-hanken">
-                                                QUANTITY IN CASES
+                                                QUANTITY IN CARTONS
                                             </label>
                                             {casesLeft <= 0 ? (
                                                 <span className="text-red-400 text-xs md:text-sm font-medium font-hanken">
@@ -730,7 +731,7 @@ export const ProductDetails: React.FC = () => {
                                                         ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
                                                         : "border-gold-500 bg-neutral-900/60 hover:bg-neutral-800 hover:border-gold-400/80 text-white cursor-pointer",
                                                 )}
-                                                aria-label="Decrease cases quantity"
+                                                aria-label="Decrease cartons quantity"
                                             >
                                                 <Minus className="size-4" />
                                             </button>
@@ -749,7 +750,7 @@ export const ProductDetails: React.FC = () => {
                                                         ? "border-neutral-700 bg-neutral-900/40 text-neutral-600 opacity-40 cursor-not-allowed"
                                                         : "border-gold-500 bg-neutral-900/60 hover:bg-neutral-800 hover:border-gold-400/80 text-gold-500 cursor-pointer",
                                                 )}
-                                                aria-label="Increase cases quantity"
+                                                aria-label="Increase cartons quantity"
                                             >
                                                 <Plus className="size-3 md:size-4" />
                                             </button>

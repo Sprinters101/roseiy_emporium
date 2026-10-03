@@ -312,7 +312,7 @@ const parseServerCart = (cartData: any): CartItem[] => {
                 if (caseSellingUnitId) {
                     sellingUnits.push({
                         ...caseUnit,
-                        name: caseUnit.name || "Case",
+                        name: caseUnit.name || "Carton",
                         price: casePrice,
                         stock: casesLeft,
                     });
@@ -752,12 +752,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
                 const allowedAdd = Math.max(0, maxCases - currentCases);
                 if (allowedAdd <= 0) {
                     toast.warning(
-                        `You already have the maximum available cases (${maxCases}) in your cart`,
+                        `You already have the maximum available cartons (${maxCases}) in your cart`,
                     );
                     actualAddCases = 0;
                 } else {
                     toast.warning(
-                        `Only ${allowedAdd} additional case(s) can be added (stock limit: ${maxCases})`,
+                        `Only ${allowedAdd} additional carton(s) can be added (stock limit: ${maxCases})`,
                     );
                     actualAddCases = allowedAdd;
                 }
@@ -930,7 +930,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
             }
             if (casesQty > maxCases) {
                 toast.warning(
-                    `Maximum available cases in stock is ${maxCases}`,
+                    `Maximum available cartons in stock is ${maxCases}`,
                 );
             }
 
@@ -1142,12 +1142,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
             if (newCasesQty > currentC) {
                 if (maxC <= 0) {
-                    toast.error("Cases are out of stock");
+                    toast.error("Cartons are out of stock");
                     return;
                 }
                 if (currentC >= maxC) {
                     toast.warning(
-                        `Maximum available cases in stock is ${maxC}`,
+                        `Maximum available cartons in stock is ${maxC}`,
                     );
                     return;
                 }

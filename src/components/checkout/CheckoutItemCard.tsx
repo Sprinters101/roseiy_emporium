@@ -11,11 +11,11 @@ export const CheckoutItemCard: React.FC<CheckoutItemCardProps> = ({
     item,
     onRemove,
 }) => {
-    // Format quantity text breakdown e.g. "1 Case and 2 Pieces" or "Quantity: 3"
+    // Format quantity text breakdown e.g. "1 Carton and 2 Pieces" or "Quantity: 3"
     const quantityParts: string[] = [];
     if (item.casesQty && item.casesQty > 0) {
         quantityParts.push(
-            `${item.casesQty} ${item.casesQty === 1 ? "Case" : "Cases"}`
+            `${item.casesQty} ${item.casesQty === 1 ? "Carton" : "Cartons"}`
         );
     }
     if (item.piecesQty && item.piecesQty > 0) {
