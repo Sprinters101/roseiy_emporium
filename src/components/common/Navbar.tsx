@@ -31,9 +31,6 @@ export const Navbar = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
-    const isDashboardSection =
-        location.pathname.startsWith("/dashboard") ||
-        location.pathname.startsWith("/overview");
     const isWishlist =
         location.pathname === "/wishlist" ||
         location.pathname === "/whitelist";
@@ -249,7 +246,7 @@ export const Navbar = () => {
                                             type="button"
                                             className={cn(
                                                 "shrink-0 flex size-9 md:size-10 items-center justify-center rounded-full bg-black-900 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors focus:outline-none cursor-pointer",
-                                                isDashboardSection &&
+                                                isAuthenticated &&
                                                     "border-gold-500/60 bg-black-800",
                                             )}
                                         />
@@ -258,7 +255,7 @@ export const Navbar = () => {
                                     <img
                                         alt="user icon"
                                         src={
-                                            isDashboardSection
+                                            isAuthenticated
                                                 ? "/icon/userActive.svg"
                                                 : "/icon/user.svg"
                                         }
@@ -267,7 +264,7 @@ export const Navbar = () => {
                                     <ChevronDown
                                         className={cn(
                                             "size-1.5 md:size-2 transition-colors",
-                                            isDashboardSection
+                                            isAuthenticated
                                                 ? "text-gold-500"
                                                 : "text-white",
                                         )}
