@@ -108,7 +108,7 @@ const HorizontalProductCard = ({ product }: { product: BestSellerProduct }) => {
                     {product.category}
                 </h4>
 
-                <h2 className="text-hg-c1 md:text-hg-b3 font-semibold tracking-widest text-white uppercase w-full max-w-35 md:max-w-49.5 font-playfair whitespace-pre-line">
+                <h2 className="text-hg-c1 md:text-hg-b3 font-semibold tracking-widest text-white uppercase w-full max-w-35 md:max-w-49.5 font-playfair whitespace-pre-line wrap-anywhere">
                     {product.title}
                 </h2>
 
