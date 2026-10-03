@@ -33,7 +33,7 @@ export const DashboardLayout = ({ isAdmin = false }: DashboardLayoutProps) => {
             </main>
 
             {/* Best Sellers / Recommended For You Section */}
-            <DashboardRecommended title="Best Sellers" />
+            <DashboardRecommended title="Recommended For You" />
             <BackToTop />
             <Footer />
         </div>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router";
 import Container from "@/components/common/Container";
 import { ProductCard } from "@/components/common/ProductCard";
@@ -16,23 +16,55 @@ import {
     useGetBrands,
 } from "@/service/queries";
 import type { FilterOption } from "./data/shopData";
-import type { ProductItem } from "@/service/types";
+import type { ProductItem, GetProductsParams } from "@/service/types";
 
 export const Shop = () => {
-    const [searchParams] = useSearchParams();
-    const urlSearch = searchParams.get("search") || searchParams.get("q") || undefined;
+    const [searchParams, setSearchParams] = useSearchParams();
+    const urlSearch =
+        searchParams.get("search") || searchParams.get("q") || undefined;
+    const urlSort =
+        (searchParams.get("sort") as GetProductsParams["sort"]) || undefined;
+    const [sortBy, setSortBy] = useState<string>(urlSort || "newest");
     const [visibleCount, setVisibleCount] = useState(12);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+    // Sync sortBy state when URL parameter changes (e.g. browser back/forward)
+    useEffect(() => {
+        const paramSort = searchParams.get("sort");
+        if (paramSort && paramSort !== sortBy) {
+            setSortBy(paramSort);
+        } else if (!paramSort && sortBy !== "newest") {
+            setSortBy("newest");
+        }
+    }, [searchParams]);
+
+    const handleSortChange = (newSort: string) => {
+        setSortBy(newSort);
+        setVisibleCount(12);
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev);
+                if (newSort && newSort !== "newest") {
+                    next.set("sort", newSort);
+                } else {
+                    next.delete("sort");
+                }
+                return next;
+            },
+            { replace: true },
+        );
+    };
 
     // 1. Fetch live categories & brands from backend
     const { data: categoriesApi, isLoading: isLoadingCategories } =
         useGetCategories();
     const { data: brandsApi, isLoading: isLoadingBrands } = useGetBrands();
 
-    // 2. Fetch live products from backend
+    // 2. Fetch live products from backend with dynamic sort parameter
     const { data: productsApi, isLoading } = useGetProducts({
         limit: 100,
         search: urlSearch,
+        sort: sortBy as GetProductsParams["sort"],
     });
 
     // Map backend products directly into the shop view (with fallback if backend is empty)
@@ -183,17 +215,21 @@ export const Shop = () => {
         selectedBrands,
         selectedPriceRanges,
         brandSearch,
-        sortBy,
         totalActiveFilters,
         filteredBrandList,
         filteredProducts,
         setBrandSearch,
-        setSortBy,
         toggleCategory,
         toggleBrand,
         togglePrice,
         clearAllFilters,
-    } = useShopFilters(allProducts as any, brandsList, categoriesList);
+    } = useShopFilters(
+        allProducts as any,
+        brandsList,
+        categoriesList,
+        sortBy,
+        handleSortChange,
+    );
 
     return (
         <div className="bg-black-900 min-h-screen pb-24">
@@ -262,7 +298,7 @@ export const Shop = () => {
                             selectedPriceRanges={selectedPriceRanges}
                             categoriesList={categoriesList}
                             brandsList={brandsList}
-                            onSortChange={setSortBy}
+                            onSortChange={handleSortChange}
                             onOpenMobileFilters={() =>
                                 setMobileFiltersOpen(true)
                             }

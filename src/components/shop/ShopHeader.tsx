@@ -19,6 +19,15 @@ interface ShopHeaderProps {
     onClearAll?: () => void;
 }
 
+export const SORT_OPTIONS = [
+    { label: "Newest Arrivals", value: "newest" },
+    { label: "Price: Low to High", value: "price_asc" },
+    { label: "Price: High to Low", value: "price_desc" },
+    { label: "Best Selling", value: "best_selling" },
+    { label: "Product Name: A to Z", value: "name_asc" },
+    { label: "Product Name: Z to A", value: "name_desc" },
+];
+
 export const ShopHeader = ({
     sortBy,
     totalActiveFilters,
@@ -34,14 +43,7 @@ export const ShopHeader = ({
     onRemovePrice,
     onClearAll,
 }: ShopHeaderProps) => {
-    const SORT_OPTIONS = [
-        { label: "Newest Arrivals", value: "newest" },
-        { label: "Price: Low to High", value: "price_asc" },
-        { label: "Price: High to Low", value: "price_desc" },
-        { label: "Best Selling", value: "best_selling" },
-        { label: "Product Name: A to Z", value: "name_asc" },
-        { label: "Product Name: Z to A", value: "name_desc" },
-    ];
+
 
     return (
         <div className="flex flex-col gap-4 mb-6">
@@ -86,8 +88,7 @@ export const ShopHeader = ({
                         {selectedCategories.map((catId) => {
                             const matched = categoriesList.find(
                                 (c) =>
-                                    isCategoryMatch(c, catId) ||
-                                    c.id === catId,
+                                    isCategoryMatch(c, catId) || c.id === catId,
                             );
                             const label = matched?.label || catId;
                             return (

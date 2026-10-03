@@ -3,17 +3,13 @@ import { useSearchParams } from "react-router";
 import type { Product } from "@/config/types";
 import { PRICE_RANGES, type FilterOption } from "./shopData";
 
-export const isCategoryMatch = (
-    cat: FilterOption,
-    query: string,
-): boolean => {
+export const isCategoryMatch = (cat: FilterOption, query: string): boolean => {
     if (!cat || !query) return false;
     const qLower = query.toLowerCase().trim();
     const qClean = qLower.replace(/[^a-z0-9]/g, "");
 
     const idMatch = cat.id === query;
-    const slugMatch =
-        !!cat.slug && cat.slug.toLowerCase().trim() === qLower;
+    const slugMatch = !!cat.slug && cat.slug.toLowerCase().trim() === qLower;
     const labelMatch = cat.label.toLowerCase().trim() === qLower;
     const cleanMatch =
         cat.label.toLowerCase().replace(/[^a-z0-9]/g, "") === qClean ||
@@ -24,10 +20,7 @@ export const isCategoryMatch = (
     return idMatch || slugMatch || labelMatch || cleanMatch;
 };
 
-export const isBrandMatch = (
-    brand: FilterOption,
-    query: string,
-): boolean => {
+export const isBrandMatch = (brand: FilterOption, query: string): boolean => {
     if (!brand || !query) return false;
     const qLower = query.toLowerCase().trim();
     const qClean = qLower.replace(/[^a-z0-9]/g, "");
@@ -49,27 +42,35 @@ export const useShopFilters = (
     initialProducts: (Product & { brandId?: string; categoryId?: string })[],
     customBrands: FilterOption[] = [],
     customCategories: FilterOption[] = [],
+    externalSortBy?: string,
+    onSortChange?: (value: string) => void,
 ) => {
     const [searchParams] = useSearchParams();
     const urlCategory = searchParams.get("category");
     const urlBrand = searchParams.get("brand");
     const urlSearch = searchParams.get("search") || searchParams.get("q");
 
-    const [selectedCategories, setSelectedCategories] = useState<string[]>(() =>
-        urlCategory ? [urlCategory] : [],
+    const [selectedCategories, setSelectedCategories] = useState<string[]>(
+        () => (urlCategory ? [urlCategory] : []),
     );
     const [selectedBrands, setSelectedBrands] = useState<string[]>(() =>
         urlBrand ? [urlBrand] : [],
     );
-    const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
+    const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>(
+        [],
+    );
     const [brandSearch, setBrandSearch] = useState("");
-    const [sortBy, setSortBy] = useState("newest");
+    const [internalSortBy, setInternalSortBy] = useState(() => searchParams.get("sort") || "newest");
+    const sortBy = externalSortBy !== undefined ? externalSortBy : internalSortBy;
+    const setSortBy = onSortChange || setInternalSortBy;
 
     // Sync with URL parameters and resolve with categories
     useEffect(() => {
         const cat = searchParams.get("category");
         if (cat) {
-            const matched = customCategories.find((c) => isCategoryMatch(c, cat));
+            const matched = customCategories.find((c) =>
+                isCategoryMatch(c, cat),
+            );
             const targetId = matched ? matched.id : cat;
 
             setSelectedCategories((prev) => {
@@ -152,8 +153,7 @@ export const useShopFilters = (
                 if (p === id) return true;
                 if (
                     matchingBrand &&
-                    (isBrandMatch(matchingBrand, p) ||
-                        p === matchingBrand.id)
+                    (isBrandMatch(matchingBrand, p) || p === matchingBrand.id)
                 ) {
                     return true;
                 }
@@ -233,8 +233,7 @@ export const useShopFilters = (
                 const matchesCat = selectedCategories.some((catFilter) => {
                     const matchedCategoryObj = customCategories.find(
                         (c) =>
-                            isCategoryMatch(c, catFilter) ||
-                            c.id === catFilter,
+                            isCategoryMatch(c, catFilter) || c.id === catFilter,
                     );
 
                     const targetId = matchedCategoryObj?.id || catFilter;
@@ -322,11 +321,8 @@ export const useShopFilters = (
                                         .replace(/[^a-z0-9]/g, ""))) ||
                         (prodBrandSlug &&
                             (prodBrandSlug ===
-                                (
-                                    matchedBrandObj?.slug || ""
-                                ).toLowerCase() ||
-                                prodBrandSlug ===
-                                    brandFilter.toLowerCase())) ||
+                                (matchedBrandObj?.slug || "").toLowerCase() ||
+                                prodBrandSlug === brandFilter.toLowerCase())) ||
                         prodName.includes(targetLabel) ||
                         prodName.includes(brandFilter.toLowerCase())
                     );
@@ -352,11 +348,15 @@ export const useShopFilters = (
         switch (sortBy) {
             case "price_asc":
             case "PriceLowHigh":
-                result = [...result].sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+                result = [...result].sort(
+                    (a, b) => (Number(a.price) || 0) - (Number(b.price) || 0),
+                );
                 break;
             case "price_desc":
             case "PriceHighLow":
-                result = [...result].sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
+                result = [...result].sort(
+                    (a, b) => (Number(b.price) || 0) - (Number(a.price) || 0),
+                );
                 break;
             case "name_asc":
             case "AZ":
