@@ -8,6 +8,7 @@ import { useRegisterCustomer, type RegisterPayload } from "@/service";
 import { AuthHeader } from "./AuthHeader";
 import { AuthFooter } from "./AuthFooter";
 import { heroBg } from "@/lib/site_data";
+import ContinueAsGuest from "../common/ContinueAsGuest";
 
 const RegisterValidationSchema = Yup.object().shape({
     firstName: Yup.string()
@@ -128,7 +129,9 @@ export const Register: React.FC = () => {
                                         disabled={isLoading}
                                         className="w-full mt-2 h-10 md:h-12 bg-gold-g hover:opacity-95 text-black font-semibold text-sm sm:text-base py-3.5 px-6 rounded-sm transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center font-hanken"
                                     >
-                                        {isLoading ? "Signing Up..." : "Sign Up"}
+                                        {isLoading
+                                            ? "Signing Up..."
+                                            : "Sign Up"}
                                     </button>
 
                                     <div className="text-xs sm:text-sm text-center text-white mt-4 font-hanken">
@@ -140,6 +143,7 @@ export const Register: React.FC = () => {
                                             Log In
                                         </Link>
                                     </div>
+                                    <ContinueAsGuest />
                                 </Form>
                             );
                         }}

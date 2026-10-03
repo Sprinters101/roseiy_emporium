@@ -10,6 +10,7 @@ import { useLogin, type LoginPayload } from "@/service";
 import { AuthHeader } from "./AuthHeader";
 import { AuthFooter } from "./AuthFooter";
 import { heroBg } from "@/lib/site_data";
+import ContinueAsGuest from "../common/ContinueAsGuest";
 
 const LoginValidationSchema = Yup.object().shape({
     email: Yup.string()
@@ -156,7 +157,7 @@ export const Login: React.FC = () => {
                                         {isLoading ? "Logging In..." : "Log In"}
                                     </button>
 
-                                    <div className="text-xs sm:text-sm text-center text-white mt-4 font-hanken">
+                                    <div className="text-xs sm:text-sm text-center text-white mt-2 font-hanken">
                                         Don't Have an Account?{" "}
                                         <Link
                                             to="/register"
@@ -165,6 +166,7 @@ export const Login: React.FC = () => {
                                             Sign Up
                                         </Link>
                                     </div>
+                                    <ContinueAsGuest />
                                 </Form>
                             );
                         }}
