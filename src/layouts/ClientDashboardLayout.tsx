@@ -28,7 +28,7 @@ export const ClientDashboardLayout: React.FC = () => {
     const userName = user?.firstName || "Bola";
 
     return (
-        <div className="w-full bg-black-900 min-h-screen text-white pt-8 pb-24">
+        <div className="w-full bg-black-900 min-h-screen text-white pt-8 pb-8">
             <Container>
                 {/* Persistent Header Greeting Bar */}
                 <div className="flex items-center justify-between w-full mb-8">
