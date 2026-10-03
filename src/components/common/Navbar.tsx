@@ -31,7 +31,30 @@ export const Navbar = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
-    const isOverview = location.pathname === "/dashboard";
+    const isDashboardSection =
+        location.pathname.startsWith("/dashboard") ||
+        location.pathname.startsWith("/overview");
+    const isWishlist =
+        location.pathname === "/wishlist" ||
+        location.pathname === "/whitelist";
+
+    const isOverviewActive =
+        location.pathname === "/dashboard" ||
+        location.pathname === "/dashboard/" ||
+        location.pathname === "/dashboard/overview" ||
+        location.pathname === "/overview";
+
+    const isOrdersActive =
+        location.pathname.startsWith("/dashboard/orders") ||
+        location.pathname.startsWith("/dashboard/order-details") ||
+        location.pathname.startsWith("/dashboard/track-order");
+
+    const isAddressesActive = location.pathname.startsWith(
+        "/dashboard/addresses",
+    );
+
+    const isProfileActive =
+        location.pathname.startsWith("/dashboard/profile");
 
     // Close mobile search when route changes
     useEffect(() => {
@@ -53,11 +76,23 @@ export const Navbar = () => {
     }, []);
 
     const isActive = (href: string) => {
-        const currentPathWithHash = location.pathname + location.hash;
         if (href === "/") {
             return location.pathname === "/" && !location.hash;
         }
-        return currentPathWithHash === href;
+        if (href.includes("#")) {
+            const hash = href.split("#")[1];
+            return location.pathname === "/" && location.hash === `#${hash}`;
+        }
+        if (href === "/shop") {
+            return (
+                location.pathname.startsWith("/shop") ||
+                location.pathname.startsWith("/product")
+            );
+        }
+        return (
+            location.pathname === href ||
+            location.pathname.startsWith(`${href}/`)
+        );
     };
 
     const handleNavClick = (href: string) => {
@@ -171,9 +206,20 @@ export const Navbar = () => {
                                 <Link
                                     to="/wishlist"
                                     type="button"
-                                    className="relative flex size-9 md:size-10 shrink-0 items-center justify-center rounded-full bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors cursor-pointer"
+                                    className={cn(
+                                        "relative flex size-9 md:size-10 shrink-0 items-center justify-center rounded-full bg-black/40 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors cursor-pointer",
+                                        isWishlist &&
+                                            "border-gold-500/60 bg-black/70 text-gold-500",
+                                    )}
                                 >
-                                    <Heart className="size-4 md:size-5" />
+                                    <Heart
+                                        className={cn(
+                                            "size-4 md:size-5 transition-colors",
+                                            isWishlist
+                                                ? "text-gold-500 fill-gold-500/20"
+                                                : "text-white",
+                                        )}
+                                    />
                                     {wishlistCount > 0 && (
                                         <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold-gradient text-[0.6rem] font-black text-black-900">
                                             {wishlistCount}
@@ -201,20 +247,31 @@ export const Navbar = () => {
                                     render={
                                         <button
                                             type="button"
-                                            className="shrink-0 flex size-9 md:size-10 items-center justify-center rounded-full bg-black-900 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors focus:outline-none cursor-pointer"
+                                            className={cn(
+                                                "shrink-0 flex size-9 md:size-10 items-center justify-center rounded-full bg-black-900 border border-neutral-800 text-white hover:bg-neutral-800 transition-colors focus:outline-none cursor-pointer",
+                                                isDashboardSection &&
+                                                    "border-gold-500/60 bg-black-800",
+                                            )}
                                         />
                                     }
                                 >
                                     <img
                                         alt="user icon"
                                         src={
-                                            isOverview
+                                            isDashboardSection
                                                 ? "/icon/userActive.svg"
                                                 : "/icon/user.svg"
                                         }
                                         className="size-3.5 md:size-4"
                                     />
-                                    <ChevronDown className="size-1.5 md:size-2 text-white" />
+                                    <ChevronDown
+                                        className={cn(
+                                            "size-1.5 md:size-2 transition-colors",
+                                            isDashboardSection
+                                                ? "text-gold-500"
+                                                : "text-white",
+                                        )}
+                                    />
                                 </DropdownMenuTrigger>
 
                                 {isAuthenticated ? (
@@ -226,7 +283,12 @@ export const Navbar = () => {
                                             render={
                                                 <Link
                                                     to="/dashboard"
-                                                    className="w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg text-gold-500 hover:bg-white/5 cursor-pointer font-hanken transition-colors"
+                                                    className={cn(
+                                                        "w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg cursor-pointer font-hanken transition-colors",
+                                                        isOverviewActive
+                                                            ? "text-gold-500 bg-white/5 font-semibold"
+                                                            : "text-white hover:text-gold-300 hover:bg-white/5",
+                                                    )}
                                                 />
                                             }
                                         >
@@ -237,7 +299,12 @@ export const Navbar = () => {
                                             render={
                                                 <Link
                                                     to="/dashboard/orders"
-                                                    className="w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg text-white hover:text-gold-300 hover:bg-white/5 cursor-pointer font-hanken transition-colors"
+                                                    className={cn(
+                                                        "w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg cursor-pointer font-hanken transition-colors",
+                                                        isOrdersActive
+                                                            ? "text-gold-500 bg-white/5 font-semibold"
+                                                            : "text-white hover:text-gold-300 hover:bg-white/5",
+                                                    )}
                                                 />
                                             }
                                         >
@@ -248,7 +315,12 @@ export const Navbar = () => {
                                             render={
                                                 <Link
                                                     to="/dashboard/addresses"
-                                                    className="w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg text-white hover:text-gold-300 hover:bg-white/5 cursor-pointer font-hanken transition-colors"
+                                                    className={cn(
+                                                        "w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg cursor-pointer font-hanken transition-colors",
+                                                        isAddressesActive
+                                                            ? "text-gold-500 bg-white/5 font-semibold"
+                                                            : "text-white hover:text-gold-300 hover:bg-white/5",
+                                                    )}
                                                 />
                                             }
                                         >
@@ -259,7 +331,12 @@ export const Navbar = () => {
                                             render={
                                                 <Link
                                                     to="/dashboard/profile"
-                                                    className="w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg text-white hover:text-gold-300 hover:bg-white/5 cursor-pointer font-hanken transition-colors"
+                                                    className={cn(
+                                                        "w-full flex items-center text-sm font-medium py-2 px-3 rounded-lg cursor-pointer font-hanken transition-colors",
+                                                        isProfileActive
+                                                            ? "text-gold-500 bg-white/5 font-semibold"
+                                                            : "text-white hover:text-gold-300 hover:bg-white/5",
+                                                    )}
                                                 />
                                             }
                                         >

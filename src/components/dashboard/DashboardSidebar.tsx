@@ -49,7 +49,12 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     const isActive = (href: string, exact?: boolean) => {
         if (exact) {
             return (
-                location.pathname === href || location.pathname === `${href}/`
+                location.pathname === "/dashboard" ||
+                location.pathname === "/dashboard/" ||
+                location.pathname === "/dashboard/overview" ||
+                location.pathname === "/dashboard/overview/" ||
+                location.pathname === "/overview" ||
+                location.pathname === "/overview/"
             );
         }
         if (href === "/dashboard/orders") {
@@ -83,16 +88,24 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                         onClick={onItemClick}
                         className={`flex items-center gap-3.5 px-4 py-3 rounded-lg text-sm font-hanken transition-all cursor-pointer ${
                             active
-                                ? "bg-white/5 gradient-text font-semibold border-l-2 border-gold-500 pl-3.5"
+                                ? "bg-white/5 border-l-2 border-gold-500 pl-3.5"
                                 : "text-neutral-300 hover:text-white font-medium hover:bg-white/5"
                         }`}
                     >
                         <Icon
-                            className={`size-4.5 shrink-0 ${
+                            className={`size-4.5 shrink-0 transition-colors ${
                                 active ? "text-gold-500" : "text-neutral-400"
                             }`}
                         />
-                        <span>{item.name}</span>
+                        <span
+                            className={
+                                active
+                                    ? "gradient-text font-semibold"
+                                    : "text-neutral-300 group-hover:text-white"
+                            }
+                        >
+                            {item.name}
+                        </span>
                     </Link>
                 );
             })}
