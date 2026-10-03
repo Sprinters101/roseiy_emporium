@@ -1,11 +1,13 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
 import { motion } from "framer-motion";
-import { categoryHeaderDivider, categories as mockCategories } from "@/lib/site_data";
+import {
+    categoryHeaderDivider,
+    categories as mockCategories,
+} from "@/lib/site_data";
 import Container from "../common/Container";
 import TitleDecoration from "../common/TitleDecoration";
 import { Button } from "../ui/button";
-import { useGetCategories } from "@/service/queries";
 
 interface CategoryCardProps {
     title: string;
@@ -51,8 +53,78 @@ const CategoryCard = ({ title, image, href }: CategoryCardProps) => {
 };
 
 export const CategoryGrid = () => {
-    const { data: categoriesApi } = useGetCategories();
+    // const { data: categoriesApi } = useGetCategories();
 
+    const categoriesApi: any = {
+        data: [
+            {
+                categoryId: "71683b7d-be88-4670-8f8b-e583dc65cc39",
+                name: "Champagne",
+                slug: "champagne",
+                description: null,
+                status: "active",
+                createdAt: "2026-09-12T16:35:09.000Z",
+                updatedAt: "2026-09-12T16:35:09.000Z",
+                isPermanent: true,
+                displayOrder: 1,
+            },
+            {
+                categoryId: "c006231f-bc5d-4c51-ba26-48d9ca23add8",
+                name: "Sweetwine",
+                slug: "sweetwine",
+                description: null,
+                status: "active",
+                createdAt: "2026-09-12T16:37:49.000Z",
+                updatedAt: "2026-09-12T16:37:49.000Z",
+                isPermanent: true,
+                displayOrder: 4,
+            },
+            {
+                categoryId: "40f2bf37-3110-4ec8-a898-d832120d10dd",
+                name: "Whiskey",
+                slug: "whiskey",
+                description: null,
+                status: "active",
+                createdAt: "2026-09-04T05:10:13.000Z",
+                updatedAt: "2026-09-12T16:38:14.000Z",
+                isPermanent: true,
+                displayOrder: 6,
+            },
+            {
+                categoryId: "33f896b8-bb03-49a8-8d11-2d0cec53a4c1",
+                name: "Cognac",
+                slug: "cognac",
+                description: "Skincare products",
+                status: "active",
+                createdAt: "2026-09-03T21:14:51.000Z",
+                updatedAt: "2026-09-12T16:38:47.000Z",
+                isPermanent: true,
+                displayOrder: 2,
+            },
+            {
+                categoryId: "6aa7f8ce-c4fd-4eb7-9841-334c53414a44",
+                name: "Tequila",
+                slug: "tequila",
+                description: "this is new so this is it",
+                status: "active",
+                createdAt: "2026-09-06T07:27:29.000Z",
+                updatedAt: "2026-09-12T16:39:01.000Z",
+                isPermanent: true,
+                displayOrder: 5,
+            },
+            {
+                categoryId: "6e2ec5a1-dd47-4723-9e93-2cf97c2a953a",
+                name: "Rum",
+                slug: "rum",
+                description: null,
+                status: "active",
+                createdAt: "2026-09-12T16:39:09.000Z",
+                updatedAt: "2026-09-12T16:39:09.000Z",
+                isPermanent: true,
+                displayOrder: 3,
+            },
+        ],
+    };
     const displayCategories = useMemo(() => {
         const rawCategories: any[] = Array.isArray(categoriesApi?.data)
             ? categoriesApi.data
@@ -65,7 +137,9 @@ export const CategoryGrid = () => {
                 const fallbackMatch = mockCategories.find(
                     (mc) =>
                         mc.title.toLowerCase() === cat.name.toLowerCase() ||
-                        cat.slug?.toLowerCase().includes(mc.title.toLowerCase()),
+                        cat.slug
+                            ?.toLowerCase()
+                            .includes(mc.title.toLowerCase()),
                 );
                 return {
                     title: cat.name,
