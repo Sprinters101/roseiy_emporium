@@ -4,17 +4,13 @@ import { Hero } from "@/components/common/Hero";
 import { Navbar } from "@/components/common/Navbar";
 import ScrollToTop from "@/components/common/ScrollToTop";
 import DashboardRecommended from "@/components/dashboard/DashboardRecommended";
-import { Outlet, useLocation } from "react-router";
+import { Outlet } from "react-router";
 
 interface DashboardLayoutProps {
     isAdmin?: boolean;
 }
 
 export const DashboardLayout = ({ isAdmin = false }: DashboardLayoutProps) => {
-    const { pathname } = useLocation();
-
-    const isOverViewPage =
-        pathname === "/dashboard" || pathname === "/overview";
     return (
         <div className="flex min-h-screen flex-col antialiased bg-black-900 text-white">
             <ScrollToTop />
@@ -37,7 +33,7 @@ export const DashboardLayout = ({ isAdmin = false }: DashboardLayoutProps) => {
             </main>
 
             {/* Best Sellers / Recommended For You Section */}
-            {isOverViewPage && <DashboardRecommended title="Best Sellers" />}
+            <DashboardRecommended title="Best Sellers" />
             <BackToTop />
             <Footer />
         </div>
