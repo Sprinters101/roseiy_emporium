@@ -31,10 +31,10 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
             toast.error("Please select a star rating (1-5) before submitting.");
             return;
         }
-        if (review.trim().length < 2) {
-            toast.error("Please enter a short review of at least 2 characters.");
-            return;
-        }
+        // if (review.trim().length < 2) {
+        //     toast.error("Please enter a short review of at least 2 characters.");
+        //     return;
+        // }
 
         setIsSubmitting(true);
         try {
