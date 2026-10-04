@@ -458,6 +458,7 @@ export interface OrderItemDetail {
     thumbnails?: string[];
     image?: string;
     volume?: string;
+    description?: string;
     category?: string;
     quantityText?: string;
 }
