@@ -35,7 +35,9 @@ export const OrderDetailsItemRow: React.FC<OrderDetailsItemRowProps> = ({
                     <h4 className="font-playfair font-bold text-[0.8125rem] sm:text-base text-white truncate mt-0.5">
                         {item.name}
                     </h4>
-                    <span className="text-[0.5rem] sm:text-sm text-neutral-400 font-hanken mt-0.5 truncate">
+                    <span className="text-[0.5rem] sm:text-sm text-neutral-400 font-hanken mt-0.5 truncate flex items-center gap-1.75">
+                        {item?.description}{" "}
+                        <span className=" block  size-1 bg-black-200 rounded-full  " />{" "}
                         {item.quantityText}
                     </span>
                 </div>

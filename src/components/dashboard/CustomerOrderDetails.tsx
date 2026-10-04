@@ -135,7 +135,7 @@ export const CustomerOrderDetails: React.FC = () => {
                 id: item.orderItemId || `item-${idx}`,
                 category: displayUnit ? displayUnit.toUpperCase() : "",
                 name: item.productName || item.name || "",
-                volume: item?.product?.description || "",
+                description: item?.description || "",
                 quantityText: `Quantity: ${item?.quantitySummary}`,
                 price:
                     typeof item.lineTotal === "number"

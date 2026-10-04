@@ -3,8 +3,6 @@ import {
     hennessyXoImg,
     claseAzulImg,
     champagneImg,
-    sweetwineImg,
-    rumImg,
 } from "@/lib/site_data";
 
 export interface OrderItemData {
@@ -23,7 +21,7 @@ export interface OrderItemDetail {
     id: string;
     category: string;
     name: string;
-    volume?: string;
+    description?: string;
     quantityText: string;
     price: string;
     image: string;
@@ -42,60 +40,6 @@ export interface OrderDetailsData {
         deliveryFee: string;
     };
 }
-
-export const DEMO_ORDER_DETAILS: OrderDetailsData = {
-    orderNumber: "RE-2026-7890",
-    placedDate: "January 15 2026",
-    itemsCount: 4,
-    totalAmount: "₦568,000",
-    items: [
-        {
-            brandName: "",
-            id: "item-1",
-            category: "WHISKEY",
-            name: "Glenfiddich Single Scotch",
-            volume: "75cl",
-            quantityText: "Quantity: 1 Carton and 2 Pieces",
-            price: "₦210,000",
-            image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png",
-        },
-        {
-            brandName: "",
-            id: "item-2",
-            category: "BOTTLED WATER",
-            name: "Voss Still Water",
-            volume: "75cl",
-            quantityText: "Quantity: 3 Pieces",
-            price: "₦8,000",
-            image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_3_bmhinc.png",
-        },
-        {
-            brandName: "",
-            id: "item-3",
-            category: "SWEETWINE",
-            name: "Four Cousins",
-            volume: "75cl",
-            quantityText: "Quantity: 1 Carton",
-            price: "₦300,000",
-            image: sweetwineImg,
-        },
-        {
-            brandName: "",
-            id: "item-4",
-            category: "RUM",
-            name: "Bacardí Carta Blanca",
-            volume: "75cl",
-            quantityText: "Quantity: 1 Carton",
-            price: "₦50,000",
-            image: rumImg,
-        },
-    ],
-    shippingAddress: {
-        title: "Shipping Address",
-        address: "Plot 8 Augustus Alakiya Close, Ogombo, Lekki Lagos",
-        deliveryFee: "₦5,000",
-    },
-};
 
 // Ongoing mock orders matching design screenshot
 export const ONGOING_ORDERS: OrderItemData[] = [
