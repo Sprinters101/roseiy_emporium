@@ -30,13 +30,13 @@ export const OrderDetailsItemRow: React.FC<OrderDetailsItemRowProps> = ({
                 {/* Details */}
                 <div className="flex flex-col min-w-0">
                     <span className="text-[0.5rem] sm:text-xs font-semibold text-gold-400 tracking-wider uppercase font-hanken">
-                        {item.category}
+                        {item.brandName}
                     </span>
                     <h4 className="font-playfair font-bold text-[0.8125rem] sm:text-base text-white truncate mt-0.5">
                         {item.name}
                     </h4>
                     <span className="text-[0.5rem] sm:text-sm text-neutral-400 font-hanken mt-0.5 truncate">
-                        {item.volume} • {item.quantityText}
+                        {item.quantityText}
                     </span>
                 </div>
             </div>

@@ -427,6 +427,7 @@ export interface TrackOrderPayload {
 
 export interface OrderItemDetail {
     orderItemId: string;
+    quantitySummary: string;
     orderId?: string;
     productId?: string;
     sellingUnitId?: string;
@@ -438,6 +439,14 @@ export interface OrderItemDetail {
     lineTotal: string | number;
     createdAt?: string;
     updatedAt?: string;
+    casesQuantity?: number;
+    piecesQuantity?: number;
+    // cartItem?:
+    brandName: string;
+    product?: {
+        description?: string;
+    };
+    // description?: string;
 
     // Optional / legacy aliases or frontend convenience
     id?: string;
@@ -721,7 +730,13 @@ export interface ClearWishlistResponseData {
 // 12. UNIVERSAL SEARCH TYPES (Storefront)
 // ==========================================
 
-export type StorefrontSearchType = "product" | "category" | "brand" | "order" | "customer" | string;
+export type StorefrontSearchType =
+    | "product"
+    | "category"
+    | "brand"
+    | "order"
+    | "customer"
+    | string;
 
 export interface UniversalSearchResultItem {
     searchType: StorefrontSearchType;
@@ -754,4 +769,3 @@ export interface UniversalSearchParams {
     type?: "all" | "product" | "category" | "brand" | string;
     limit?: number;
 }
-

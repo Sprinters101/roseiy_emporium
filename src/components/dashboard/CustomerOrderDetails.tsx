@@ -135,10 +135,8 @@ export const CustomerOrderDetails: React.FC = () => {
                 id: item.orderItemId || `item-${idx}`,
                 category: displayUnit ? displayUnit.toUpperCase() : "",
                 name: item.productName || item.name || "",
-                volume:
-                    item.volume ||
-                    (displayUnit ? displayUnit : ""),
-                quantityText: `Quantity: ${item.quantity} ${displayUnit}`,
+                volume: item?.product?.description,
+                quantityText: `Quantity: ${item?.quantitySummary}`,
                 price:
                     typeof item.lineTotal === "number"
                         ? `₦${item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -147,6 +145,7 @@ export const CustomerOrderDetails: React.FC = () => {
                           ? item.lineTotal
                           : `₦${Number(item.lineTotal || Number(item.unitPrice || item.price || 0) * (item.quantity || 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                 image: extractImageFromObject(item) || "",
+                brandName: item.brandName,
             };
         },
     );

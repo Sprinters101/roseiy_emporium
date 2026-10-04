@@ -27,6 +27,7 @@ export interface OrderItemDetail {
     quantityText: string;
     price: string;
     image: string;
+    brandName: string;
 }
 
 export interface OrderDetailsData {
@@ -49,6 +50,7 @@ export const DEMO_ORDER_DETAILS: OrderDetailsData = {
     totalAmount: "₦568,000",
     items: [
         {
+            brandName: "",
             id: "item-1",
             category: "WHISKEY",
             name: "Glenfiddich Single Scotch",
@@ -58,6 +60,7 @@ export const DEMO_ORDER_DETAILS: OrderDetailsData = {
             image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_5_ohp3t7.png",
         },
         {
+            brandName: "",
             id: "item-2",
             category: "BOTTLED WATER",
             name: "Voss Still Water",
@@ -67,6 +70,7 @@ export const DEMO_ORDER_DETAILS: OrderDetailsData = {
             image: "https://res.cloudinary.com/dzk1a6bjt/image/upload/v1784813212/p_3_bmhinc.png",
         },
         {
+            brandName: "",
             id: "item-3",
             category: "SWEETWINE",
             name: "Four Cousins",
@@ -76,6 +80,7 @@ export const DEMO_ORDER_DETAILS: OrderDetailsData = {
             image: sweetwineImg,
         },
         {
+            brandName: "",
             id: "item-4",
             category: "RUM",
             name: "Bacardí Carta Blanca",
