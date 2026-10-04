@@ -23,7 +23,7 @@ export interface OrderItemDetail {
     id: string;
     category: string;
     name: string;
-    volume: string;
+    volume?: string;
     quantityText: string;
     price: string;
     image: string;
