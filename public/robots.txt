@@ -1,0 +1,10 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /checkout/
+Disallow: /api/
+
+Sitemap: https://roseiyemporium.com/sitemap-index.xml
+Sitemap: https://roseiyemporium.com/sitemap.xml
+Sitemap: https://roseiyemporium.com/sitemap-images.xml
