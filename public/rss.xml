@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Roseiy Emporium | Fine Wines, Champagnes &amp; Luxury Spirits</title>
+    <link>https://roseiyemporium.com</link>
+    <description>Your premier destination for exceptional champagnes, fine wines, and rare artisanal spirits.</description>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 05 Oct 2026 17:28:25 +0100</lastBuildDate>
+    <atom:link href="https://roseiyemporium.com/rss.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Exclusive Cellar Collection &amp; Vintage Champagnes</title>
+      <link>https://roseiyemporium.com/shop</link>
+      <guid isPermaLink="true">https://roseiyemporium.com/shop</guid>
+      <pubDate>Mon, 05 Oct 2026 12:00:00 +0100</pubDate>
+      <description>Explore our newly stocked luxury champagnes and rare single malt whiskeys with white-glove doorstep delivery.</description>
+    </item>
+  </channel>
+</rss>

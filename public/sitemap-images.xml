@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+    <url>
+        <loc>https://roseiyemporium.com/shop</loc>
+        <image:image>
+            <image:loc>https://roseiyemporium.com/icon/sideDrink.png</image:loc>
+            <image:title>Roseiy Emporium Fine Wines &amp; Luxury Champagnes Selection</image:title>
+            <image:caption>Curated selection of fine champagnes, rare spirits, and vintage wines.</image:caption>
+        </image:image>
+    </url>
+    <url>
+        <loc>https://roseiyemporium.com/</loc>
+        <image:image>
+            <image:loc>https://roseiyemporium.com/icon/hero-bg-texture.png</image:loc>
+            <image:title>Roseiy Emporium Premier Wine Cellar</image:title>
+            <image:caption>Luxury fine wines, champagnes and rare artisanal spirits with white-glove delivery.</image:caption>
+        </image:image>
+    </url>
+</urlset>
