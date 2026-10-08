@@ -7,7 +7,6 @@ const AGE_VERIFIED_KEY = "roseiy_age_verified";
 
 export const AgeVerificationModal: React.FC = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const [declined, setDeclined] = useState<boolean>(false);
 
     useEffect(() => {
         const isVerifiedLocal = localStorage.getItem(AGE_VERIFIED_KEY);
@@ -77,52 +76,48 @@ export const AgeVerificationModal: React.FC = () => {
                             />
                         </div>
 
-                        {!declined ? (
-                            <>
-                                {/* Heading */}
-                                <h2 className="text-2xl sm:text-[2.4375rem] font-playfair font-bold text-white tracking-tight mt-1">
-                                    Welcome to Roseiy Emporium
-                                </h2>
+                        <>
+                            {/* Heading */}
+                            <h2 className="text-2xl sm:text-[2.4375rem] font-playfair font-bold text-white tracking-tight mt-1">
+                                Welcome to Roseiy Emporium
+                            </h2>
 
-                                {/* Description */}
-                                <p className="text-xs sm:text-[1.25rem] font-hanken text-neutral-300 leading-relaxed mt-3 max-w-xs sm:max-w-[31.75rem]">
-                                    Roseiy Emporium offers premium alcoholic
-                                    beverages. To enter Roseiy Emporium, please
-                                    confirm that you are{" "}
-                                    <span className="font-bold text-white">
-                                        18 years of age or older.
-                                    </span>
-                                </p>
+                            {/* Description */}
+                            <p className="text-xs sm:text-[1.25rem] font-hanken text-neutral-300 leading-relaxed mt-3 max-w-xs sm:max-w-[31.75rem]">
+                                Roseiy Emporium offers premium alcoholic
+                                beverages. To enter Roseiy Emporium, please
+                                confirm that you are{" "}
+                                <span className="font-bold text-white">
+                                    18 years of age or older.
+                                </span>
+                            </p>
 
-                                {/* Buttons Container */}
-                                <div className="flex flex-col gap-3 w-full mt-6">
-                                    {/* Primary Button */}
-                                    <button
-                                        type="button"
-                                        onClick={handleAccept}
-                                        className="w-full py-3 sm:py-3.5 bg-gold-g hover:opacity-95 text-black font-semibold font-hanken text-xs sm:text-base rounded-sm transition-all shadow-md cursor-pointer"
-                                    >
-                                        Yes, I'm 18 or Older
-                                    </button>
+                            {/* Buttons Container */}
+                            <div className="flex flex-col gap-3 w-full mt-6">
+                                {/* Primary Button */}
+                                <button
+                                    type="button"
+                                    onClick={handleAccept}
+                                    className="w-full py-3 sm:py-3.5 bg-gold-g hover:opacity-95 text-black font-semibold font-hanken text-xs sm:text-base rounded-sm transition-all shadow-md cursor-pointer"
+                                >
+                                    Yes, I'm 18 or Older
+                                </button>
 
-                                    {/* Secondary Button */}
-                                    <button
-                                        type="button"
-                                        onClick={handleDecline}
-                                        className="w-full py-3 sm:py-3.5 bg-transparent border border-neutral-700 hover:border-gold-500 text-white font-semibold font-hanken text-xs sm:text-base rounded-sm transition-all cursor-pointer"
-                                    >
-                                        No, Exit
-                                    </button>
-                                </div>
+                                {/* Secondary Button */}
+                                <button
+                                    type="button"
+                                    onClick={handleDecline}
+                                    className="w-full py-3 sm:py-3.5 bg-transparent border border-neutral-700 hover:border-gold-500 text-white font-semibold font-hanken text-xs sm:text-base rounded-sm transition-all cursor-pointer"
+                                >
+                                    No, Exit
+                                </button>
+                            </div>
 
-                                {/* Footnote */}
-                                <p className="text-[0.8125rem] italic text-gold-400/90 font-playfair mt-4">
-                                    Please enjoy responsibly.
-                                </p>
-                            </>
-                        ) : (
-                            <></>
-                        )}
+                            {/* Footnote */}
+                            <p className="text-[0.8125rem] italic text-gold-400/90 font-playfair mt-4">
+                                Please enjoy responsibly.
+                            </p>
+                        </>
                     </motion.div>
                 </div>
             )}
