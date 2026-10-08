@@ -48,7 +48,7 @@ export const AgeVerificationModal: React.FC = () => {
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+                <div className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
                     {/* Dark Blurred Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
